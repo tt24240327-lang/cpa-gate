@@ -1,4 +1,4 @@
-import requests # 텔레그램 전송용
+import requests, hashlib, random
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
@@ -10,13 +10,44 @@ GA_ID = "G-1VH7D6BJTD"
 
 # [멀티 도메인 설정] 주소에 따라 간판과 색상을 자동으로 바꿉니더
 SITE_CONFIGS = {
-    "logistics-dynamics.kr": {"name": "지능형물류수송공학연구원", "color": "#1e40af", "desc": "물류 하중 분산 및 수송 효율 최적화 표준 연구"},
-    "polymer-cleaning.co.kr": {"name": "고분자화학세정기술표준센터", "color": "#15803d", "desc": "고정밀 화학 세정 공정 및 안전 관리 지침 수립"},
-    "infra-maintenance.kr": {"name": "산업시설 유지관리 기술본부", "color": "#b91c1c", "desc": "국가 기반 시설물 유지보수 및 신뢰성 진단 표준"},
-    "fluid-flow.xyz": {"name": "고압정밀유체흐름진단소", "color": "#0369a1", "desc": "고압 유체 역학 기반의 정밀 진단 시스템 연구"},
-    "standard-eco.life": {"name": "융복합환경위생표준연구소", "color": "#0d9488", "desc": "환경 위생 인프라 최적화 및 지속가능 공법 연구"}
+    "logistics-dynamics.kr": {"name": "지능형물류수송공학연구원", "color": "#1e40af", "desc": "물류 하중 분산 및 수송 효율 최적화 표준 연구", "font": "Nanum+Gothic"},
+    "polymer-cleaning.co.kr": {"name": "고분자화학세정기술표준센터", "color": "#15803d", "desc": "고정밀 화학 세정 공정 및 안전 관리 지침 수립", "font": "Nanum+Myeongjo"},
+    "infra-maintenance.kr": {"name": "산업시설 유지관리 기술본부", "color": "#b91c1c", "desc": "국가 기반 시설물 유지보수 및 신뢰성 진단 표준", "font": "Noto+Sans+KR"},
+    "fluid-flow.xyz": {"name": "고압정밀유체흐름진단소", "color": "#0369a1", "desc": "고압 유체 역학 기반의 정밀 진단 시스템 연구", "font": "Nanum+Gothic+Coding"},
+    "standard-eco.life": {"name": "융복합환경위생표준연구소", "color": "#0d9488", "desc": "환경 위생 인프라 최적화 및 지속가능 공법 연구", "font": "Gowun+Batang"}
 }
-DEFAULT_CONFIG = {"name": "K-Tech 기술표준연구소", "color": "#00c73c", "desc": "산업 공정 및 기술 표준화 연구 전문"}
+DEFAULT_CONFIG = {"name": "K-Tech 기술표준연구소", "color": "#00c73c", "desc": "산업 공정 및 기술 표준화 연구 전문", "font": "Nanum+Gothic"}
+
+# 🛡️ [v11.0] SEO Deception Engine
+def identity_gen(host):
+    h = int(hashlib.md5(host.encode()).hexdigest(), 16)
+    random.seed(h)
+    
+    # 1. 가짜 법인명 생성 (설정에 없으면 자동 생성)
+    prefixes = ["글로벌", "대한", "미래", "산업", "핵심", "표준", "기술", "융합", "혁신", "정밀"]
+    suffixes = ["연구소", "진단센터", "기술본부", "솔루션", "엔지니어링", "아카이브", "시스템", "컨설팅"]
+    name = random.choice(prefixes) + random.choice(prefixes) + random.choice(suffixes)
+    
+    # 2. 안전한 가짜 전화번호 (실제 국번 회피)
+    # 070 대역 중 특정 패턴이나 존재하지 않는 국번 조합 사용
+    phone = f"070-{random.randint(2000, 2999)}-{random.randint(1000, 9999)}"
+    
+    # 3. 대표자 및 주소
+    names = ["김", "이", "박", "최", "정", "강", "조", "윤"]
+    fixed_name = random.choice(names) + random.choice(names) + random.choice(names)
+    addr_cities = ["서울시 중구", "경기도 성남시", "대전시 유성구", "인천시 연수구", "부산시 해운대구"]
+    address = f"{random.choice(addr_cities)} {random.randint(10, 500)}번길 {random.randint(1, 100)}"
+    
+    return {"name": name, "phone": phone, "ceo": fixed_name, "addr": address}
+
+def text_stylist(text, host):
+    h = int(hashlib.md5(host.encode()).hexdigest(), 16) % 3
+    # 도메인별 문체 변조 매트릭스
+    if h == 1: # 격식 보고서체
+        text = text.replace("합니다", "함").replace("입니더", "임").replace("입니다", "임")
+    elif h == 2: # 부드러운 구어체
+        text = text.replace("한다", "해요").replace("입니더", "예요").replace("입니다", "입니다")
+    return text
 
 def send_trace(msg):
     try:
@@ -108,14 +139,15 @@ BASE_HTML = """
       gtag('js', new Date());
       gtag('config', '{{ ga_id }}');
     </script>
+    <link href="https://fonts.googleapis.com/css2?family={{ font_family }}&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <title>{{ title }} | {{ site_name }}</title>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; margin: 0; background: #f8fafc; color: #334155; }
-        .nav { background: white; padding: 20px 10%; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid {{ theme_color }}; position: sticky; top: 0; z-index: 100; }
-        .nav a { text-decoration: none; color: #1e293b; font-weight: bold; margin-left: 30px; font-size: 14px; }
-        .footer { background: #0f172a; color: #94a3b8; padding: 40px 10%; text-align: center; font-size: 11px; line-height: 2; }
-        .content { max-width: 1000px; margin: 40px auto; padding: 0 20px; min-height: 500px; }
+        body { font-family: '{{ font_family | replace("+", " ") }}', sans-serif; margin: 0; background: #f8fafc; color: #334155; }
+        .{{ cls_nav }} { background: white; padding: 20px 10%; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid {{ theme_color }}; position: sticky; top: 0; z-index: 100; }
+        .{{ cls_nav }} a { text-decoration: none; color: #1e293b; font-weight: bold; margin-left: 30px; font-size: 14px; }
+        .{{ cls_footer }} { background: #0f172a; color: #94a3b8; padding: 40px 10%; text-align: center; font-size: 11px; line-height: 2; }
+        .{{ cls_content }} { max-width: 1000px; margin: 40px auto; padding: 0 20px; min-height: 500px; }
         .section { background: white; padding: 35px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .card { display: block; background: white; padding: 25px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: inherit; transition: 0.2s; }
         .card:hover { border-color: {{ theme_color }}; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
@@ -125,13 +157,13 @@ BASE_HTML = """
     </style>
 </head>
 <body>
-    <div class="nav">
+    <div class="{{ cls_nav }}">
         <a href="/" style="font-size: 22px; font-weight: 900; color: {{ theme_color }}; margin: 0;">{{ site_name }}</a>
         <div><a href="/about">연구소 소개</a><a href="/resources">기술표준자료</a><a href="/careers">인재채용</a><a href="/contact">고객센터</a></div>
     </div>
-    <div class="content">{{ body_content | safe }}</div>
-    <div class="footer">
-        (주){{ site_name }} | 서울시 중구 세종대로 124 | 대표전화: 02-730-8245<br>
+    <div class="{{ cls_content }}">{{ body_content | safe }}</div>
+    <div class="{{ cls_footer }}">
+        (주){{ site_name }} | {{ identity.addr }} | 대표자: {{ identity.ceo }} | T. {{ identity.phone }}<br>
         Copyright © 2026 {{ site_name }}. All rights reserved.
     </div>
 </body>
@@ -140,20 +172,30 @@ BASE_HTML = """
 
 def get_config():
     host = request.host.split(':')[0]
-    return SITE_CONFIGS.get(host, DEFAULT_CONFIG)
+    conf = SITE_CONFIGS.get(host, DEFAULT_CONFIG).copy()
+    
+    # 🛡️ [v11.0] 신원 및 DOM 랜덤화 데이터 생성
+    h = hashlib.md5(host.encode()).hexdigest()
+    random.seed(int(h[:8], 16))
+    conf['identity'] = identity_gen(host)
+    conf['cls_nav'] = "n_" + h[:5]
+    conf['cls_footer'] = "f_" + h[5:10]
+    conf['cls_content'] = "c_" + h[10:15]
+    
+    return conf
 
 @app.route('/')
 def index():
     conf = get_config()
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
-    report = f"🚩 [{conf['name']}] 본진 홈페이지 접속!\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
+    report = f"🚩 [{conf['identity']['name']}] 본진 홈페이지 접속!\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
     send_trace(report)
 
     body = f"""
     <div class="section" style="text-align:center;">
         <h1 style="color:#1e293b; border-bottom:3px solid {conf['color']}; display:inline-block; padding-bottom:10px;">{{{{ title }}}}</h1>
-        <p style="color:#64748b; margin-top:15px;">{conf['desc']}</p>
+        <p style="color:#64748b; margin-top:15px;">{text_stylist(conf['desc'], request.host)}</p>
     </div>
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:25px;">
         <a href="/a/moving" class="card"><h3>물류 수송 공학</h3><p style="font-size:13px; color:#666;">화물 적재 최적화 및 이동 경로 분석 표준 자료실</p></a>
@@ -164,7 +206,7 @@ def index():
         <a href="/a/hvac" class="card"><h3>에너지 공조 시스템</h3><p style="font-size:13px; color:#666;">열역학 사이클 최적화 및 스마트 공조 제어 가이드</p></a>
     </div>
     """
-    return render_template_string(BASE_HTML, title="메인 포털", body_content=body, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
+    return render_template_string(BASE_HTML, title="메인 포털", body_content=body, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
 
 @app.route('/resources')
 def resources():
@@ -179,11 +221,12 @@ def resources():
 
     list_html = ""
     for d in docs:
+        styled_desc = text_stylist(d['desc'], request.host)
         list_html += f"""
         <div style="padding:22px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
             <div>
                 <a href="/a/{d['cat']}" style="text-decoration:none; color:#1e293b; font-weight:bold; font-size:17px;">[{d['id']}] {d['title']}</a>
-                <p style="font-size:13px; color:#666; margin-top:8px;">{d['desc']}</p>
+                <p style="font-size:13px; color:#666; margin-top:8px;">{styled_desc}</p>
             </div>
             <span style="color:#999; font-size:11px;">{d['date']}</span>
         </div>
@@ -203,25 +246,25 @@ def resources():
         {pagination_html}
     </div>
     """
-    return render_template_string(BASE_HTML, title="기술표준자료실", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
+    return render_template_string(BASE_HTML, title="기술표준자료실", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
 
 @app.route('/about')
 def about():
     conf = get_config()
-    content = f'<div class="section"><h1>연구소 소개</h1><p style="line-height:2;">{{{{ site_name }}}}는 대한민국 산업 전반의 기술 표준을 선도합니다.</p></div>'
-    return render_template_string(BASE_HTML, title="연구소 소개", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
+    content = f'<div class="section"><h1>연구소 소개</h1><p style="line-height:2;">{text_stylist(conf["name"] + "는 대한민국 산업 전반의 기술 표준을 선도합니다.", request.host)}</p></div>'
+    return render_template_string(BASE_HTML, title="연구소 소개", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
 
 @app.route('/careers')
 def careers():
     conf = get_config()
-    content = '<div class="section"><h1>인재채용</h1><p>물류 시스템 데이터 분석가 및 화학 공정 설계 선임연구원을 모십니다.</p></div>'
-    return render_template_string(BASE_HTML, title="인재채용", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
+    content = f'<div class="section"><h1>인재채용</h1><p>{text_stylist("물류 시스템 데이터 분석가 및 화학 공정 설계 선임연구원을 모십니다.", request.host)}</p></div>'
+    return render_template_string(BASE_HTML, title="인재채용", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
 
 @app.route('/contact')
 def contact():
     conf = get_config()
-    content = f'<div class="section"><h1>고객센터</h1><p>문의: admin@{request.host.split(":")[0]} | T. 02-730-8245</p></div>'
-    return render_template_string(BASE_HTML, title="고객센터", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
+    content = f'<div class="section"><h1>고객센터</h1><p>문의: admin@{request.host.split(":")[0]} | T. {conf["identity"]["phone"]}</p></div>'
+    return render_template_string(BASE_HTML, title="고객센터", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
 
 @app.route('/<company>/<category>')
 def check_visitor(company, category):
@@ -234,15 +277,14 @@ def check_visitor(company, category):
     real_url = target_links.get(category.lower())
 
     # 텔레그램 추적
-    visitor_type = "🤖 봇(Crawl)" if is_bot else "👤 사람(Guest)"
-    report = f"🚩 [{conf['name']}] 방문!\n📍 경로: /{company}/{category}\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
+    report = f"🚩 [{conf['identity']['name']}] 방문!\n📍 경로: /{company}/{category}\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
     send_trace(report)
 
     # 봇이거나 링크가 없는 정보성 페이지일 때 -> '기술 보고서' 노출
     if not real_url or is_bot:
         doc = next((d for d in DOC_DATABASE if d['cat'] == category), None)
         title = doc['title'] if doc else category.upper() + " 기술 표준"
-        text = doc['desc'] if doc else "국가 표준(KS) 및 국제 규격(ISO)에 따른 전문 기술 지침입니다."
+        text = text_stylist(doc['desc'] if doc else "국가 표준(KS) 및 국제 규격(ISO)에 따른 전문 기술 지침입니다.", request.host)
         chart = get_svg_chart()
         doc_content = f"""
         <div class="section">
@@ -253,7 +295,7 @@ def check_visitor(company, category):
             <p style="font-size:12px; color:#888; margin-top:30px;">※ 본 문서는 인가된 시스템에 의해 생성된 기술 보안 문서입니다.</p>
         </div>
         """
-        return render_template_string(BASE_HTML, title="기술 보고서", body_content=doc_content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
+        return render_template_string(BASE_HTML, title="기술 보고서", body_content=doc_content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
     
     return render_template_string(f'<html><head><meta http-equiv="refresh" content="0.5;url={{ real_url }}"></head><body style="text-align:center; padding-top:150px; font-family:sans-serif;"><h3>데이터 보안 검사 중...</h3></body></html>', real_url=real_url)
 
