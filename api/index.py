@@ -199,7 +199,7 @@ BASE_HTML = """
 """
 
 def get_config():
-    host = request.host.split(':')[0]
+    host = request.host.split(':')[0].replace('www.', '')
     conf = SITE_CONFIGS.get(host, DEFAULT_CONFIG).copy()
     
     # 🛡️ [v11.0] 신원 및 DOM 랜덤화 데이터 생성
