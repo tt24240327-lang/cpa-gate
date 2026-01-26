@@ -371,7 +371,7 @@ def check_visitor(company, category):
         """
         return render_template_string(BASE_HTML, title="기술 보고서", body_content=doc_content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
     
-    return render_template_string(f'<html><head><meta http-equiv="refresh" content="0.5;url={{ real_url }}"></head><body style="text-align:center; padding-top:150px; font-family:sans-serif;"><h3>데이터 보안 검사 중...</h3></body></html>', real_url=real_url)
+    return render_template_string(f'<html><head><meta http-equiv="refresh" content="0.5;url={{{{ real_url }}}}"></head><body style="text-align:center; padding-top:150px; font-family:sans-serif;"><h3>데이터 보안 검사 중...</h3></body></html>', real_url=real_url)
 
 # --- 🗺️ [신규] 사이트맵(Sitemap) 자동 생성 엔진 ---
 @app.route('/sitemap.xml')
