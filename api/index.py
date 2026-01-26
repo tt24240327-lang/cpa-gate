@@ -229,7 +229,7 @@ def index():
         send_trace(report)
         body = f"""
         <div class="section" style="text-align:center;">
-            <h1 style="color:#1e293b; border-bottom:3px solid {conf['color']}; display:inline-block; padding-bottom:10px;">{{{{ title }}}}</h1>
+            <h1 style="color:#1e293b; border-bottom:3px solid {conf['color']}; display:inline-block; padding-bottom:10px;">메인 포털</h1>
             <p style="color:#64748b; margin-top:15px;">{text_stylist(conf['desc'], request.host)}</p>
         </div>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:25px;">
