@@ -146,15 +146,31 @@ DOC_DATABASE = [
     {"id": "KTS-2023-01", "cat": "mining", "title": "광산 현장 건설 장비의 자율 주행용 장애물 회피 경로 계획", "date": "2023-01-10", "desc": "비정형 지형에서의 Lidar 데이터 융합 및 실시간 궤적 생성 알고리즘"}
 ]
 
-# 🎨 [시각화] 봇을 홀리는 실시간 그래프
-def get_svg_chart():
-    return """
+# 🎨 [v13.0] 익스트림 위장 엔진: 요염한 데이터 생성기
+def get_dynamic_chart(host):
+    h = int(hashlib.md5(host.encode()).hexdigest(), 16)
+    random.seed(h)
+    points = [random.randint(20, 130) for _ in range(5)]
+    color = random.choice(["#00c73c", "#1e40af", "#b91c1c", "#0d9488", "#0369a1"])
+    path = f"M50,{points[0]} L150,{points[1]} L250,{points[2]} L350,{points[3]} L450,{points[4]}"
+    circles = "".join([f'<circle cx="{i*100+50}" cy="{points[i]}" r="5" fill="#1e293b"/>' for i in range(5)])
+    return f"""
     <svg viewBox="0 0 500 150" style="background:#fff; border:1px solid #eee; border-radius:8px; margin:20px 0;">
-        <path d="M50,120 L150,80 L250,90 L350,40 L450,20" fill="none" stroke="#00c73c" stroke-width="4"/>
-        <circle cx="50" cy="120" r="5" fill="#1e293b"/><circle cx="150" cy="80" r="5" fill="#1e293b"/>
-        <circle cx="250" cy="90" r="5" fill="#1e293b"/><circle cx="350" cy="40" r="5" fill="#1e293b"/><circle cx="450" cy="20" r="5" fill="#1e293b"/>
+        <path d="{path}" fill="none" stroke="{color}" stroke-width="4"/>
+        {circles}
     </svg>
     """
+
+def get_term(host, key):
+    h = int(hashlib.md5(host.encode()).hexdigest(), 16)
+    random.seed(h)
+    matrix = {
+        "resources": ["기술표준자료", "데이터 아카이브", "표준 문서 보관소", "공정 매뉴얼 센터", "기술 백서"],
+        "about": ["연구소 소개", "기관 안내", "연구원 개요", "센터 히스토리", "조직 가이드"],
+        "portal": ["메인 포털", "종합 관제 센터", "허브 포털", "통합 정보실", "중앙 데이터 센터"],
+        "report": ["기술 보고서", "표준 지침서", "연구 성과물", "공정 분석서", "기술 규격서"]
+    }
+    return random.choice(matrix.get(key, ["정보"]))
 
 BASE_HTML = """
 <!DOCTYPE html>
@@ -171,14 +187,16 @@ BASE_HTML = """
     <meta charset="UTF-8">
     <title>{{ title }} | {{ site_name }}</title>
     <style>
-        body { font-family: '{{ font_family | replace("+", " ") }}', sans-serif; margin: 0; background: #f8fafc; color: #334155; }
-        .{{ cls_nav }} { background: white; padding: 20px 10%; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid {{ theme_color }}; position: sticky; top: 0; z-index: 100; }
-        .{{ cls_nav }} a { text-decoration: none; color: #1e293b; font-weight: bold; margin-left: 30px; font-size: 14px; }
-        .{{ cls_footer }} { background: #0f172a; color: #94a3b8; padding: 40px 10%; text-align: center; font-size: 11px; line-height: 2; }
+        body { font-family: '{{ font_family | replace("+", " ") }}', sans-serif; margin: 0; background: #f8fafc; color: #334155; letter-spacing: -0.5px; }
+        .{{ cls_nav }} { background: white; padding: 20px 10%; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid {{ theme_color }}; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .{{ cls_nav }} a { text-decoration: none; color: #1e293b; font-weight: bold; margin-left: 30px; font-size: 14px; transition: 0.2s; }
+        .{{ cls_nav }} a:hover { color: {{ theme_color }}; }
+        .{{ cls_footer }} { background: #0f172a; color: #94a3b8; padding: 40px 10%; text-align: center; font-size: 11px; line-height: 2; border-top: 1px solid #1e293b; }
         .{{ cls_content }} { max-width: 1000px; margin: 40px auto; padding: 0 20px; min-height: 500px; }
-        .section { background: white; padding: 35px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .card { display: block; background: white; padding: 25px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: inherit; transition: 0.2s; }
-        .card:hover { border-color: {{ theme_color }}; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .section { background: white; padding: 35px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid #f1f5f9; }
+        .card { display: block; background: white; padding: 25px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: inherit; transition: 0.2s; position: relative; overflow: hidden; }
+        .card:hover { border-color: {{ theme_color }}; transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .card h3 { margin: 0 0 10px 0; font-size: 18px; color: #1e293b; }
         .pagination { display: flex; justify-content: center; margin-top: 30px; gap: 10px; }
         .pagination a { padding: 8px 15px; border: 1px solid #ddd; background: white; color: #333; text-decoration: none; border-radius: 5px; }
         .pagination a.active { background: {{ theme_color }}; color: white; border-color: {{ theme_color }}; }
@@ -186,8 +204,13 @@ BASE_HTML = """
 </head>
 <body>
     <div class="{{ cls_nav }}">
-        <a href="/" style="font-size: 22px; font-weight: 900; color: {{ theme_color }}; margin: 0;">{{ site_name }}</a>
-        <div><a href="/about">연구소 소개</a><a href="/resources">기술표준자료</a><a href="/careers">인재채용</a><a href="/contact">고객센터</a></div>
+        <a href="/" style="font-size: 22px; font-weight: 900; color: {{ theme_color }}; margin: 0; letter-spacing: -1.5px;">{{ site_name }}</a>
+        <div>
+            <a href="/about">{{ terms.about }}</a>
+            <a href="/resources">{{ terms.resources }}</a>
+            <a href="/careers">인재채용</a>
+            <a href="/contact">고객센터</a>
+        </div>
     </div>
     <div class="{{ cls_content }}">{{ body_content | safe }}</div>
     <div class="{{ cls_footer }}">
@@ -202,13 +225,19 @@ def get_config():
     host = request.host.split(':')[0].replace('www.', '')
     conf = SITE_CONFIGS.get(host, DEFAULT_CONFIG).copy()
     
-    # 🛡️ [v11.0] 신원 및 DOM 랜덤화 데이터 생성
+    # 🛡️ [v11.0/v13.0] 신원 및 DOM 랜덤화 데이터 생성
     h = hashlib.md5(host.encode()).hexdigest()
     random.seed(int(h[:8], 16))
     conf['identity'] = identity_gen(host)
     conf['cls_nav'] = "n_" + h[:5]
     conf['cls_footer'] = "f_" + h[5:10]
     conf['cls_content'] = "c_" + h[10:15]
+    conf['terms'] = {
+        "resources": get_term(host, "resources"),
+        "about": get_term(host, "about"),
+        "portal": get_term(host, "portal"),
+        "report": get_term(host, "report")
+    }
     
     return conf
 
@@ -217,31 +246,42 @@ def index():
     conf = get_config()
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
+    host = request.host.split(':')[0].replace('www.', '')
     
     # 🕵️ [v12.0] 파라미터 및 봇 탐지
     keyword = request.args.get('k', '')
     type_code = request.args.get('t', 'A') 
     is_bot = any(bot in ua for bot in ['bot', 'crawl', 'slurp', 'spider', 'naver', 'daum', 'google'])
 
-    # 🚩 봇이거나 키워드 없는 직접 접속 -> [v11.0 연구소 위장막]
+    # 🚩 봇이거나 키워드 없는 직접 접속 -> [v11.0/v13.0 연구소 위장막]
     if is_bot or not keyword:
         report = f"🚩 [{conf['identity']['name']}] 본진 위장홈 접속!\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
         send_trace(report)
+        
+        # 🎭 [v13.0] 카드 셔플링 로직
+        cards = [
+            ('<a href="/a/moving" class="card"><h3>물류 수송 공학</h3><p style="font-size:13px; color:#666;">화물 적재 최적화 및 이동 경로 분석 표준 자료실</p></a>', 1),
+            ('<a href="/a/cleaning" class="card"><h3>고분자 세정 기술</h3><p style="font-size:13px; color:#666;">미세 오염물질 제거를 위한 화학적 세정 공정 가이드</p></a>', 2),
+            ('<a href="/a/welding" class="card"><h3>금속 접합 신뢰성</h3><p style="font-size:13px; color:#666;">정밀 용접 품질 검증 및 비파괴 탐상 기술 표준</p></a>', 3),
+            ('<a href="/a/drain" class="card"><h3>관로 유지 관리</h3><p style="font-size:13px; color:#666;">유체 역학 기반의 배관 세척 및 진단 기술 표준</p></a>', 4),
+            ('<a href="/a/homecare" class="card"><h3>환경 위생 최적화</h3><p style="font-size:13px; color:#666;">주거 환경 품질 관리 및 항균 기술 표준 매뉴얼</p></a>', 5),
+            ('<a href="/a/hvac" class="card"><h3>에너지 공조 시스템</h3><p style="font-size:13px; color:#666;">열역학 사이클 최적화 및 스마트 공조 제어 가이드</p></a>', 6)
+        ]
+        random.seed(int(hashlib.md5(host.encode()).hexdigest()[:8], 16))
+        random.shuffle(cards)
+        cards_html = "".join([c[0] for c in cards])
+
         body = f"""
         <div class="section" style="text-align:center;">
             <h1 style="color:#1e293b; border-bottom:3px solid {conf['color']}; display:inline-block; padding-bottom:10px;">{conf['name']}</h1>
-            <p style="color:#64748b; margin-top:15px;">{text_stylist(conf['desc'], request.host)}</p>
+            <p style="color:#64748b; margin-top:15px; font-weight:500;">{text_stylist(conf['desc'], request.host)}</p>
+            <div style="margin-top:20px; font-size:12px; color:#94a3b8;">{conf['terms']['portal']} | ID: {hashlib.md5(host.encode()).hexdigest()[:10].upper()}</div>
         </div>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:25px;">
-            <a href="/a/moving" class="card"><h3>물류 수송 공학</h3><p style="font-size:13px; color:#666;">화물 적재 최적화 및 이동 경로 분석 표준 자료실</p></a>
-            <a href="/a/cleaning" class="card"><h3>고분자 세정 기술</h3><p style="font-size:13px; color:#666;">미세 오염물질 제거를 위한 화학적 세정 공정 가이드</p></a>
-            <a href="/a/welding" class="card"><h3>금속 접합 신뢰성</h3><p style="font-size:13px; color:#666;">정밀 용접 품질 검증 및 비파괴 탐상 기술 표준</p></a>
-            <a href="/a/drain" class="card"><h3>관로 유지 관리</h3><p style="font-size:13px; color:#666;">유체 역학 기반의 배관 세척 및 진단 기술 표준</p></a>
-            <a href="/a/homecare" class="card"><h3>환경 위생 최적화</h3><p style="font-size:13px; color:#666;">주거 환경 품질 관리 및 항균 기술 표준 매뉴얼</p></a>
-            <a href="/a/hvac" class="card"><h3>에너지 공조 시스템</h3><p style="font-size:13px; color:#666;">열역학 사이클 최적화 및 스마트 공조 제어 가이드</p></a>
+            {cards_html}
         </div>
         """
-        return render_template_string(BASE_HTML, title="메인 포털", body_content=body, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
+        return render_template_string(BASE_HTML, title=conf['terms']['portal'], body_content=body, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
 
     # 🎯 [v12.0] 진짜 손님(키워드 有) -> [심플 캠페인 랜딩]
     selected_data = None
@@ -311,31 +351,31 @@ def resources():
 
     content = f"""
     <div class="section">
-        <h1 style="color:#1e293b; border-bottom:3px solid #00c73c; display:inline-block; padding-bottom:10px;">기술표준자료실</h1>
+        <h1 style="color:#1e293b; border-bottom:3px solid {conf['color']}; display:inline-block; padding-bottom:10px;">{conf['terms']['resources']}</h1>
         <p style="margin-top:15px; color:#64748b; font-size:14px;">본 연구소에서 발행한 최신 기술 표준 및 공정 매뉴얼 아카이브입니다.</p>
         <div style="margin-top:30px; border-top:2px solid #1e293b;">{list_html}</div>
         {pagination_html}
     </div>
     """
-    return render_template_string(BASE_HTML, title="기술표준자료실", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
+    return render_template_string(BASE_HTML, title=conf['terms']['resources'], body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
 
 @app.route('/about')
 def about():
     conf = get_config()
-    content = f'<div class="section"><h1>연구소 소개</h1><p style="line-height:2;">{text_stylist(conf["name"] + "는 대한민국 산업 전반의 기술 표준을 선도합니다.", request.host)}</p></div>'
-    return render_template_string(BASE_HTML, title="연구소 소개", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
+    content = f'<div class="section"><h1>{conf["terms"]["about"]}</h1><p style="line-height:2;">{text_stylist(conf["name"] + "는 대한민국 산업 전반의 기술 표준을 선도합니다.", request.host)}</p></div>'
+    return render_template_string(BASE_HTML, title=conf['terms']['about'], body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
 
 @app.route('/careers')
 def careers():
     conf = get_config()
     content = f'<div class="section"><h1>인재채용</h1><p>{text_stylist("물류 시스템 데이터 분석가 및 화학 공정 설계 선임연구원을 모십니다.", request.host)}</p></div>'
-    return render_template_string(BASE_HTML, title="인재채용", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
+    return render_template_string(BASE_HTML, title="인재채용", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
 
 @app.route('/contact')
 def contact():
     conf = get_config()
     content = f'<div class="section"><h1>고객센터</h1><p>문의: admin@{request.host.split(":")[0]} | T. {conf["identity"]["phone"]}</p></div>'
-    return render_template_string(BASE_HTML, title="고객센터", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
+    return render_template_string(BASE_HTML, title="고객센터", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
 
 @app.route('/<company>/<category>')
 def check_visitor(company, category):
@@ -343,7 +383,8 @@ def check_visitor(company, category):
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
     is_bot = any(prefix in user_ip for prefix in ['110.93.', '114.111.', '125.209.', '211.249.', '210.89.']) or any(bot in ua for bot in ['naver', 'yeti', 'bot', 'crawl', 'google'])
-    
+    host = request.host.split(':')[0].replace('www.', '')
+
     # 🕵️ [v12.0] 기존 CPA_DATA 대신 DATA_MAP에서 카테고리 매칭 (하위 호환성)
     target_data = DATA_MAP.get(category.lower())
     real_url = None
@@ -359,17 +400,17 @@ def check_visitor(company, category):
         doc = next((d for d in DOC_DATABASE if d['cat'] == category), None)
         title = doc['title'] if doc else category.upper() + " 기술 표준"
         text = text_stylist(doc['desc'] if doc else "국가 표준(KS) 및 국제 규격(ISO)에 따른 전문 기술 지침입니다.", request.host)
-        chart = get_svg_chart()
+        chart = get_dynamic_chart(host)
         doc_content = f"""
         <div class="section">
             <div style="float:right; border:2px solid #e74c3c; color:#e74c3c; padding:4px 10px; font-weight:bold; transform:rotate(12deg);">APPROVED</div>
-            <p style="color:{conf['color']}; font-weight:bold;">[Technical Report]</p>
-            <h1>{title}</h1>{chart}
-            <p style="text-align:justify; line-height:2;">{text}</p>
-            <p style="font-size:12px; color:#888; margin-top:30px;">※ 본 문서는 인가된 시스템에 의해 생성된 기술 보안 문서입니다.</p>
+            <p style="color:{conf['color']}; font-weight:bold;">[{conf['terms']['report']}]</p>
+            <h1 style="color:#1e293b; margin-top:10px;">{title}</h1>{chart}
+            <p style="text-align:justify; line-height:2; color:#334155;">{text}</p>
+            <p style="font-size:12px; color:#888; margin-top:30px; border-top:1px solid #f1f5f9; padding-top:15px;">※ 본 문서는 인가된 시스템에 의해 생성된 기술 보안 문서입니다. (ID: {hashlib.md5(host.encode()).hexdigest()[:8].upper()})</p>
         </div>
         """
-        return render_template_string(BASE_HTML, title="기술 보고서", body_content=doc_content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
+        return render_template_string(BASE_HTML, title=conf['terms']['report'], body_content=doc_content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
     
     return render_template_string(f'<html><head><meta http-equiv="refresh" content="0.5;url={{{{ real_url }}}}"></head><body style="text-align:center; padding-top:150px; font-family:sans-serif;"><h3>데이터 보안 검사 중...</h3></body></html>', real_url=real_url)
 
