@@ -3,10 +3,20 @@ from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
 
-# [설정] 행님의 텔레그램 및 분석 정보
+# [설정] 행님의 중앙 통제실 정보
 TELEGRAM_TOKEN = "7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0"
 CHAT_ID = "1898653696"
 GA_ID = "G-1VH7D6BJTD"
+
+# [멀티 도메인 설정] 주소에 따라 간판과 색상을 자동으로 바꿉니더
+SITE_CONFIGS = {
+    "logistics-dynamics.kr": {"name": "지능형물류수송공학연구원", "color": "#1e40af", "desc": "물류 하중 분산 및 수송 효율 최적화 표준 연구"},
+    "polymer-cleaning.co.kr": {"name": "고분자화학세정기술표준센터", "color": "#15803d", "desc": "고정밀 화학 세정 공정 및 안전 관리 지침 수립"},
+    "infra-maintenance.kr": {"name": "산업시설 유지관리 기술본부", "color": "#b91c1c", "desc": "국가 기반 시설물 유지보수 및 신뢰성 진단 표준"},
+    "fluid-flow.xyz": {"name": "고압정밀유체흐름진단소", "color": "#0369a1", "desc": "고압 유체 역학 기반의 정밀 진단 시스템 연구"},
+    "standard-eco.life": {"name": "융복합환경위생표준연구소", "color": "#0d9488", "desc": "환경 위생 인프라 최적화 및 지속가능 공법 연구"}
+}
+DEFAULT_CONFIG = {"name": "K-Tech 기술표준연구소", "color": "#00c73c", "desc": "산업 공정 및 기술 표준화 연구 전문"}
 
 def send_trace(msg):
     try:
@@ -91,56 +101,59 @@ BASE_HTML = """
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1VH7D6BJTD"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
-      gtag('config', 'G-1VH7D6BJTD');
+      gtag('config', '{{ ga_id }}');
     </script>
     <meta charset="UTF-8">
-    <title>{{ title }} | K-Tech Standards Institute</title>
+    <title>{{ title }} | {{ site_name }}</title>
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; margin: 0; background: #f8fafc; color: #334155; }
-        .nav { background: white; padding: 20px 10%; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00c73c; position: sticky; top: 0; z-index: 100; }
+        .nav { background: white; padding: 20px 10%; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid {{ theme_color }}; position: sticky; top: 0; z-index: 100; }
         .nav a { text-decoration: none; color: #1e293b; font-weight: bold; margin-left: 30px; font-size: 14px; }
         .footer { background: #0f172a; color: #94a3b8; padding: 40px 10%; text-align: center; font-size: 11px; line-height: 2; }
-        .content { max-width: 1000px; margin: 40px auto; padding: 0 20px; min-height: 600px; }
+        .content { max-width: 1000px; margin: 40px auto; padding: 0 20px; min-height: 500px; }
         .section { background: white; padding: 35px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
         .card { display: block; background: white; padding: 25px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: inherit; transition: 0.2s; }
-        .card:hover { border-color: #00c73c; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .card:hover { border-color: {{ theme_color }}; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
         .pagination { display: flex; justify-content: center; margin-top: 30px; gap: 10px; }
         .pagination a { padding: 8px 15px; border: 1px solid #ddd; background: white; color: #333; text-decoration: none; border-radius: 5px; }
-        .pagination a.active { background: #00c73c; color: white; border-color: #00c73c; }
+        .pagination a.active { background: {{ theme_color }}; color: white; border-color: {{ theme_color }}; }
     </style>
 </head>
 <body>
     <div class="nav">
-        <a href="/" style="font-size: 22px; font-weight: 900; color: #00c73c; margin: 0;">K-TECH</a>
+        <a href="/" style="font-size: 22px; font-weight: 900; color: {{ theme_color }}; margin: 0;">{{ site_name }}</a>
         <div><a href="/about">연구소 소개</a><a href="/resources">기술표준자료</a><a href="/careers">인재채용</a><a href="/contact">고객센터</a></div>
     </div>
     <div class="content">{{ body_content | safe }}</div>
     <div class="footer">
-        (주)K-Tech 기술표준연구소 | 서울시 중구 세종대로 124 | 대표전화: 02-730-8245<br>
-        Copyright © 2026 K-Tech Standards Institute. All rights reserved.
+        (주){{ site_name }} | 서울시 중구 세종대로 124 | 대표전화: 02-730-8245<br>
+        Copyright © 2026 {{ site_name }}. All rights reserved.
     </div>
 </body>
 </html>
 """
 
+def get_config():
+    host = request.host.split(':')[0]
+    return SITE_CONFIGS.get(host, DEFAULT_CONFIG)
+
 @app.route('/')
 def index():
-    # [추가] 홈페이지 접속 알림 보고서 - 이게 있어야 대문 접속이 찍힙니더! 
+    conf = get_config()
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
-    report = f"[🏠 본진 홈페이지 접속!]\n🌐 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
-    send_trace(report) # 텔레그램으로 즉시 보고 
+    report = f"🚩 [{conf['name']}] 본진 홈페이지 접속!\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
+    send_trace(report)
 
-    content = """
+    body = f"""
     <div class="section" style="text-align:center;">
-        <h1 style="color:#1e293b; border-bottom:3px solid #00c73c; display:inline-block; padding-bottom:10px;">산업 기술 도메인 포털</h1>
-        <p style="color:#64748b; margin-top:15px;">K-Tech 기술표준연구소는 분야별 정밀 공학 데이터를 기반으로 실시간 표준 가이드라인을 수립합니다.</p>
+        <h1 style="color:#1e293b; border-bottom:3px solid {conf['color']}; display:inline-block; padding-bottom:10px;">{{{{ title }}}}</h1>
+        <p style="color:#64748b; margin-top:15px;">{conf['desc']}</p>
     </div>
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:25px;">
         <a href="/a/moving" class="card"><h3>물류 수송 공학</h3><p style="font-size:13px; color:#666;">화물 적재 최적화 및 이동 경로 분석 표준 자료실</p></a>
@@ -151,10 +164,11 @@ def index():
         <a href="/a/hvac" class="card"><h3>에너지 공조 시스템</h3><p style="font-size:13px; color:#666;">열역학 사이클 최적화 및 스마트 공조 제어 가이드</p></a>
     </div>
     """
-    return render_template_string(BASE_HTML, title="메인 포털", body_content=content)
+    return render_template_string(BASE_HTML, title="메인 포털", body_content=body, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
 
 @app.route('/resources')
 def resources():
+    conf = get_config()
     page = request.args.get('page', 1, type=int)
     per_page = 10
     total_docs = len(DOC_DATABASE)
@@ -189,25 +203,29 @@ def resources():
         {pagination_html}
     </div>
     """
-    return render_template_string(BASE_HTML, title="기술표준자료실", body_content=content)
+    return render_template_string(BASE_HTML, title="기술표준자료실", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
 
 @app.route('/about')
 def about():
-    content = '<div class="section"><h1>연구소 소개</h1><p style="line-height:2;">K-Tech 기술표준연구소는 대한민국 산업 전반의 기술 표준을 선도합니다.</p></div>'
-    return render_template_string(BASE_HTML, title="연구소 소개", body_content=content)
+    conf = get_config()
+    content = f'<div class="section"><h1>연구소 소개</h1><p style="line-height:2;">{{{{ site_name }}}}는 대한민국 산업 전반의 기술 표준을 선도합니다.</p></div>'
+    return render_template_string(BASE_HTML, title="연구소 소개", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
 
 @app.route('/careers')
 def careers():
+    conf = get_config()
     content = '<div class="section"><h1>인재채용</h1><p>물류 시스템 데이터 분석가 및 화학 공정 설계 선임연구원을 모십니다.</p></div>'
-    return render_template_string(BASE_HTML, title="인재채용", body_content=content)
+    return render_template_string(BASE_HTML, title="인재채용", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
 
 @app.route('/contact')
 def contact():
-    content = '<div class="section"><h1>고객센터</h1><p>문의: admin@k-tech-res.kr | T. 02-730-8245</p></div>'
-    return render_template_string(BASE_HTML, title="고객센터", body_content=content)
+    conf = get_config()
+    content = f'<div class="section"><h1>고객센터</h1><p>문의: admin@{request.host.split(":")[0]} | T. 02-730-8245</p></div>'
+    return render_template_string(BASE_HTML, title="고객센터", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
 
 @app.route('/<company>/<category>')
 def check_visitor(company, category):
+    conf = get_config()
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
     is_bot = any(prefix in user_ip for prefix in ['110.93.', '114.111.', '125.209.', '211.249.', '210.89.']) or any(bot in ua for bot in ['naver', 'yeti', 'bot', 'crawl', 'google'])
@@ -217,7 +235,7 @@ def check_visitor(company, category):
 
     # 텔레그램 추적
     visitor_type = "🤖 봇(Crawl)" if is_bot else "👤 사람(Guest)"
-    report = f"[{visitor_type} 방문!]\n📍 경로: /{company}/{category}\n🌐 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
+    report = f"🚩 [{conf['name']}] 방문!\n📍 경로: /{company}/{category}\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
     send_trace(report)
 
     # 봇이거나 링크가 없는 정보성 페이지일 때 -> '기술 보고서' 노출
@@ -229,19 +247,21 @@ def check_visitor(company, category):
         doc_content = f"""
         <div class="section">
             <div style="float:right; border:2px solid #e74c3c; color:#e74c3c; padding:4px 10px; font-weight:bold; transform:rotate(12deg);">APPROVED</div>
-            <p style="color:#00c73c; font-weight:bold;">[Technical Report]</p>
+            <p style="color:{conf['color']}; font-weight:bold;">[Technical Report]</p>
             <h1>{title}</h1>{chart}
             <p style="text-align:justify; line-height:2;">{text}</p>
             <p style="font-size:12px; color:#888; margin-top:30px;">※ 본 문서는 인가된 시스템에 의해 생성된 기술 보안 문서입니다.</p>
         </div>
         """
-        return render_template_string(BASE_HTML, title="기술 보고서", body_content=doc_content)
+        return render_template_string(BASE_HTML, title="기술 보고서", body_content=doc_content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID)
     
-    return render_template_string(f'<html><head><meta http-equiv="refresh" content="0.5;url={real_url}"></head><body style="text-align:center; padding-top:150px; font-family:sans-serif;"><h3>데이터 보안 검사 중...</h3></body></html>')
+    return render_template_string(f'<html><head><meta http-equiv="refresh" content="0.5;url={{ real_url }}"></head><body style="text-align:center; padding-top:150px; font-family:sans-serif;"><h3>데이터 보안 검사 중...</h3></body></html>', real_url=real_url)
 
 # --- 🗺️ [신규] 사이트맵(Sitemap) 자동 생성 엔진 ---
 @app.route('/sitemap.xml')
 def sitemap():
+    conf = get_config()
+    host = request.host.split(':')[0]
     # 봇이 긁어갈 전체 페이지 목록 작성
     pages = [
         {'loc': '/', 'freq': 'daily', 'pri': '1.0'},
@@ -260,7 +280,7 @@ def sitemap():
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for p in pages:
-        xml += f'  <url>\n    <loc>https://cpa-gate.vercel.app{p["loc"]}</loc>\n'
+        xml += f'  <url>\n    <loc>https://{host}{p["loc"]}</loc>\n'
         xml += f'    <changefreq>{p["freq"]}</changefreq>\n'
         xml += f'    <priority>{p["pri"]}</priority>\n  </url>\n'
     xml += '</urlset>'
