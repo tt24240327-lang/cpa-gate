@@ -57,19 +57,47 @@ def send_trace(msg):
     except:
         pass
 
-# [DB] 형님의 실제 CPA 링크 (리다이렉트 전용)
-CPA_DATA = {
-    'a': {
-        'moving': 'https://www.replyalba.co.kr/pt/LlocSbdUSY',
-        'cleaning': 'https://www.replyalba.co.kr/pt/WwVCgW9E1R',
-        'welding': 'https://www.replyalba.co.kr/pt/XpBx9dZ5aE'
+# 🛡️ [v12.0] Tactical A/B DATA_MAP
+DATA_MAP = {
+    "cleaning": {
+        "keywords": ["입주청소", "이사청소", "거주청소", "청소업체", "청소", "입주 청소"],
+        "image": "cleaning.jpg",
+        "link_A": "https://www.replyalba.co.kr/pt/WwVCgW9E1R",
+        "link_B": "https://albarich.com/pt/z2NytCt42i"
     },
-    'b': {
-        'moving': 'https://albarich.com/pt/zdIDBDSzof',
-        'cleaning': 'https://albarich.com/pt/z2NytCt42i',
-        'welding': 'https://albarich.com/pt/SROHH97olh'
+    "moving": {
+        "keywords": ["이사", "포장이사", "원룸이사", "용달이사", "이삿짐", "포장 이사"],
+        "image": "moving.jpg",
+        "link_A": "https://www.replyalba.co.kr/pt/LlocSbdUSY",
+        "link_B": "https://albarich.com/pt/zdIDBDSzof"
+    },
+    "welding": {
+        "keywords": ["용접", "출장용접", "알곤용접", "배관용접", "용접업체"],
+        "image": "welding.jpg",
+        "link_A": "https://www.replyalba.co.kr/pt/XpBx9dZ5aE",
+        "link_B": "https://albarich.com/pt/SROHH97olh"
+    },
+    "plumbing": {
+        "keywords": ["막힘", "누수", "뚫음", "변기막힘", "하수구막힘", "배관", "싱크대막힘", "역류"],
+        "image": "plumbing.jpg",
+        "link_A": "https://www.replyalba.co.kr/pt/GkVRvxfx1T",
+        "link_B": "https://albarich.com/pt/QOaojnBV2v"
+    },
+    "fixture": {
+        "keywords": ["수전교체", "변기교체", "세면대교체", "부속교체", "수전", "세면대", "도기교체"],
+        "image": "fixture.jpg",
+        "link_A": "https://www.replyalba.co.kr/pt/FzYOdTzVNw",
+        "link_B": "https://albarich.com/pt/vRUcqPts9r"
+    },
+    "demolition": {
+        "keywords": ["철거", "원상복구", "상가철거", "인테리어철거", "가벽철거", "폐기물"],
+        "image": "demolition.jpg",
+        "link_A": "https://www.replyalba.co.kr/pt/10qHjZwUanF",
+        "link_B": "https://albarich.com/pt/NS5WRB4yKa"
     }
 }
+
+# 🛡️ [v11.0] SEO Deception Engine
 
 # 🤖 50개 이상의 기술 논문 데이터베이스 (2023 ~ 2026)
 DOC_DATABASE = [
@@ -189,24 +217,67 @@ def index():
     conf = get_config()
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
-    report = f"🚩 [{conf['identity']['name']}] 본진 홈페이지 접속!\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
+    
+    # 🕵️ [v12.0] 파라미터 및 봇 탐지
+    keyword = request.args.get('k', '')
+    type_code = request.args.get('t', 'A') 
+    is_bot = any(bot in ua for bot in ['bot', 'crawl', 'slurp', 'spider', 'naver', 'daum', 'google'])
+
+    # 🚩 봇이거나 키워드 없는 직접 접속 -> [v11.0 연구소 위장막]
+    if is_bot or not keyword:
+        report = f"🚩 [{conf['identity']['name']}] 본진 위장홈 접속!\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
+        send_trace(report)
+        body = f"""
+        <div class="section" style="text-align:center;">
+            <h1 style="color:#1e293b; border-bottom:3px solid {conf['color']}; display:inline-block; padding-bottom:10px;">{{{{ title }}}}</h1>
+            <p style="color:#64748b; margin-top:15px;">{text_stylist(conf['desc'], request.host)}</p>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:25px;">
+            <a href="/a/moving" class="card"><h3>물류 수송 공학</h3><p style="font-size:13px; color:#666;">화물 적재 최적화 및 이동 경로 분석 표준 자료실</p></a>
+            <a href="/a/cleaning" class="card"><h3>고분자 세정 기술</h3><p style="font-size:13px; color:#666;">미세 오염물질 제거를 위한 화학적 세정 공정 가이드</p></a>
+            <a href="/a/welding" class="card"><h3>금속 접합 신뢰성</h3><p style="font-size:13px; color:#666;">정밀 용접 품질 검증 및 비파괴 탐상 기술 표준</p></a>
+            <a href="/a/drain" class="card"><h3>관로 유지 관리</h3><p style="font-size:13px; color:#666;">유체 역학 기반의 배관 세척 및 진단 기술 표준</p></a>
+            <a href="/a/homecare" class="card"><h3>환경 위생 최적화</h3><p style="font-size:13px; color:#666;">주거 환경 품질 관리 및 항균 기술 표준 매뉴얼</p></a>
+            <a href="/a/hvac" class="card"><h3>에너지 공조 시스템</h3><p style="font-size:13px; color:#666;">열역학 사이클 최적화 및 스마트 공조 제어 가이드</p></a>
+        </div>
+        """
+        return render_template_string(BASE_HTML, title="메인 포털", body_content=body, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
+
+    # 🎯 [v12.0] 진짜 손님(키워드 有) -> [심플 캠페인 랜딩]
+    selected_data = None
+    for category, data in DATA_MAP.items():
+        if any(k in keyword for k in data['keywords']):
+            selected_data = data
+            break
+    if not selected_data:
+        selected_data = DATA_MAP["moving"]
+    
+    final_link = selected_data['link_B'] if type_code == 'B' else selected_data['link_A']
+    report = f"💰 [{selected_data['image'].split('.')[0]}] 랜딩 진입!\n🔑 키워드: {keyword}\n🅰️🅱️ 타입: {type_code}\n🌐 주소: {request.host}\n📍 IP: {user_ip}"
     send_trace(report)
 
-    body = f"""
-    <div class="section" style="text-align:center;">
-        <h1 style="color:#1e293b; border-bottom:3px solid {conf['color']}; display:inline-block; padding-bottom:10px;">{{{{ title }}}}</h1>
-        <p style="color:#64748b; margin-top:15px;">{text_stylist(conf['desc'], request.host)}</p>
-    </div>
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:25px;">
-        <a href="/a/moving" class="card"><h3>물류 수송 공학</h3><p style="font-size:13px; color:#666;">화물 적재 최적화 및 이동 경로 분석 표준 자료실</p></a>
-        <a href="/a/cleaning" class="card"><h3>고분자 세정 기술</h3><p style="font-size:13px; color:#666;">미세 오염물질 제거를 위한 화학적 세정 공정 가이드</p></a>
-        <a href="/a/welding" class="card"><h3>금속 접합 신뢰성</h3><p style="font-size:13px; color:#666;">정밀 용접 품질 검증 및 비파괴 탐상 기술 표준</p></a>
-        <a href="/a/drain" class="card"><h3>관로 유지 관리</h3><p style="font-size:13px; color:#666;">유체 역학 기반의 배관 세척 및 진단 기술 표준</p></a>
-        <a href="/a/homecare" class="card"><h3>환경 위생 최적화</h3><p style="font-size:13px; color:#666;">주거 환경 품질 관리 및 항균 기술 표준 매뉴얼</p></a>
-        <a href="/a/hvac" class="card"><h3>에너지 공조 시스템</h3><p style="font-size:13px; color:#666;">열역학 사이클 최적화 및 스마트 공조 제어 가이드</p></a>
-    </div>
-    """
-    return render_template_string(BASE_HTML, title="메인 포털", body_content=body, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'])
+    return render_template_string(f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>공식 접수처</title>
+        <style>
+            body {{ margin: 0; padding: 0; background: white; }}
+            .container {{ width: 100%; max-width: 800px; margin: 0 auto; }}
+            .img-box img {{ width: 100%; display: block; }}
+            .cpa-frame {{ width: 100%; height: 2000px; border: none; display: block; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="img-box"><img src="/static/{selected_data['image']}" alt="상세내용"></div>
+            <iframe class="cpa-frame" src="{final_link}"></iframe>
+        </div>
+    </body>
+    </html>
+    """)
 
 @app.route('/resources')
 def resources():
@@ -273,11 +344,14 @@ def check_visitor(company, category):
     ua = request.headers.get('User-Agent', '').lower()
     is_bot = any(prefix in user_ip for prefix in ['110.93.', '114.111.', '125.209.', '211.249.', '210.89.']) or any(bot in ua for bot in ['naver', 'yeti', 'bot', 'crawl', 'google'])
     
-    target_links = CPA_DATA.get(company.lower(), {})
-    real_url = target_links.get(category.lower())
-
+    # 🕵️ [v12.0] 기존 CPA_DATA 대신 DATA_MAP에서 카테고리 매칭 (하위 호환성)
+    target_data = DATA_MAP.get(category.lower())
+    real_url = None
+    if target_data:
+        real_url = target_data['link_A'] # 기본 A 업체로 연동
+    
     # 텔레그램 추적
-    report = f"🚩 [{conf['identity']['name']}] 방문!\n📍 경로: /{company}/{category}\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
+    report = f"🚩 [{conf['identity']['name']}] 내부링크 방문!\n📍 경로: /{company}/{category}\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
     send_trace(report)
 
     # 봇이거나 링크가 없는 정보성 페이지일 때 -> '기술 보고서' 노출
