@@ -16,10 +16,7 @@ BOT_UA_KEYWORDS = [
     'vercel-screenshot', 'req/v3', 'python-requests', 'aiohttp', 'curl', 'wget',
     'selenium', 'playwright', 'cypress', 'go-http-client', 'okhttp', 'axios', 'guava'
 ]
-BLOCKED_IP_PREFIXES = [
-    '110.93.', '114.111.', '125.209.', '211.249.', '210.89.', '223.130.', 
-    '216.73.', '34.', '35.', '52.', '54.', '13.107.', '20.', '192.30.', '140.82.', '185.199.'
-]
+BLOCKED_IP_PREFIXES = [] # 임시 해제 (사용자 접근성 확보)
 VISITOR_LOGS = {} 
 
 def is_bot_detected(ip, ua):
@@ -44,7 +41,7 @@ def is_bot_detected(ip, ua):
     VISITOR_LOGS[ip] = [t for t in VISITOR_LOGS[ip] if now - t < 1.0]
     VISITOR_LOGS[ip].append(now)
     
-    if len(VISITOR_LOGS[ip]) > 3:
+    if len(VISITOR_LOGS[ip]) > 10: # 3 -> 10으로 완화
         return True, "BEHAVIOR_SPEED"
         
     return False, None
@@ -441,21 +438,26 @@ def get_unique_report_content(host, category):
     return report_text
 
 # ????[v22.0] Honeypot (주)???: ????? ?????????? ?????
+# ✅ [v36.7] Honeypot (관리자 로그인 페이지 위장)
 def get_honeypot_response(cham):
     body = f"""
-    <div class="section" style="max-width:400px; margin: 100px auto; padding:40px; border-top: 5px solid {cham['theme']['color']};">
+    <div class="section" style="max-width:400px; margin: 80px auto; padding:40px; border-top: 5px solid {cham['theme']['color']}; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
         <h2 style="text-align:center; color:#1e293b; margin-bottom:30px;">K-Tech Intranet Login</h2>
         <div style="margin-bottom:20px;">
             <label style="display:block; font-size:13px; color:#64748b; margin-bottom:5px;">Employee ID</label>
-            <input type="text" style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:5px; background:#f8fafc;" disabled value="Guest_Member">
+            <input type="text" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc;" disabled value="Guest_Member">
         </div>
         <div style="margin-bottom:30px;">
             <label style="display:block; font-size:13px; color:#64748b; margin-bottom:5px;">Security Password</label>
-            <input type="password" style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:5px; background:#f8fafc;" disabled value="********">
+            <input type="password" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc;" disabled value="********">
         </div>
-        <button style="width:100%; padding:12px; background:#94a3b8; color:white; border:none; border-radius:5px; font-weight:bold; cursor:not-allowed;">Access Restricted</button>
-        <p style="margin-top:20px; font-size:12px; color:#ef4444; text-align:center;">비정상 접근 ???????? ????????????????<br>?????????? ??? ?????????? ????????</p>
+        <button style="width:100%; padding:14px; background:#94a3b8; color:white; border:none; border-radius:8px; font-weight:bold; cursor:not-allowed;">Access Restricted</button>
+        <div style="margin-top:30px; text-align:center;">
+             <div style="border:3px solid #f3f3f3; border-top:3px solid {cham['theme']['color']}; border-radius:50%; width:20px; height:20px; animation: spin 1s linear infinite; display:inline-block; margin-right:10px; vertical-align:middle;"></div>
+             <span style="font-size:12px; color:#ef4444; vertical-align:middle;">비정상적 접근 패턴 감지 - 시스템 잠금 상태</span>
+        </div>
     </div>
+    <style>@keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}</style>
     """
     return render_template_string(BASE_HTML, title="Intranet Gateway", body_content=body, site_name=cham['name'], theme_color="#94a3b8", ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "Login", "resources": "System"}, cls_nav="n_lock", cls_footer="f_lock", cls_content="c_lock")
 
@@ -506,22 +508,7 @@ def get_professional_report(host, category, show_cta=False, target_url="#"):
     return render_template_string(BASE_HTML, title=f"{category.upper()} 고등 기술 공정 분석 리포트", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_doc", cls_footer="f_doc", cls_content="c_doc")
 
 
-def get_honeypot_response(cham):
-    body = f"""
-    <div class="section" style="text-align:center; padding: 100px 20px;">
-        <h1 style="color:#e74c3c; font-size:40px;">⛔ Access Denied</h1>
-        <p style="margin-top:20px; color:#334155; font-size:18px;">비정상적인 접근이 감지되어 접속이 일시 차단되었습니다.</p>
-        <div style="margin:40px auto; max-width:500px; padding:30px; background:#fef2f2; border:1px solid #fee2e2; border-radius:12px;">
-            <p style="font-size:15px; color:#b91c1c;"><strong>보안 정책 위반 (Code: {random.randint(10000, 99999)})</strong><br>자동화된 수집 도구 또는 비정상적인 트래픽 패턴이 식별되었습니다.</p>
-        </div>
-        <p style="font-size:13px; color:#94a3b8;">차단이 실수라고 판단되시면 관리자에게 문의바라며, 24시간 모니터링 중입니다.</p>
-        <div style="margin-top:40px;" id="spinner">
-            <div style="border:5px solid #f3f3f3; border-top:5px solid #e74c3c; border-radius:50%; width:40px; height:40px; animation: spin 1s linear infinite; margin:0 auto;"></div>
-        </div>
-    </div>
-    <style>@keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}</style>
-    """
-    return render_template_string(BASE_HTML, title="Security Alert", body_content=body, site_name=cham['name'], theme_color="#e74c3c", ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "차단안내", "resources": "보안정책"}, cls_nav="n_err", cls_footer="f_err", cls_content="c_err")
+# (중복 정의 제거됨)
 
 
 @app.route('/')
