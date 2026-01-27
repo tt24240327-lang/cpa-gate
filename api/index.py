@@ -1,4 +1,4 @@
-import requests, hashlib, random, base64 # v1.1.1 Deployment Force
+import requests, hashlib, random, base64, time # v1.1.2 Deployment Force
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
@@ -7,6 +7,43 @@ app = Flask(__name__)
 TELEGRAM_TOKEN = "7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0"
 CHAT_ID = "1898653696"
 GA_ID = "G-1VH7D6BJTD"
+
+# 🛡️ [v19.0] Iron Dome Defense Constants (강력봇 차단 대역)
+BOT_UA_KEYWORDS = [
+    'bot', 'crawl', 'slurp', 'spider', 'naver', 'daum', 'google', 'phantom', 'headless',
+    'vercel-screenshot', 'req/v3', 'python-requests', 'aiohttp', 'curl', 'wget',
+    'selenium', 'playwright', 'cypress', 'go-http-client', 'okhttp', 'axios', 'guava'
+]
+BLOCKED_IP_PREFIXES = [
+    '216.73.', '34.', '35.', '52.', '54.', '13.107.', '20.', '192.30.', '140.82.', '185.199.'
+]
+
+# 🕵️ [v19.0] Behavioral Tracker (실시간 행동 분석용 장부)
+VISITOR_LOGS = {} 
+
+def is_bot_detected(ip, ua):
+    ua_lower = ua.lower()
+    # 1. User-Agent 블랙리스트 (vercel-screenshot, headless 등)
+    if any(keyword in ua_lower for keyword in BOT_UA_KEYWORDS):
+        return True, f"UA_BLACK({ua[:20]})"
+    
+    # 2. IP 대역 차단 (해외 클라우드 등)
+    if any(ip.startswith(prefix) for prefix in BLOCKED_IP_PREFIXES):
+        return True, "IP_BLACK"
+    
+    # 3. 행동 분석 (1초에 3회 이상 클릭 시 봇으로 간주)
+    now = time.time()
+    if ip not in VISITOR_LOGS:
+        VISITOR_LOGS[ip] = []
+    
+    # 최근 1초 이내 기록만 유지
+    VISITOR_LOGS[ip] = [t for t in VISITOR_LOGS[ip] if now - t < 1.0]
+    VISITOR_LOGS[ip].append(now)
+    
+    if len(VISITOR_LOGS[ip]) > 3:
+        return True, "BEHAVIOR_SPEED"
+        
+    return False, None
 
 # [멀티 도메인 설정] 주소에 따라 간판과 색상을 자동으로 바꿉니더
 SITE_CONFIGS = {
@@ -430,18 +467,43 @@ def get_unique_report_content(host, category):
 
     return report_text
 
+# 🛡️ [v19.0] Honeypot (허니팟): 봇 전용 가짜 페이지
+def get_honeypot_response(cham):
+    body = f"""
+    <div class="section" style="text-align:center; padding: 100px 20px;">
+        <h1 style="color:#e74c3c; font-size:40px;">⚠️ Access Denied</h1>
+        <p style="margin-top:20px; color:#334155; font-size:18px;">비정상적인 접속 활동이 감지되어 시스템 접근이 차단되었습니다.</p>
+        <div style="margin:40px auto; max-width:500px; padding:30px; background:#fef2f2; border:1px solid #fee2e2; border-radius:12px;">
+            <p style="font-size:15px; color:#b91c1c;"><strong>보안 정책 위반 (Code: {random.randint(10000, 99999)})</strong><br>자동화된 크롤링 또는 비정상적인 속도의 요청이 감지되었습니다.</p>
+        </div>
+        <p style="font-size:13px; color:#94a3b8;">본 조치는 시스템 안정성을 위해 자동으로 실행되었으며, 24시간 후 해제됩니다.</p>
+        <div style="margin-top:40px;" id="spinner">
+            <div style="border:5px solid #f3f3f3; border-top:5px solid #e74c3c; border-radius:50%; width:40px; height:40px; animation: spin 1s linear infinite; margin:0 auto;"></div>
+        </div>
+    </div>
+    <style>@keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}</style>
+    """
+    return render_template_string(BASE_HTML, title="Security Alert", body_content=body, site_name=cham['name'], theme_color="#e74c3c", ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "안내", "resources": "보안"}, cls_nav="n_err", cls_footer="f_err", cls_content="c_err")
+
 @app.route('/')
 def index():
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
     host = request.host.split(':')[0].replace('www.', '')
     
-    # 🕵️ [v18.0] 실시간 키워드 추출 및 봇 탐지
+    # 🕵️ [v19.0] Iron Dome 전방위 봇 탐지 (UA + IP + Behavioral)
     keyword_raw = request.args.get('k', '')
     keyword = get_keyword(keyword_raw) or ""
-    is_bot = any(bot in ua for bot in ['bot', 'crawl', 'slurp', 'spider', 'naver', 'daum', 'google', 'phantom', 'headless'])
+    
+    is_bot, bot_reason = is_bot_detected(user_ip, ua)
     
     cham = get_chameleon_data(host, keyword)
+    
+    # 🚩 [CASE 0] 봇이 확실하면 즉시 허니팟으로 던지기
+    if is_bot:
+        report = f"🛡️ [차단] {bot_reason} 탐지!\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ UA: {ua[:40]}..."
+        send_trace(report)
+        return get_honeypot_response(cham)
     type_code = request.args.get('t', 'A')
 
     # 🚩 [CASE 1] 봇이거나 키워드 없는 직접 접속 -> "전문 연구소 메인"
@@ -583,7 +645,11 @@ def check_visitor(category, company=None):
     cham = get_chameleon_data(host)
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
-    is_bot = any(prefix in user_ip for prefix in ['110.93.', '114.111.', '125.209.', '211.249.', '210.89.']) or any(bot in ua for bot in ['naver', 'yeti', 'bot', 'crawl', 'google'])
+    
+    # 🛡️ [v19.0] 내부 링크에서도 봇 감지 가동
+    is_bot, bot_reason = is_bot_detected(user_ip, ua)
+    if is_bot:
+        return get_honeypot_response(cham)
     
     # 카테고리 매칭
     target_data = DATA_MAP.get(category.lower())
