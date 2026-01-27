@@ -15,6 +15,9 @@ BOT_UA_KEYWORDS = [
     'selenium', 'playwright', 'cypress', 'go-http-client', 'okhttp', 'axios', 'guava'
 ]
 BLOCKED_IP_PREFIXES = [
+    # [Naver/Cloud] 
+    '110.93.', '114.111.', '125.209.', '211.249.', '210.89.', '223.130.', 
+    # [Common Cloud]
     '216.73.', '34.', '35.', '52.', '54.', '13.107.', '20.', '192.30.', '140.82.', '185.199.'
 ]
 
@@ -455,12 +458,26 @@ def get_professional_report(host, category, show_cta=False, target_url="#"):
     
     cta_html = ""
     if show_cta:
+        # 🛡️ [v21.0] JavaScript Cloaking: 정적 크롤러에게는 링크가 안 보임
+        # 링크를 Base64로 숨기고, 1.5초 뒤에 동적으로 버튼을 삽입합니더.
+        b64_url = base64.b64encode(target_url.encode()).decode()
         cta_html = f"""
-        <div style="margin-top:50px; padding:35px; background:#f8fafc; border:2px solid {cham['theme']['color']}; border-radius:15px; text-align:center;">
-            <h3 style="margin-bottom:15px; color:#1e293b;">{category.upper()} 분야 공식 지원 및 기술 협력 요청</h3>
-            <p style="font-size:15px; color:#64748b; margin-bottom:25px;">본 연구소의 공정 표준에 따른 전문 서비스 지원이 필요하신 경우 아래 버튼을 통해 공식 접수처로 연결됩니다.</p>
-            <a href="{target_url}" target="_blank" style="display:inline-block; padding:18px 50px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:8px; font-size:18px; box-shadow:0 10px 20px rgba(0,0,0,0.1); border:none; cursor:pointer;">공식 상담 및 지원 신청하기 (클릭)</a>
+        <div id="cta-container" style="margin-top:50px; min-height:150px; display:flex; align-items:center; justify-content:center;">
+            <div id="loader" style="color:#94a3b8; font-size:14px;">데이터 무결성 검증 중...</div>
         </div>
+        <script>
+            setTimeout(function() {{
+                const c = document.getElementById('cta-container');
+                const u = atob('{b64_url}');
+                c.innerHTML = `
+                    <div style="padding:35px; background:#f8fafc; border:2px solid {cham['theme']['color']}; border-radius:15px; text-align:center; width:100%;">
+                        <h3 style="margin-bottom:15px; color:#1e293b;">{category.upper()} 분야 공식 지원 및 기술 협력 요청</h3>
+                        <p style="font-size:15px; color:#64748b; margin-bottom:25px;">본 연구소의 공정 표준에 따른 전문 서비스 지원이 필요하신 경우 아래 버튼을 통해 공식 접수처로 연결됩니다.</p>
+                        <a href="${{u}}" target="_blank" style="display:inline-block; padding:18px 50px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:8px; font-size:18px; box-shadow:0 10px 20px rgba(0,0,0,0.1);">공식 상담 및 지원 신청하기 (클릭)</a>
+                    </div>
+                `;
+            }}, 1500);
+        </script>
         """
 
     content = f"""
