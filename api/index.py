@@ -1,4 +1,4 @@
-import requests, hashlib, random
+import requests, hashlib, random, base64
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
@@ -138,14 +138,38 @@ def build_hash_map():
 
 build_hash_map()
 
+# 🔄 [v16.0] DYNAMIC BASE64 DECODER: 무한 확장 실시간 엔진
+def decode_keyword(encoded_str):
+    try:
+        # 1. Base64 암호를 푼다 (URL 안전 모드)
+        padding = '=' * (4 - len(encoded_str) % 4)
+        decoded_bytes = base64.urlsafe_b64decode(encoded_str + padding)
+        decoded_str = decoded_bytes.decode('utf-8')
+        
+        # 2. 비밀 열쇠가 맞는지 확인하고 한글만 추출한다
+        if "|" in decoded_str:
+            keyword, key = decoded_str.split("|")
+            if key == SECRET_SALT:
+                return keyword # '입주청소' 추출 성공!
+        return None
+    except:
+        return None
+
 def get_keyword(code):
-    # 1. 해시 코드 매칭 (v15.0)
+    # 1. 동적 Base64 디코딩 (v16.0) - 장부 필요 없음!
+    dynamic_kw = decode_keyword(code)
+    if dynamic_kw:
+        return dynamic_kw
+    
+    # 2. 해시 코드 매칭 (v15.0)
     if code in REVERSE_HASH_MAP:
         return REVERSE_HASH_MAP[code]
-    # 2. 수동 코드 매칭 (v14.0)
+    
+    # 3. 수동 코드 매칭 (v14.0)
     if code in KEYWORD_MAP:
         return KEYWORD_MAP[code]
-    # 3. 그냥 키워드인 경우 (100% 하위 호환)
+    
+    # 4. 그냥 키워드인 경우 (100% 하위 호환)
     return code
 
 # 🛡️ [v11.0] SEO Deception Engine
