@@ -1,4 +1,4 @@
-import requests, hashlib, random, base64, time # v35.10_FINAL_REPAIR
+import requests, hashlib, random, base64, time # v35.11_REPORT_FIX
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
@@ -460,29 +460,29 @@ def get_honeypot_response(cham):
     return render_template_string(BASE_HTML, title="Intranet Gateway", body_content=body, site_name=cham['name'], theme_color="#94a3b8", ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "Login", "resources": "System"}, cls_nav="n_lock", cls_footer="f_lock", cls_content="c_lock")
 
 # ????[v22.0] Deep Deception: ??????????????? (??? ??? ??? ????
+# [v35.11] Deep Deception: Professional Report Generation
 def get_professional_report(host, category, show_cta=False, target_url="#"):
     cham = get_chameleon_data(host, category)
     report_text = get_unique_report_content(host, category)
     
     cta_html = ""
     if show_cta:
-        # ????[v22.0] Ultimate Stealth "The Ghost": ????????? ??????????
-        # ??? ????? ?????? ?????????????????????????????????.
+        # [v35.11] Safe JS Injection
         b64_url = base64.b64encode(target_url.encode()).decode()
         cta_html = f"""
         <div id="cta-immediate-zone" style="margin-top:40px;"></div>
         <script>
-            (function() {
+            (function() {{
                 const u = atob('{b64_url}');
                 const zone = document.getElementById('cta-immediate-zone');
                 zone.innerHTML = `
                     <div style="padding:40px; background:#f8fafc; border:2px solid {cham['theme']['color']}; border-radius:12px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-                        <h3 style="margin-bottom:12px; color:#1e293b; font-size:20px;">{category.upper()} ??? ??? ??? ???????</h3>
-                        <p style="font-size:15px; color:#64748b; margin-bottom:25px;">????? ??? ??????????? ??? ????? ??? ?????????? ????????</p>
-                        <a href="${{u}}" target="_blank" style="display:inline-block; padding:18px 60px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:8px; font-size:18px; box-shadow:0 8px 15px rgba(0,0,0,0.1); width: 80%; max-width: 400px;">??? ??? ????? ???????</a>
+                        <h3 style="margin-bottom:12px; color:#1e293b; font-size:20px;">{category.upper()} 전문 상담 신청 접수처</h3>
+                        <p style="font-size:15px; color:#64748b; margin-bottom:25px;">검증된 지역 전문 업체와 연결하여 빠르고 투명한 견적을 받아보세요.</p>
+                        <a href="${{u}}" target="_blank" style="display:inline-block; padding:18px 60px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:8px; font-size:18px; box-shadow:0 8px 15px rgba(0,0,0,0.1); width: 80%; max-width: 400px;">무료 견적 및 상담 신청</a>
                     </div>
                 `;
-            })();
+            }})();
         </script>
         <style>@keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; transform: translateY(0); }} }}</style>
         """
@@ -490,22 +490,22 @@ def get_professional_report(host, category, show_cta=False, target_url="#"):
     content = f"""
     <div class="section">
         <div style="float:right; border:4px solid #e74c3c; color:#e74c3c; padding:10px 20px; font-weight:bold; transform:rotate(12deg); font-size:24px; border-radius:5px;">CONFIDENTIAL</div>
-        <p style="color:{cham['theme']['color']}; font-weight:bold; font-size:14px;">[??????????????: {cham['doc_id']}]</p>
-        <h1 style="color:#1e293b; margin-top:15px; font-size:32px; letter-spacing:-1px;">{category.upper()} 고등 기술 공정 분석 리포트 <span style="font-size:10px; color:#eee;">v34.0_SYNC</span></h1>
+        <p style="color:{cham['theme']['color']}; font-weight:bold; font-size:14px;">[기술인프라 보존번호: {cham['doc_id']}]</p>
+        <h1 style="color:#1e293b; margin-top:15px; font-size:32px; letter-spacing:-1px;">{category.upper()} 고등 기술 공정 분석 리포트 <span style="font-size:10px; color:#eee;">v35.11_FIXED</span></h1>
         <hr style="border:0; border-top:3px solid {cham['theme']['color']}22; margin:30px 0;">
         
         <div style="font-size:16px; color:#334155;">{report_text}</div>
         
         {cta_html}
         
-                <p style="font-size:12px; color:#94a3b8; margin-top:50px; border-top:1px solid #eee; padding-top:20px; line-height:1.6;">
-            본 문서는 {cham['name']}의 엄격한 보안 지침에 따라 관리되는 내부 성과물입니다. 비인가자에 의한 무단 복제 및 전재를 엄격히 금하며, 위반 시 법적 책임이 따를 수 있습니다. (Hash: {hashlib.md5(host.encode()).hexdigest()[:16].upper()})
+        <p style="font-size:12px; color:#94a3b8; margin-top:50px; border-top:1px solid #eee; padding-top:20px; line-height:1.6;">
+            (Hash: {hashlib.md5(host.encode()).hexdigest()[:16].upper()})
         </p>
     </div>
     """
     return render_template_string(BASE_HTML, title=f"{category.upper()} 고등 기술 공정 분석 리포트", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_doc", cls_footer="f_doc", cls_content="c_doc")
 
-# 🕸️ [v35.9] Honeypot (봇 전용 함정 페이지)
+
 def get_honeypot_response(cham):
     body = f"""
     <div class="section" style="text-align:center; padding: 100px 20px;">
