@@ -590,7 +590,9 @@ def index():
             {"".join(selected_cards)}
         </div>
         """
-        return render_template_string(BASE_HTML, title=cham['name'], body_content=body, site_name=cham['name'], theme_color=cham['theme']['color'], site_desc=cham['doc_id'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_main", cls_footer="f_main", cls_content="c_main")
+        resp = Response(render_template_string(BASE_HTML, title=cham['name'], body_content=body, site_name=cham['name'], theme_color=cham['theme']['color'], site_desc=cham['doc_id'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_main", cls_footer="f_main", cls_content="c_main"))
+        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        return resp
 
     # 🎯 [CASE 2] 진짜 손님 -> [중요] 절대 자동 리다이렉트 안함. 리포트 페이지로 이동 후 버튼 노출.
     selected_data = None
@@ -609,7 +611,9 @@ def index():
     send_trace(f"💰 [진입/Human] - {keyword} ({category_key})\n🔗 링크: {final_url}")
     
     # 🚩 [v20.0] 리포트 페이지에 상담 신청 버튼을 넣어서 반환 (자동 이동 금지)
-    return get_professional_report(host, category_key, show_cta=True, target_url=final_url)
+    resp = Response(get_professional_report(host, category_key, show_cta=True, target_url=final_url))
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    return resp
 
 @app.route('/resources')
 def resources():
@@ -690,7 +694,9 @@ def check_visitor(category, company=None):
     # 여기서는 좀 더 안전하게 '봇이 아닐 때만' 버튼을 노출하도록 처리합니다.
     show_button = not is_bot 
     
-    return get_professional_report(host, category.lower(), show_cta=show_button, target_url=real_url)
+    resp = Response(get_professional_report(host, category.lower(), show_cta=show_button, target_url=real_url))
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    return resp
 
 # --- 🗺️ [신규] 사이트맵(Sitemap) 자동 생성 엔진 ---
 @app.route('/sitemap.xml')
