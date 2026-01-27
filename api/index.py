@@ -97,6 +97,26 @@ DATA_MAP = {
     }
 }
 
+
+# 🔑 [v14.0] SMART KEYWORD DECODER: 무한 확장형 키워드 엔진
+KEYWORD_MAP = {
+    # [청소]
+    "cln-01": "입주청소", "cln-02": "이사청소", "cln-03": "거주청소", "cln-04": "청소업체",
+    # [이사]
+    "mov-01": "포장이사", "mov-02": "원룸이사", "mov-03": "용달이사", "mov-04": "이삿짐",
+    # [용접]
+    "wld-01": "용접", "wld-02": "출장용접", "wld-03": "알곤용접",
+    # [설비/막힘]
+    "pip-01": "하수구막힘", "pip-02": "변기막힘", "pip-03": "싱크대막힘",
+    # [교체/수리]
+    "fix-01": "수전교체", "fix-02": "변기교체", "fix-03": "세면대교체",
+    # [철거]
+    "dem-01": "철거", "dem-02": "원상복구", "dem-03": "상가철거"
+}
+
+def get_keyword(code):
+    return KEYWORD_MAP.get(code, code)
+
 # 🛡️ [v11.0] SEO Deception Engine
 
 # 🤖 50개 이상의 기술 논문 데이터베이스 (2023 ~ 2026)
@@ -248,8 +268,9 @@ def index():
     ua = request.headers.get('User-Agent', '').lower()
     host = request.host.split(':')[0].replace('www.', '')
     
-    # 🕵️ [v12.0] 파라미터 및 봇 탐지
-    keyword = request.args.get('k', '')
+    # 🕵️ [v12.0/v14.0] 파라미터 디코딩 및 봇 탐지
+    keyword_raw = request.args.get('k', '')
+    keyword = get_keyword(keyword_raw)
     type_code = request.args.get('t', 'A') 
     is_bot = any(bot in ua for bot in ['bot', 'crawl', 'slurp', 'spider', 'naver', 'daum', 'google'])
 
@@ -293,7 +314,8 @@ def index():
         selected_data = DATA_MAP["moving"]
     
     final_link = selected_data['link_B'] if type_code == 'B' else selected_data['link_A']
-    report = f"💰 [{selected_data['image'].split('.')[0]}] 랜딩 진입!\n🔑 키워드: {keyword}\n🅰️🅱️ 타입: {type_code}\n🌐 주소: {request.host}\n📍 IP: {user_ip}"
+    # 텔레그램 보고 시 원본 코드와 한글 키워드를 같이 보여줍니다.
+    report = f"💰 [{selected_data['image'].split('.')[0]}] 랜딩 진입!\n🔑 키워드: {keyword} ({keyword_raw})\n🅰️🅱️ 타입: {type_code}\n🌐 주소: {request.host}\n📍 IP: {user_ip}"
     send_trace(report)
 
     return render_template_string(f"""
