@@ -494,20 +494,25 @@ def get_professional_report(host, category, show_cta=False, target_url="#"):
         </div>
         <script>
             let activated = false;
-            window.onscroll = function() {{
-                if (!activated && window.pageYOffset > 100) {{
-                    activated = true;
-                    const c = document.getElementById('cta-trigger-zone');
-                    const u = atob('{b64_url}');
-                    c.innerHTML = `
-                        <div style="padding:35px; background:#f8fafc; border:2px solid {cham['theme']['color']}; border-radius:15px; text-align:center; width:100%; animation:fadeIn 0.5s;">
-                            <h3 style="margin-bottom:15px; color:#1e293b;">{category.upper()} 분야 공식 지원 및 기술 협력 요청</h3>
-                            <p style="font-size:15px; color:#64748b; margin-bottom:25px;">본 연구소의 공정 표준에 따른 전문 서비스 지원이 필요하신 경우 아래 버튼을 통해 공식 접수처로 연결됩니다.</p>
-                            <a href="${{u}}" target="_blank" style="display:inline-block; padding:18px 50px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:8px; font-size:18px; box-shadow:0 10px 20px rgba(0,0,0,0.1);">공식 상담 및 지원 신청하기 (클릭)</a>
-                        </div>
-                    `;
-                }}
-            }};
+            function activateCTA() {
+                if (activated) return;
+                activated = true;
+                const c = document.getElementById('cta-trigger-zone');
+                const u = atob('{b64_url}');
+                c.innerHTML = `
+                    <div style="padding:35px; background:#f8fafc; border:2px solid {cham['theme']['color']}; border-radius:15px; text-align:center; width:100%; animation:fadeIn 0.5s; box-shadow: 0 15px 30px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom:15px; color:#1e293b;">{category.upper()} 분야 공식 지원 및 기술 협력 요청</h3>
+                        <p style="font-size:15px; color:#64748b; margin-bottom:25px;">본 연구소의 공정 표준에 따른 전문 서비스 지원이 필요하신 경우 아래 버튼을 통해 공식 접수처로 연결됩니다.</p>
+                        <a href="${{u}}" target="_blank" style="display:inline-block; padding:20px 60px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:10px; font-size:20px; box-shadow:0 10px 20px rgba(0,0,0,0.1); transition: 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">공식 상담 및 지원 신청하기 (클릭)</a>
+                    </div>
+                `;
+            }
+            // 🛡️ [v23.0] Multi-Trigger Human Verification
+            window.addEventListener('scroll', () => { if(window.pageYOffset > 20) activateCTA(); });
+            window.addEventListener('mousemove', activateCTA);
+            window.addEventListener('touchstart', activateCTA);
+            window.addEventListener('click', activateCTA);
+            setTimeout(activateCTA, 5000); // 5초 뒤 자동 활성화 (최후의 보루)
         </script>
         <style>@keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; transform: translateY(0); }} }}</style>
         """
