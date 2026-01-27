@@ -375,9 +375,9 @@ def index():
         
         # 가짜 연구물 카드 (주소별 셔플링)
         cards = [
-            f'<div class="card"><h3>{keyword or "핵심"} 기술 보고서</h3><p>{cham["doc_id"]} 공정 분석 자료</p></div>',
-            '<div class="card"><h3>주요 인프라 최적화</h3><p>에너지 효율 및 시스템 진단</p></div>',
-            '<div class="card"><h3>글로벌 기술 표준</h3><p>ISO 인증 및 국가 표준 준수</p></div>'
+            f'<a href="/a/moving" class="card" style="text-decoration:none;"><h3>{keyword or "핵심"} 기술 보고서</h3><p style="color:#666; font-size:13px;">{cham["doc_id"]} 공정 분석 자료</p></a>',
+            f'<a href="/a/cleaning" class="card" style="text-decoration:none;"><h3>주요 인프라 최적화</h3><p style="color:#666; font-size:13px;">에너지 효율 및 시스템 진단</p></a>',
+            f'<a href="/a/welding" class="card" style="text-decoration:none;"><h3>글로벌 기술 표준</h3><p style="color:#666; font-size:13px;">ISO 인증 및 국가 표준 준수</p></a>'
         ]
         random.seed(int(hashlib.md5(host.encode()).hexdigest()[:8], 16))
         random.shuffle(cards)
@@ -478,9 +478,10 @@ def about():
 
 @app.route('/careers')
 def careers():
-    conf = get_config()
-    content = f'<div class="section"><h1>인재채용</h1><p>{text_stylist("물류 시스템 데이터 분석가 및 화학 공정 설계 선임연구원을 모십니다.", request.host)}</p></div>'
-    return render_template_string(BASE_HTML, title="인재채용", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
+    host = request.host.split(':')[0].replace('www.', '')
+    cham = get_chameleon_data(host)
+    content = f'<div class="section"><h1>인재채용</h1><p>{cham["name"]}와 함께할 차세대 기술 분석가 및 시스템 운영 효율화 전문가를 모십니다.</p></div>'
+    return render_template_string(BASE_HTML, title="인재채용", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_car", cls_footer="f_car", cls_content="c_car")
 
 @app.route('/contact')
 def contact():
@@ -491,7 +492,8 @@ def contact():
 
 @app.route('/<company>/<category>')
 def check_visitor(company, category):
-    conf = get_config()
+    host = request.host.split(':')[0].replace('www.', '')
+    cham = get_chameleon_data(host)
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
     is_bot = any(prefix in user_ip for prefix in ['110.93.', '114.111.', '125.209.', '211.249.', '210.89.']) or any(bot in ua for bot in ['naver', 'yeti', 'bot', 'crawl', 'google'])
