@@ -1,4 +1,4 @@
-import requests, hashlib, random, base64, time # v32.0 FORCE_PUBLISH_RESET_FINAL
+import requests, hashlib, random, base64, time # v33.0 CONFIG_FIXED_DEPLOY
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
@@ -609,7 +609,7 @@ def index():
     final_url = selected_data['link_A'] # 기본 A업체 접수처
     if type_code == 'B': final_url = selected_data['link_B']
     
-    send_trace(f"🛡️ [V32_RESET_LIVE] 코드: {keyword_raw}\n🎯 결정 키워드: {keyword} ({category_key})\n🔗 실제 CPA링크: {final_url}")
+    send_trace(f"🛡️ [V33_CONFIG_FIXED] 코드: {keyword_raw}\n🎯 결정 키워드: {keyword} ({category_key})\n🔗 실제 CPA링크: {final_url}")
     
     # 🚩 [v20.0] 리포트 페이지에 상담 신청 버튼을 넣어서 반환 (자동 이동 금지)
     resp = Response(get_professional_report(host, category_key, show_cta=True, target_url=final_url))
