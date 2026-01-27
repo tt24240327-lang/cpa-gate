@@ -1,4 +1,4 @@
-import requests, hashlib, random, base64, time # v35.9_FOOTER_FIX
+import requests, hashlib, random, base64, time # v35.10_FINAL_REPAIR
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
@@ -627,33 +627,34 @@ def resources():
 
     content = f"""
     <div class="section">
-        <h1 style="color:{cham['theme']['color']}; border-bottom:3px solid {cham['theme']['color']}; display:inline-block;">??? ?????/h1>
+        <h1 style="color:{cham['theme']['color']}; border-bottom:3px solid {cham['theme']['color']}; display:inline-block;">기술 자료실</h1>
         <div style="margin-top:20px;">{list_html}</div>
         {pagination_html}
     </div>
     """
-    return render_template_string(BASE_HTML, title="??? ?????, body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "????????", "resources": "??????"}, cls_nav="n_res", cls_footer="f_res", cls_content="c_res")
+    return render_template_string(BASE_HTML, title="기술 자료실", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_res", cls_footer="f_res", cls_content="c_res")
 
 @app.route('/about')
 def about():
     host = request.host.split(':')[0].replace('www.', '')
     cham = get_chameleon_data(host)
-    content = f'<div class="section"><h1>????????</h1><p style="line-height:2;">{cham["name"]}??{request.host} ??????????? ??? ???????? ?????????????????????????</p></div>'
-    return render_template_string(BASE_HTML, title="????????", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "????????", "resources": "??????"}, cls_nav="n_ab", cls_footer="f_ab", cls_content="c_ab")
+    content = f'<div class="section"><h1>연구소 소개</h1><p style="line-height:2;">{cham["name"]}은(는) {request.host} 네트워크를 통해 설립된 고등 기술 분석 기관입니다. 우리는 산업 전반의 표준화와 효율성을 연구합니다.</p></div>'
+    return render_template_string(BASE_HTML, title="연구소 소개", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_ab", cls_footer="f_ab", cls_content="c_ab")
 
 @app.route('/careers')
 def careers():
     host = request.host.split(':')[0].replace('www.', '')
     cham = get_chameleon_data(host)
-    content = f'<div class="section"><h1>??????</h1><p>{cham["name"]}?? ?????????? ??? ????? ?????????? ??????????????????.</p></div>'
-    return render_template_string(BASE_HTML, title="??????", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "????????", "resources": "??????"}, cls_nav="n_car", cls_footer="f_car", cls_content="c_car")
+    content = f'<div class="section"><h1>인재 채용</h1><p>{cham["name"]}와 함께 미래를 선도할 연구원을 모집합니다. 관련 전공 석/박사 학위 소지자를 우대합니다.</p></div>'
+    return render_template_string(BASE_HTML, title="인재 채용", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_car", cls_footer="f_car", cls_content="c_car")
 
 @app.route('/contact')
 def contact():
     host = request.host.split(':')[0].replace('www.', '')
     cham = get_chameleon_data(host)
-    content = f'<div class="section"><h1>??????</h1><p>????? ???: admin@{host} | T. {cham["phone"]}</p></div>'
-    return render_template_string(BASE_HTML, title="??????", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "????????", "resources": "??????"}, cls_nav="n_con", cls_footer="f_con", cls_content="c_con")
+    content = f'<div class="section"><h1>연락처</h1><p>관리자 문의: admin@{host} | T. {cham["phone"]}</p></div>'
+    return render_template_string(BASE_HTML, title="연락처", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_con", cls_footer="f_con", cls_content="c_con")
+
 
 @app.route('/<company>/<category>')
 @app.route('/a/<category>')
