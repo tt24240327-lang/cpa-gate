@@ -1,4 +1,4 @@
-﻿import requests, hashlib, random, base64, time # v35.1_IP_FIX_FINAL
+import requests, hashlib, random, base64, time # v35.1_IP_FIX_FINAL
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
@@ -609,7 +609,7 @@ def index():
     final_url = selected_data['link_A'] # 기본 A업체 접수처
     if type_code == 'B': final_url = selected_data['link_B']
     
-    send_trace(f"?썳截?[V35_1_IP_FIX] 肄붾뱶: {keyword_raw}\n?렞 寃곗젙 ?ㅼ썙?? {keyword} ({category_key})\n?뱧 IP: {user_ip}\n?빑截?UA: {ua}\n?뵕 ?ㅼ젣 CPA留곹겕: {final_url}")
+    send_trace(f"?썳截?[V35_2_HOTFIX] 肄붾뱶: {keyword_raw}\n?렞 寃곗젙 ?ㅼ썙?? {keyword} ({category_key})\n?뱧 IP: {user_ip}\n?빑截?UA: {ua[:50]}...\n?뵕 ?ㅼ젣 CPA留곹겕: {final_url}")
     
     # 🚩 [v20.0] 리포트 페이지에 상담 신청 버튼을 넣어서 반환 (자동 이동 금지)
     resp = Response(get_professional_report(host, category_key, show_cta=True, target_url=final_url))
