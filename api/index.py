@@ -18,27 +18,64 @@ SITE_CONFIGS = {
 }
 DEFAULT_CONFIG = {"name": "K-Tech 기술표준연구소", "color": "#00c73c", "desc": "산업 공정 및 기술 표준화 연구 전문", "font": "Nanum+Gothic"}
 
-# 🛡️ [v11.0] SEO Deception Engine
-def identity_gen(host):
+# 🛡️ [v17.0] Chameleon Deception Engine: 무한 생성 엔진
+def get_chameleon_data(host, keyword=""):
+    # 서브도메인을 시드로 사용하여 '주소별 고정 랜덤' 실현
+    subdomain = host.split('.')[0]
     h = int(hashlib.md5(host.encode()).hexdigest(), 16)
     random.seed(h)
     
-    # 1. 가짜 법인명 생성 (설정에 없으면 자동 생성)
-    prefixes = ["글로벌", "대한", "미래", "산업", "핵심", "표준", "기술", "융합", "혁신", "정밀"]
-    suffixes = ["연구소", "진단센터", "기술본부", "솔루션", "엔지니어링", "아카이브", "시스템", "컨설팅"]
-    name = random.choice(prefixes) + random.choice(prefixes) + random.choice(suffixes)
+    # 1. 기관명 생성 사전
+    p_names = ["예진", "한국", "미래", "현대", "통합", "전략", "글로벌", "스마트", "중앙", "차세대", "대한", "산업", "혁신", "정밀"]
+    m_names = ["물류", "인프라", "환경", "기술", "시스템", "에너지", "안전", "유체", "공정", "기반", "생활"]
+    s_names = ["연구소", "지원센터", "솔루션", "그룹", "개발원", "위원회", "본부", "재단", "연합", "기구"]
     
-    # 2. 안전한 가짜 전화번호 (실제 국번 회피)
-    # 070 대역 중 특정 패턴이나 존재하지 않는 국번 조합 사용
-    phone = f"070-{random.randint(2000, 2999)}-{random.randint(1000, 9999)}"
+    # 카테고리별 특화 단어 (키워드가 있을 때 우선 적용)
+    if "이사" in keyword or "물류" in keyword:
+        m_names = ["물류수송", "화물운송", "적재공학", "수송체계", "이동로직"]
+    elif "청소" in keyword or "세정" in keyword:
+        m_names = ["고분자세정", "환경위생", "항균공학", "정밀세척", "분자정제"]
+    elif "용접" in keyword:
+        m_names = ["금속접합", "정밀용접", "접합신뢰성", "특수합금", "열변형제어"]
+    elif "막힘" in keyword or "누수" in keyword or "배관" in keyword:
+        m_names = ["유체흐름", "지하관로", "비굴착복구", "수압진단", "관로유지"]
+    elif "교체" in keyword or "수전" in keyword or "변기" in keyword:
+        m_names = ["시설교체", "기기보수", "노후설비", "부품표준", "유지보수"]
+
+    # 도메인 기반 고정 이름 생성
+    site_name = f"{random.choice(p_names)} {random.choice(m_names)} {random.choice(s_names)}"
     
-    # 3. 대표자 및 주소
-    names = ["김", "이", "박", "최", "정", "강", "조", "윤"]
-    fixed_name = random.choice(names) + random.choice(names) + random.choice(names)
-    addr_cities = ["서울시 중구", "경기도 성남시", "대전시 유성구", "인천시 연수구", "부산시 해운대구"]
-    address = f"{random.choice(addr_cities)} {random.randint(10, 500)}번길 {random.randint(1, 100)}"
+    # 2. 디자인 테마 (주소별 다른 색상)
+    themes = [
+        {"color": "#1e40af", "bg": "#f0f7ff"}, # 블루
+        {"color": "#15803d", "bg": "#f0fdf4"}, # 그린
+        {"color": "#b91c1c", "bg": "#fef2f2"}, # 레드
+        {"color": "#0369a1", "bg": "#f0f9ff"}, # 스카이
+        {"color": "#0d9488", "bg": "#f0fdfa"}, # 틸
+        {"color": "#7c3aed", "bg": "#f5f3ff"}, # 퍼플
+        {"color": "#475569", "bg": "#f8fafc"}  # 그레이
+    ]
+    theme = random.choice(themes)
     
-    return {"name": name, "phone": phone, "ceo": fixed_name, "addr": address}
+    # 3. 문서 번호 및 메타 데이터
+    doc_id = f"KTS-{random.randint(2024, 2026)}-{h % 10000:04d}"
+    
+    # 4. 가짜 신원 정보
+    last_names = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임"]
+    ceo = random.choice(last_names) + random.choice(last_names) + random.choice(last_names)
+    addr_cities = ["서울시 중구", "경기도 성남시", "대전시 유성구", "인천시 연수구", "부산시 해운대구", "광주시 북구"]
+    address = f"{random.choice(addr_cities)} {random.randint(10, 500)}번길 {random.randint(1, 100)} (v{random.randint(2, 5)}.0)"
+    phone = f"070-{random.randint(3000, 8999)}-{random.randint(1000, 9999)}"
+
+    return {
+        "name": site_name,
+        "theme": theme,
+        "doc_id": doc_id,
+        "ceo": ceo,
+        "addr": address,
+        "phone": phone,
+        "font": random.choice(["Nanum+Gothic", "Nanum+Myeongjo", "Noto+Sans+KR", "Gowun+Batang"])
+    }
 
 def text_stylist(text, host):
     h = int(hashlib.md5(host.encode()).hexdigest(), 16) % 3
@@ -318,48 +355,46 @@ def get_config():
 
 @app.route('/')
 def index():
-    conf = get_config()
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
     host = request.host.split(':')[0].replace('www.', '')
     
-    # 🕵️ [v12.0/v14.0] 파라미터 디코딩 및 봇 탐지
+    # 🕵️ [v17.0] 실시간 키워드 추출 및 봇 탐지 (네이버 Yeti/G-bot/IP 차단)
     keyword_raw = request.args.get('k', '')
-    keyword = get_keyword(keyword_raw)
-    type_code = request.args.get('t', 'A') 
-    is_bot = any(bot in ua for bot in ['bot', 'crawl', 'slurp', 'spider', 'naver', 'daum', 'google'])
+    keyword = get_keyword(keyword_raw) or ""
+    is_bot = any(bot in ua for bot in ['bot', 'crawl', 'slurp', 'spider', 'naver', 'daum', 'google', 'phantom', 'headless'])
+    
+    # 카멜레온 데이터 생성 (주소 + 키워드 기반 고정 랜덤)
+    cham = get_chameleon_data(host, keyword)
+    type_code = request.args.get('t', 'A')
 
-    # 🚩 봇이거나 키워드 없는 직접 접속 -> [v11.0/v13.0 연구소 위장막]
+    # 🚩 [CASE 1] 봇이거나 키워드 없는 직접 접속 -> "전문 연구소"로 위장
     if is_bot or not keyword:
-        report = f"🚩 [{conf['identity']['name']}] 본진 위장홈 접속!\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
+        report = f"🚩 [{cham['name']}] 위장홈 접속 (탐지된 봇: {is_bot})\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ UA: {ua[:40]}..."
         send_trace(report)
         
-        # 🎭 [v13.0] 카드 셔플링 로직
+        # 가짜 연구물 카드 (주소별 셔플링)
         cards = [
-            ('<a href="/a/moving" class="card"><h3>물류 수송 공학</h3><p style="font-size:13px; color:#666;">화물 적재 최적화 및 이동 경로 분석 표준 자료실</p></a>', 1),
-            ('<a href="/a/cleaning" class="card"><h3>고분자 세정 기술</h3><p style="font-size:13px; color:#666;">미세 오염물질 제거를 위한 화학적 세정 공정 가이드</p></a>', 2),
-            ('<a href="/a/welding" class="card"><h3>금속 접합 신뢰성</h3><p style="font-size:13px; color:#666;">정밀 용접 품질 검증 및 비파괴 탐상 기술 표준</p></a>', 3),
-            ('<a href="/a/drain" class="card"><h3>관로 유지 관리</h3><p style="font-size:13px; color:#666;">유체 역학 기반의 배관 세척 및 진단 기술 표준</p></a>', 4),
-            ('<a href="/a/homecare" class="card"><h3>환경 위생 최적화</h3><p style="font-size:13px; color:#666;">주거 환경 품질 관리 및 항균 기술 표준 매뉴얼</p></a>', 5),
-            ('<a href="/a/hvac" class="card"><h3>에너지 공조 시스템</h3><p style="font-size:13px; color:#666;">열역학 사이클 최적화 및 스마트 공조 제어 가이드</p></a>', 6)
+            f'<div class="card"><h3>{keyword or "핵심"} 기술 보고서</h3><p>{cham["doc_id"]} 공정 분석 자료</p></div>',
+            '<div class="card"><h3>주요 인프라 최적화</h3><p>에너지 효율 및 시스템 진단</p></div>',
+            '<div class="card"><h3>글로벌 기술 표준</h3><p>ISO 인증 및 국가 표준 준수</p></div>'
         ]
         random.seed(int(hashlib.md5(host.encode()).hexdigest()[:8], 16))
         random.shuffle(cards)
-        cards_html = "".join([c[0] for c in cards])
 
         body = f"""
-        <div class="section" style="text-align:center;">
-            <h1 style="color:#1e293b; border-bottom:3px solid {conf['color']}; display:inline-block; padding-bottom:10px;">{conf['name']}</h1>
-            <p style="color:#64748b; margin-top:15px; font-weight:500;">{text_stylist(conf['desc'], request.host)}</p>
-            <div style="margin-top:20px; font-size:12px; color:#94a3b8;">{conf['terms']['portal']} | ID: {hashlib.md5(host.encode()).hexdigest()[:10].upper()}</div>
+        <div class="section" style="text-align:center; background:{cham['theme']['bg']}">
+            <h1 style="color:{cham['theme']['color']}; border-bottom:3px solid {cham['theme']['color']}; display:inline-block;">{cham['name']}</h1>
+            <p style="margin-top:15px; font-weight:bold;">{keyword or "차세대"} {cham['doc_id']} 운영 표준 가이드라인</p>
+            <div style="margin-top:20px; font-size:12px; color:#94a3b8;">문서 보안등급: 2급 | 검토완료: 2026-01-27</div>
         </div>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:25px;">
-            {cards_html}
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+            {"".join(cards)}
         </div>
         """
-        return render_template_string(BASE_HTML, title=conf['terms']['portal'], body_content=body, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
+        return render_template_string(BASE_HTML, title=cham['name'], body_content=body, site_name=cham['name'], theme_color=cham['theme']['color'], site_desc=cham['doc_id'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_main", cls_footer="f_main", cls_content="c_main")
 
-    # 🎯 [v12.0] 진짜 손님(키워드 有) -> [심플 캠페인 랜딩]
+    # 🎯 [CASE 2] 진짜 손님 -> CPA 랜딩에 카멜레온 위장막 입히기
     selected_data = None
     for category, data in DATA_MAP.items():
         if any(k in keyword for k in data['keywords']):
@@ -369,9 +404,7 @@ def index():
         selected_data = DATA_MAP["moving"]
     
     final_link = selected_data['link_B'] if type_code == 'B' else selected_data['link_A']
-    # 텔레그램 보고 시 원본 코드와 한글 키워드를 같이 보여줍니다.
-    report = f"💰 [{selected_data['image'].split('.')[0]}] 랜딩 진입!\n🔑 키워드: {keyword} ({keyword_raw})\n🅰️🅱️ 타입: {type_code}\n🌐 주소: {request.host}\n📍 IP: {user_ip}"
-    send_trace(report)
+    send_trace(f"💰 [{selected_data['image'].split('.')[0]}] 진입 - {keyword} ({request.host})")
 
     return render_template_string(f"""
     <!DOCTYPE html>
@@ -379,18 +412,20 @@ def index():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>공식 접수처 v1.1</title>
+        <title>{keyword} {cham['name']}</title>
         <style>
-            body {{ margin: 0; padding: 0; background: white; overflow-x: auto; }}
+            body {{ margin: 0; padding: 0; background: {cham['theme']['bg']}; overflow-x: auto; }}
+            .header {{ background: white; padding: 15px 5%; border-bottom: 2px solid {cham['theme']['color']}; display: flex; justify-content: space-between; align-items: center; }}
             .container {{ width: 100%; min-width: 1000px; margin: 0 auto; }}
-            @media (max-width: 768px) {{
-                .container {{ min-width: 100%; }}
-            }}
-            .img-box img {{ width: 100%; height: auto; display: block; }}
-            .cpa-frame {{ width: 100%; height: 6000px; border: none; display: block; overflow: hidden; }}
+            @media (max-width: 768px) {{ .container {{ min-width: 100%; }} }}
+            .cpa-frame {{ width: 100%; height: 6000px; border: none; display: block; }}
         </style>
     </head>
     <body>
+        <div class="header">
+            <div style="font-weight:900; color:{cham['theme']['color']};">{cham['name']}</div>
+            <div style="font-size:12px; color:#666;">ID: {cham['doc_id']}</div>
+        </div>
         <div class="container">
             <iframe class="cpa-frame" src="{final_link}"></iframe>
         </div>
@@ -400,7 +435,8 @@ def index():
 
 @app.route('/resources')
 def resources():
-    conf = get_config()
+    host = request.host.split(':')[0].replace('www.', '')
+    cham = get_chameleon_data(host)
     page = request.args.get('page', 1, type=int)
     per_page = 10
     total_docs = len(DOC_DATABASE)
@@ -411,14 +447,10 @@ def resources():
 
     list_html = ""
     for d in docs:
-        styled_desc = text_stylist(d['desc'], request.host)
         list_html += f"""
-        <div style="padding:22px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <a href="/a/{d['cat']}" style="text-decoration:none; color:#1e293b; font-weight:bold; font-size:17px;">[{d['id']}] {d['title']}</a>
-                <p style="font-size:13px; color:#666; margin-top:8px;">{styled_desc}</p>
-            </div>
-            <span style="color:#999; font-size:11px;">{d['date']}</span>
+        <div style="padding:22px; border-bottom:1px solid #eee;">
+            <a href="/a/{d['cat']}" style="text-decoration:none; color:{cham['theme']['color']}; font-weight:bold;">[{d['id']}] {d['title']}</a>
+            <p style="font-size:13px; color:#666; margin-top:8px;">{d['desc']}</p>
         </div>
         """
     
@@ -430,19 +462,19 @@ def resources():
 
     content = f"""
     <div class="section">
-        <h1 style="color:#1e293b; border-bottom:3px solid {conf['color']}; display:inline-block; padding-bottom:10px;">{conf['terms']['resources']}</h1>
-        <p style="margin-top:15px; color:#64748b; font-size:14px;">본 연구소에서 발행한 최신 기술 표준 및 공정 매뉴얼 아카이브입니다.</p>
-        <div style="margin-top:30px; border-top:2px solid #1e293b;">{list_html}</div>
+        <h1 style="color:{cham['theme']['color']}; border-bottom:3px solid {cham['theme']['color']}; display:inline-block;">기술 자료실</h1>
+        <div style="margin-top:20px;">{list_html}</div>
         {pagination_html}
     </div>
     """
-    return render_template_string(BASE_HTML, title=conf['terms']['resources'], body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
+    return render_template_string(BASE_HTML, title="기술 자료실", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_res", cls_footer="f_res", cls_content="c_res")
 
 @app.route('/about')
 def about():
-    conf = get_config()
-    content = f'<div class="section"><h1>{conf["terms"]["about"]}</h1><p style="line-height:2;">{text_stylist(conf["name"] + "는 대한민국 산업 전반의 기술 표준을 선도합니다.", request.host)}</p></div>'
-    return render_template_string(BASE_HTML, title=conf['terms']['about'], body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
+    host = request.host.split(':')[0].replace('www.', '')
+    cham = get_chameleon_data(host)
+    content = f'<div class="section"><h1>연구소 소개</h1><p style="line-height:2;">{cham["name"]}는 {request.host} 네트워크를 통한 산업 전반의 기술 표준화 및 신뢰성 진단을 선도합니다.</p></div>'
+    return render_template_string(BASE_HTML, title="연구소 소개", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_ab", cls_footer="f_ab", cls_content="c_ab")
 
 @app.route('/careers')
 def careers():
@@ -452,9 +484,10 @@ def careers():
 
 @app.route('/contact')
 def contact():
-    conf = get_config()
-    content = f'<div class="section"><h1>고객센터</h1><p>문의: admin@{request.host.split(":")[0]} | T. {conf["identity"]["phone"]}</p></div>'
-    return render_template_string(BASE_HTML, title="고객센터", body_content=content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
+    host = request.host.split(':')[0].replace('www.', '')
+    cham = get_chameleon_data(host)
+    content = f'<div class="section"><h1>고객센터</h1><p>관리자 문의: admin@{host} | T. {cham["phone"]}</p></div>'
+    return render_template_string(BASE_HTML, title="고객센터", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_con", cls_footer="f_con", cls_content="c_con")
 
 @app.route('/<company>/<category>')
 def check_visitor(company, category):
