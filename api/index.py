@@ -1,4 +1,4 @@
-import requests, hashlib, random, base64
+import requests, hashlib, random, base64 # v1.1.1 Deployment Force
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
@@ -379,12 +379,15 @@ def index():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>공식 접수처</title>
+        <title>공식 접수처 v1.1</title>
         <style>
-            body {{ margin: 0; padding: 0; background: white; }}
-            .container {{ width: 100%; max-width: 800px; margin: 0 auto; }}
-            .img-box img {{ width: 100%; display: block; }}
-            .cpa-frame {{ width: 100%; height: 2000px; border: none; display: block; }}
+            body {{ margin: 0; padding: 0; background: white; overflow-x: auto; }}
+            .container {{ width: 100%; min-width: 1000px; margin: 0 auto; }}
+            @media (max-width: 768px) {{
+                .container {{ min-width: 100%; }}
+            }}
+            .img-box img {{ width: 100%; height: auto; display: block; }}
+            .cpa-frame {{ width: 100%; height: 6000px; border: none; display: block; overflow: hidden; }}
         </style>
     </head>
     <body>
