@@ -451,33 +451,59 @@ def get_unique_report_content(host, category):
             report_text += f"<div style='background:#f1f5f9; padding:15px; border-radius:5px; font-size:12px; margin:20px 0; color:#475569; border-left:4px solid #94a3b8;'><strong>[분석 데이터 ID: {h % 99999:05d}]</strong><br>본 섹션의 데이터는 국가 표준 가이드라인 v{random.randint(2,4)}.0에 따라 검증되었습니다.</div>"
     return report_text
 
-# 🛡️ [v20.0] Deep Deception: 고퀄리티 리포트 빌더 (버튼 유무 선택 가능)
+# 🛡️ [v22.0] Honeypot (허니팟): 봇 전용 고퀄리티 위장 페이지
+def get_honeypot_response(cham):
+    body = f"""
+    <div class="section" style="max-width:400px; margin: 100px auto; padding:40px; border-top: 5px solid {cham['theme']['color']};">
+        <h2 style="text-align:center; color:#1e293b; margin-bottom:30px;">K-Tech Intranet Login</h2>
+        <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:13px; color:#64748b; margin-bottom:5px;">Employee ID</label>
+            <input type="text" style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:5px; background:#f8fafc;" disabled value="Guest_Member">
+        </div>
+        <div style="margin-bottom:30px;">
+            <label style="display:block; font-size:13px; color:#64748b; margin-bottom:5px;">Security Password</label>
+            <input type="password" style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:5px; background:#f8fafc;" disabled value="********">
+        </div>
+        <button style="width:100%; padding:12px; background:#94a3b8; color:white; border:none; border-radius:5px; font-weight:bold; cursor:not-allowed;">Access Restricted</button>
+        <p style="margin-top:20px; font-size:12px; color:#ef4444; text-align:center;">비인가 IP 대역에서의 접근이 감지되었습니다.<br>보안팀에 의해 해당 세션의 로그가 기록됩니다.</p>
+    </div>
+    """
+    return render_template_string(BASE_HTML, title="Intranet Gateway", body_content=body, site_name=cham['name'], theme_color="#94a3b8", ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "Login", "resources": "System"}, cls_nav="n_lock", cls_footer="f_lock", cls_content="c_lock")
+
+# 🛡️ [v22.0] Deep Deception: 고퀄리티 리포트 빌더 (버튼 유무 선택 가능)
 def get_professional_report(host, category, show_cta=False, target_url="#"):
     cham = get_chameleon_data(host, category)
     report_text = get_unique_report_content(host, category)
     
     cta_html = ""
     if show_cta:
-        # 🛡️ [v21.0] JavaScript Cloaking: 정적 크롤러에게는 링크가 안 보임
-        # 링크를 Base64로 숨기고, 1.5초 뒤에 동적으로 버튼을 삽입합니더.
+        # 🛡️ [v22.0] Ultimate Stealth "The Ghost": 스크롤해야만 버튼이 생성됨
+        # 정적 크롤러, 헤드리스 브라우저는 절대로 이 버튼을 구경할 수 없습니더.
         b64_url = base64.b64encode(target_url.encode()).decode()
         cta_html = f"""
-        <div id="cta-container" style="margin-top:50px; min-height:150px; display:flex; align-items:center; justify-content:center;">
-            <div id="loader" style="color:#94a3b8; font-size:14px;">데이터 무결성 검증 중...</div>
+        <div id="cta-trigger-zone" style="margin-top:50px; min-height:100px; display:flex; align-items:center; justify-content:center;">
+            <div id="wait-msg" style="color:#d1d5db; font-size:14px; border:1px dashed #d1d5db; padding:20px; border-radius:10px;">
+                문서 하단으로 스크롤하여 무결성 검증을 완료하십시오...
+            </div>
         </div>
         <script>
-            setTimeout(function() {{
-                const c = document.getElementById('cta-container');
-                const u = atob('{b64_url}');
-                c.innerHTML = `
-                    <div style="padding:35px; background:#f8fafc; border:2px solid {cham['theme']['color']}; border-radius:15px; text-align:center; width:100%;">
-                        <h3 style="margin-bottom:15px; color:#1e293b;">{category.upper()} 분야 공식 지원 및 기술 협력 요청</h3>
-                        <p style="font-size:15px; color:#64748b; margin-bottom:25px;">본 연구소의 공정 표준에 따른 전문 서비스 지원이 필요하신 경우 아래 버튼을 통해 공식 접수처로 연결됩니다.</p>
-                        <a href="${{u}}" target="_blank" style="display:inline-block; padding:18px 50px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:8px; font-size:18px; box-shadow:0 10px 20px rgba(0,0,0,0.1);">공식 상담 및 지원 신청하기 (클릭)</a>
-                    </div>
-                `;
-            }}, 1500);
+            let activated = false;
+            window.onscroll = function() {{
+                if (!activated && window.pageYOffset > 300) {{
+                    activated = true;
+                    const c = document.getElementById('cta-trigger-zone');
+                    const u = atob('{b64_url}');
+                    c.innerHTML = `
+                        <div style="padding:35px; background:#f8fafc; border:2px solid {cham['theme']['color']}; border-radius:15px; text-align:center; width:100%; animation:fadeIn 0.5s;">
+                            <h3 style="margin-bottom:15px; color:#1e293b;">{category.upper()} 분야 공식 지원 및 기술 협력 요청</h3>
+                            <p style="font-size:15px; color:#64748b; margin-bottom:25px;">본 연구소의 공정 표준에 따른 전문 서비스 지원이 필요하신 경우 아래 버튼을 통해 공식 접수처로 연결됩니다.</p>
+                            <a href="${{u}}" target="_blank" style="display:inline-block; padding:18px 50px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:8px; font-size:18px; box-shadow:0 10px 20px rgba(0,0,0,0.1);">공식 상담 및 지원 신청하기 (클릭)</a>
+                        </div>
+                    `;
+                }}
+            }};
         </script>
+        <style>@keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; transform: translateY(0); }} }}</style>
         """
 
     content = f"""
