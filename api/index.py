@@ -1,4 +1,4 @@
-import requests, hashlib, random, base64, time # v35.8_TERM_FIX
+import requests, hashlib, random, base64, time # v35.9_FOOTER_FIX
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
@@ -498,30 +498,31 @@ def get_professional_report(host, category, show_cta=False, target_url="#"):
         
         {cta_html}
         
-        <p style="font-size:12px; color:#94a3b8; margin-top:50px; border-top:1px solid #eee; padding-top:20px; line-height:1.6;">
-            ?????????{cham['name']}?????????? ????? ??? ?????????? ?????????. ???????? ??? ??? ??? ????????????????? ??? ????? ???????? ????????. (Hash: {hashlib.md5(host.encode()).hexdigest()[:16].upper()})
+                <p style="font-size:12px; color:#94a3b8; margin-top:50px; border-top:1px solid #eee; padding-top:20px; line-height:1.6;">
+            본 문서는 {cham['name']}의 엄격한 보안 지침에 따라 관리되는 내부 성과물입니다. 비인가자에 의한 무단 복제 및 전재를 엄격히 금하며, 위반 시 법적 책임이 따를 수 있습니다. (Hash: {hashlib.md5(host.encode()).hexdigest()[:16].upper()})
         </p>
     </div>
     """
-    return render_template_string(BASE_HTML, title=f"{category.upper()} ??? ?????, body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "????????", "resources": "??????"}, cls_nav="n_doc", cls_footer="f_doc", cls_content="c_doc")
+    return render_template_string(BASE_HTML, title=f"{category.upper()} 고등 기술 공정 분석 리포트", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_doc", cls_footer="f_doc", cls_content="c_doc")
 
-# ????[v19.0] Honeypot (?????: ????? ?????????
+# 🕸️ [v35.9] Honeypot (봇 전용 함정 페이지)
 def get_honeypot_response(cham):
     body = f"""
     <div class="section" style="text-align:center; padding: 100px 20px;">
-        <h1 style="color:#e74c3c; font-size:40px;">??? Access Denied</h1>
-        <p style="margin-top:20px; color:#334155; font-size:18px;">??????????? ??????????? ?????????????????????</p>
+        <h1 style="color:#e74c3c; font-size:40px;">⛔ Access Denied</h1>
+        <p style="margin-top:20px; color:#334155; font-size:18px;">비정상적인 접근이 감지되어 접속이 일시 차단되었습니다.</p>
         <div style="margin:40px auto; max-width:500px; padding:30px; background:#fef2f2; border:1px solid #fee2e2; border-radius:12px;">
-            <p style="font-size:15px; color:#b91c1c;"><strong>??? ??? ??? (Code: {random.randint(10000, 99999)})</strong><br>?????? ???????? ?????????????????????????????</p>
+            <p style="font-size:15px; color:#b91c1c;"><strong>보안 정책 위반 (Code: {random.randint(10000, 99999)})</strong><br>자동화된 수집 도구 또는 비정상적인 트래픽 패턴이 식별되었습니다.</p>
         </div>
-        <p style="font-size:13px; color:#94a3b8;">?????????????????? ??? ?????? ?????????, 24??? ??????????</p>
+        <p style="font-size:13px; color:#94a3b8;">차단이 실수라고 판단되시면 관리자에게 문의바라며, 24시간 모니터링 중입니다.</p>
         <div style="margin-top:40px;" id="spinner">
             <div style="border:5px solid #f3f3f3; border-top:5px solid #e74c3c; border-radius:50%; width:40px; height:40px; animation: spin 1s linear infinite; margin:0 auto;"></div>
         </div>
     </div>
     <style>@keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}</style>
     """
-    return render_template_string(BASE_HTML, title="Security Alert", body_content=body, site_name=cham['name'], theme_color="#e74c3c", ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "???", "resources": "???"}, cls_nav="n_err", cls_footer="f_err", cls_content="c_err")
+    return render_template_string(BASE_HTML, title="Security Alert", body_content=body, site_name=cham['name'], theme_color="#e74c3c", ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "차단안내", "resources": "보안정책"}, cls_nav="n_err", cls_footer="f_err", cls_content="c_err")
+
 
 @app.route('/')
 def index():
