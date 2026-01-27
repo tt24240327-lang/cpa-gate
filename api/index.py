@@ -392,7 +392,6 @@ def index():
     </head>
     <body>
         <div class="container">
-            <div class="img-box"><img src="/static/{selected_data['image']}" alt="상세내용"></div>
             <iframe class="cpa-frame" src="{final_link}"></iframe>
         </div>
     </body>
