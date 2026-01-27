@@ -194,7 +194,7 @@ KEYWORD_MAP = {
     "faf45575": "이사", "ce8a5ce4": "포장이사", "c8b22f8a": "이사업체", "d108d7a5": "사무실이사",
     "f79702a3": "이사견적", "fa13bc33": "원룸이사", "eeaf8186": "용달이사",
     # [배관/막힘]
-    "66cb8240": "누수탐지",
+    "3e848ae6": "누수탐지", "66cb8240": "누수탐지",
     "8e2996c7": "배관 누수", "81edc02c": "변기막힘", "8745563e": "하수구막힘", "617a0005": "누수탐지",
     "5d19986d": "변기뚫는업체", "a0ef0c00": "싱크대막힘", "e6d02452": "배수구 막힘", "35467a5c": "하수구 역류",
     "9ce613e1": "변기 물 안 내려감", "68943f44": "하수구 뚫는 업체", "c8abc514": "변기 뚫는 곳",
@@ -509,7 +509,7 @@ def get_professional_report(host, category, show_cta=False, target_url="#"):
     <div class="section">
         <div style="float:right; border:4px solid #e74c3c; color:#e74c3c; padding:10px 20px; font-weight:bold; transform:rotate(12deg); font-size:24px; border-radius:5px;">CONFIDENTIAL</div>
         <p style="color:{cham['theme']['color']}; font-weight:bold; font-size:14px;">[기술인프라 보존번호: {cham['doc_id']}]</p>
-        <h1 style="color:#1e293b; margin-top:15px; font-size:32px; letter-spacing:-1px;">{category.upper()} 고등 기술 공정 분석 리포트</h1>
+        <h1 style="color:#1e293b; margin-top:15px; font-size:32px; letter-spacing:-1px;">{category.upper()} 고등 기술 공정 분석 리포트 <span style="font-size:10px; color:#eee;">v26.0</span></h1>
         <hr style="border:0; border-top:3px solid {cham['theme']['color']}22; margin:30px 0;">
         
         <div style="font-size:16px; color:#334155;">{report_text}</div>
