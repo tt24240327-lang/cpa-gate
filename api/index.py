@@ -98,6 +98,15 @@ DATA_MAP = {
 }
 
 
+# 🔑 [v15.0] HASH-BASED SECURE OBFUSCATOR: 솔트 입힌 해시 엔진
+SECRET_SALT = "yejin_love_2026"
+
+def get_auto_code(keyword):
+    # 키워드 뒤에 우리만 아는 비밀번호(Salt)를 살짝 섞어서 보안 강화
+    full_str = keyword + SECRET_SALT
+    # MD5 해시 생성 후 앞 6자리만 사용
+    return hashlib.md5(full_str.encode()).hexdigest()[:6]
+
 # 🔑 [v14.0] SMART KEYWORD DECODER: 무한 확장형 키워드 엔진
 KEYWORD_MAP = {
     # [청소]
@@ -114,8 +123,30 @@ KEYWORD_MAP = {
     "dem-01": "철거", "dem-02": "원상복구", "dem-03": "상가철거"
 }
 
+# 🔐 [v15.0] 역방향 조회를 위한 자동 해시 맵 생성
+REVERSE_HASH_MAP = {}
+def build_hash_map():
+    # 1. 모든 알려진 키워드 수량 확보
+    all_kws = set(KEYWORD_MAP.values())
+    for data in DATA_MAP.values():
+        all_kws.update(data['keywords'])
+    
+    # 2. 해시 코드 -> 키워드 맵핑 자동 생성
+    for kw in all_kws:
+        h_code = get_auto_code(kw)
+        REVERSE_HASH_MAP[h_code] = kw
+
+build_hash_map()
+
 def get_keyword(code):
-    return KEYWORD_MAP.get(code, code)
+    # 1. 해시 코드 매칭 (v15.0)
+    if code in REVERSE_HASH_MAP:
+        return REVERSE_HASH_MAP[code]
+    # 2. 수동 코드 매칭 (v14.0)
+    if code in KEYWORD_MAP:
+        return KEYWORD_MAP[code]
+    # 3. 그냥 키워드인 경우 (100% 하위 호환)
+    return code
 
 # 🛡️ [v11.0] SEO Deception Engine
 
