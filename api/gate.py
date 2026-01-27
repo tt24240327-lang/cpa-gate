@@ -609,7 +609,7 @@ def index():
     final_url = selected_data['link_A'] # 기본 A업체 접수처
     if type_code == 'B': final_url = selected_data['link_B']
     
-    send_trace(f"💰 [진입/Human] - {keyword} ({category_key})\n🔗 링크: {final_url}")
+    send_trace(f"💰 [V28_FINAL] 코드: {keyword_raw}\n🎯 키워드: {keyword} ({category_key})\n🔗 CPA링크: {final_url}")
     
     # 🚩 [v20.0] 리포트 페이지에 상담 신청 버튼을 넣어서 반환 (자동 이동 금지)
     resp = Response(get_professional_report(host, category_key, show_cta=True, target_url=final_url))
