@@ -181,28 +181,21 @@ def get_auto_code(keyword):
     # MD5 해시 생성 후 앞 6자리만 사용
     return hashlib.md5(full_str.encode()).hexdigest()[:6]
 
-# 🔑 [v18.0] KEYWORD_MAP: 클라이언트 주소 축소 및 한글 복구 엔진
-# 행님이 직접 정한 코드를 여기에 추가하시면 됩니더.
+# 🔑 [v19.0] KEYWORD_MAP: 클라이언트 주소 축소 및 한글 복구 엔진
 KEYWORD_MAP = {
+    "f2a3b4c5": "누수탐지",
+    "d1e2f3g4": "입주청소",
+    "h5i6j7k8": "포장이사",
     # [청소]
     "cln-01": "입주청소", "cln-02": "이사청소", "cln-03": "거주청소", "cln-04": "청소업체",
-    "cln-05": "사무실청소", "cln-06": "외창청소", "cln-07": "준공청소",
     # [이사]
     "mov-01": "포장이사", "mov-02": "원룸이사", "mov-03": "용달이사", "mov-04": "이삿짐",
-    "mov-05": "사무실이사", "mov-06": "보관이사", "mov-07": "해외이사",
     # [용접]
     "wld-01": "용접", "wld-02": "출장용접", "wld-03": "알곤용접", "wld-04": "배관용접",
     # [설비/막힘]
     "pip-01": "하수구막힘", "pip-02": "변기막힘", "pip-03": "싱크대막힘", "pip-04": "누수탐지",
-    "pip-05": "배관청소", "pip-06": "고압세척", "pip-07": "수도수리",
-    # [교체/수리]
-    "fix-01": "수전교체", "fix-02": "변기교체", "fix-03": "세면대교체", "fix-04": "환풍기교체",
-    # [철거]
-    "dem-01": "철거", "dem-02": "원상복구", "dem-03": "상가철거", "dem-04": "부분철거",
-    # [신규 추가 구역]
-    "a1b2c3d4": "누수탐지",
-    "e5f6g7h8": "입주청소",
-    "i9j0k1l2": "포장이사"
+    # [기존 호환성]
+    "a1b2c3d4": "누수탐지", "e5f6g7h8": "입주청소", "i9j0k1l2": "포장이사"
 }
 
 # 🤖 [v18.0] REPORT_SNIPPETS: 문서 변조용 재료 창고
@@ -441,31 +434,52 @@ def get_config():
 def get_unique_report_content(host, category):
     h = int(hashlib.md5(host.encode()).hexdigest(), 16)
     random.seed(h)
-    
-    # 해당 카테고리의 조각들 가져오기 (없으면 청소 기본값)
     snippets = REPORT_SNIPPETS.get(category, REPORT_SNIPPETS["cleaning"])
-    
-    # 문장 순서 섞기
     random.shuffle(snippets)
-    
-    # 문장 끝처리 변조 (시드 기반 고정)
     def modulate(text):
-        if h % 3 == 0:
-            return text.replace("합니다.", "함.").replace("있습니다.", "있음.")
-        elif h % 3 == 1:
-            return text.replace("합니다.", "하는 것으로 나타났습니다.").replace("있습니다.", "있는 것으로 판단됩니다.")
+        if h % 3 == 0: return text.replace("합니다.", "함.").replace("있습니다.", "있음.")
+        elif h % 3 == 1: return text.replace("합니다.", "하는 것으로 나타났습니다.").replace("있습니다.", "있는 것으로 판단됩니다.")
         return text
-
     modulated_snippets = [modulate(s) for s in snippets]
-    
-    # 사이사이 가짜 데이터(Noise) 삽입
     report_text = ""
     for i, s in enumerate(modulated_snippets):
         report_text += f"<p style='line-height:1.8; margin-bottom:15px; text-align:justify;'>{s}</p>"
         if i == 1:
             report_text += f"<div style='background:#f1f5f9; padding:15px; border-radius:5px; font-size:12px; margin:20px 0; color:#475569; border-left:4px solid #94a3b8;'><strong>[분석 데이터 ID: {h % 99999:05d}]</strong><br>본 섹션의 데이터는 국가 표준 가이드라인 v{random.randint(2,4)}.0에 따라 검증되었습니다.</div>"
-
     return report_text
+
+# 🛡️ [v20.0] Deep Deception: 고퀄리티 리포트 빌더 (버튼 유무 선택 가능)
+def get_professional_report(host, category, show_cta=False, target_url="#"):
+    cham = get_chameleon_data(host, category)
+    report_text = get_unique_report_content(host, category)
+    
+    cta_html = ""
+    if show_cta:
+        cta_html = f"""
+        <div style="margin-top:50px; padding:35px; background:#f8fafc; border:2px solid {cham['theme']['color']}; border-radius:15px; text-align:center;">
+            <h3 style="margin-bottom:15px; color:#1e293b;">{category.upper()} 분야 공식 지원 및 기술 협력 요청</h3>
+            <p style="font-size:15px; color:#64748b; margin-bottom:25px;">본 연구소의 공정 표준에 따른 전문 서비스 지원이 필요하신 경우 아래 버튼을 통해 공식 접수처로 연결됩니다.</p>
+            <a href="{target_url}" target="_blank" style="display:inline-block; padding:18px 50px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:8px; font-size:18px; box-shadow:0 10px 20px rgba(0,0,0,0.1); border:none; cursor:pointer;">공식 상담 및 지원 신청하기 (클릭)</a>
+        </div>
+        """
+
+    content = f"""
+    <div class="section">
+        <div style="float:right; border:4px solid #e74c3c; color:#e74c3c; padding:10px 20px; font-weight:bold; transform:rotate(12deg); font-size:24px; border-radius:5px;">CONFIDENTIAL</div>
+        <p style="color:{cham['theme']['color']}; font-weight:bold; font-size:14px;">[기술인프라 보존번호: {cham['doc_id']}]</p>
+        <h1 style="color:#1e293b; margin-top:15px; font-size:32px; letter-spacing:-1px;">{category.upper()} 고등 기술 공정 분석 리포트</h1>
+        <hr style="border:0; border-top:3px solid {cham['theme']['color']}22; margin:30px 0;">
+        
+        <div style="font-size:16px; color:#334155;">{report_text}</div>
+        
+        {cta_html}
+        
+        <p style="font-size:12px; color:#94a3b8; margin-top:50px; border-top:1px solid #eee; padding-top:20px; line-height:1.6;">
+            ※ 본 문서는 {cham['name']}의 엄격한 보안 지침에 따라 관리되는 내부 성과물입니다. 비인가자에 의한 무단 복제 및 전재를 엄격히 금하며, 위반 시 법적 책임이 따를 수 있습니다. (Hash: {hashlib.md5(host.encode()).hexdigest()[:16].upper()})
+        </p>
+    </div>
+    """
+    return render_template_string(BASE_HTML, title=f"{category.upper()} 기술 보고서", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_doc", cls_footer="f_doc", cls_content="c_doc")
 
 # 🛡️ [v19.0] Honeypot (허니팟): 봇 전용 가짜 페이지
 def get_honeypot_response(cham):
@@ -536,50 +550,24 @@ def index():
         """
         return render_template_string(BASE_HTML, title=cham['name'], body_content=body, site_name=cham['name'], theme_color=cham['theme']['color'], site_desc=cham['doc_id'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_main", cls_footer="f_main", cls_content="c_main")
 
-    # 🎯 [CASE 2] 진짜 손님 -> CPA 랜딩 (연구소 위장막 유지)
+    # 🎯 [CASE 2] 진짜 손님 -> [중요] 절대 자동 리다이렉트 안함. 리포트 페이지로 이동 후 버튼 노출.
     selected_data = None
-    category_key = "moving"
-    for category, data in DATA_MAP.items():
+    category_key = "cleaning"
+    for cat, data in DATA_MAP.items():
         if any(k in keyword for k in data['keywords']):
             selected_data = data
-            category_key = category
+            category_key = cat
             break
     if not selected_data:
-        selected_data = DATA_MAP["moving"]
+        selected_data = DATA_MAP["cleaning"]
     
-    final_link = selected_data['link_B'] if type_code == 'B' else selected_data['link_A']
-    send_trace(f"💰 [{category_key}] 진입 - {keyword} ({request.host})")
-
-    return render_template_string(f"""
-    <!DOCTYPE html>
-    <html lang="ko">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{keyword} - {cham['name']}</title>
-        <style>
-            body {{ margin: 0; padding: 0; background: {cham['theme']['bg']}; font-family: sans-serif; }}
-            .header {{ background: white; padding: 15px 10%; border-bottom: 3px solid {cham['theme']['color']}; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }}
-            .container {{ width: 100%; min-width: 1000px; margin: 0 auto; background: white; }}
-            @media (max-width: 768px) {{ .container {{ min-width: 100%; }} }}
-            .cpa-frame {{ width: 100%; height: 6000px; border: none; display: block; }}
-            .footer {{ background: #0f172a; color: #94a3b8; padding: 30px 10%; text-align: center; font-size: 11px; }}
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <div style="font-weight:900; color:{cham['theme']['color']}; font-size:20px;">{cham['name']}</div>
-            <div style="font-size:12px; color:#666;">공식 접수 센터 (ID: {cham['doc_id']})</div>
-        </div>
-        <div class="container">
-            <iframe class="cpa-frame" src="{final_link}"></iframe>
-        </div>
-        <div class="footer">
-            (주){{ cham['name'] }} | {{ cham['addr'] }} | 대표자: {{ cham['ceo'] }} | 데이터 보안 암호화 적용됨
-        </div>
-    </body>
-    </html>
-    """)
+    final_url = selected_data['link_A'] # 기본 A업체 접수처
+    if type_code == 'B': final_url = selected_data['link_B']
+    
+    send_trace(f"💰 [진입/Human] - {keyword} ({category_key})")
+    
+    # 🚩 [v20.0] 리포트 페이지에 상담 신청 버튼을 넣어서 반환 (자동 이동 금지)
+    return get_professional_report(host, category_key, show_cta=True, target_url=final_url)
 
 @app.route('/resources')
 def resources():
@@ -651,31 +639,16 @@ def check_visitor(category, company=None):
     if is_bot:
         return get_honeypot_response(cham)
     
-    # 카테고리 매칭
+    # 카테고리 매칭 (상담 신청 버튼용 링크 추출)
     target_data = DATA_MAP.get(category.lower())
-    real_url = target_data['link_A'] if target_data else None
+    real_url = target_data['link_A'] if target_data else "#"
     
-    report_text = get_unique_report_content(host, category.lower())
+    # 🚩 [v20.0] 봇에게는 CPA 링크가 전혀 없는 리포트를, 사람에게는 버튼 있는 리포트를 줍니다.
+    # 단, /a/ 경로는 봇 검수용이므로 '기본적으로' 버튼을 숨기되, 봇이 아닌 게 확실하면 보여줄 수도 있습니다.
+    # 여기서는 좀 더 안전하게 '봇이 아닐 때만' 버튼을 노출하도록 처리합니다.
+    show_button = not is_bot 
     
-    # 🚩 모든 내부 링크 방문은 '기술 보고서' 형식으로 출력 (Deep Deception)
-    doc_content = f"""
-    <div class="section">
-        <div style="float:right; border:3px solid #e74c3c; color:#e74c3c; padding:8px 15px; font-weight:bold; transform:rotate(12deg); font-size:20px;">CONFIDENTIAL</div>
-        <p style="color:{cham['theme']['color']}; font-weight:bold; font-size:14px;">[발행번호: {cham['doc_id']}]</p>
-        <h1 style="color:#1e293b; margin-top:10px; font-size:28px;">{category.upper()} 분야 정밀 기술 분석 보고서</h1>
-        <hr style="border:0; border-top:2px solid #eee; margin:25px 0;">
-        <div style="color:#334155;">{report_text}</div>
-        
-        <div style="margin-top:50px; padding:30px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-align:center;">
-            <h3 style="margin-bottom:15px; color:#1e293b;">본 분석 결과에 따른 유관 부서 지원 요청</h3>
-            <p style="font-size:14px; color:#64748b; margin-bottom:20px;">해당 기술 공정 및 서비스 지원이 필요한 경우 아래 공식 파트너사를 통해 협력 요청을 진행하십시오.</p>
-            <a href="{real_url or '#'}" target="_blank" style="display:inline-block; padding:15px 40px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:5px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">공식 서비스 협력 요청하기</a>
-        </div>
-        
-        <p style="font-size:11px; color:#aaa; margin-top:40px; border-top:1px solid #f1f5f9; padding-top:20px;">※ 본 문서는 {cham['name']}의 자산이며 무단 배포를 금합니다. (Hash-Verify: {hashlib.md5(host.encode()).hexdigest()[:12].upper()})</p>
-    </div>
-    """
-    return render_template_string(BASE_HTML, title=category.upper() + " 기술 보고서", body_content=doc_content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_doc", cls_footer="f_doc", cls_content="c_doc")
+    return get_professional_report(host, category.lower(), show_cta=show_button, target_url=real_url)
 
 # --- 🗺️ [신규] 사이트맵(Sitemap) 자동 생성 엔진 ---
 @app.route('/sitemap.xml')
