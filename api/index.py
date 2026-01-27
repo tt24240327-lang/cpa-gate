@@ -1,15 +1,15 @@
-import requests, hashlib, random, base64, time # v35.11_REPORT_FIX
+﻿import requests, hashlib, random, base64, time # v35.11_REPORT_FIX
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
 
-# [???] ???????? ????????
+# [v36.6] 보안 환경 설정
 TELEGRAM_TOKEN = "7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0"
 CHAT_ID = "1898653696"
 GA_ID = "G-1VH7D6BJTD"
 
-# ????[v19.0] Iron Dome Defense Constants (주)?????? ????
-WHITELIST_IPS = ['61.83.9.20'] # ??? ?????(주)?????????)
+# 🛡️ [v36.6] Iron Dome Defense Constants (K-Tech 보안 모듈)
+WHITELIST_IPS = ['61.83.9.20'] # 운영진 IP (관리자 예외)
 
 BOT_UA_KEYWORDS = [
     'bot', 'crawl', 'slurp', 'spider', 'naver', 'daum', 'google', 'phantom', 'headless',
@@ -27,11 +27,11 @@ def is_bot_detected(ip, ua):
         return False, None
     
     ua_lower = ua.lower()
-    # 1. User-Agent ????????(vercel-screenshot, headless ??
+    # 1. User-Agent 블랙리스트 확인
     if any(keyword in ua_lower for keyword in BOT_UA_KEYWORDS):
         return True, f"UA_BLACK({ua[:20]})"
     
-    # 2. IP ??????? (주)? ?????? ??
+    # 2. IP 대역 차단 확인
     if any(ip.startswith(prefix) for prefix in BLOCKED_IP_PREFIXES):
         return True, "IP_BLACK"
     
@@ -390,7 +390,7 @@ BASE_HTML = """
             <a href="/about">{{ terms.about }}</a>
             <a href="/resources">{{ terms.resources }}</a>
             <a href="/careers">인재 채용</a>
-            <a href="/contact">인재 채용</a>
+            <a href="/contact">연락처</a>
         </div>
     </div>
     <div class="{{ cls_content }}">{{ body_content | safe }}</div>
@@ -429,15 +429,15 @@ def get_unique_report_content(host, category):
     snippets = REPORT_SNIPPETS.get(category, REPORT_SNIPPETS["cleaning"])
     random.shuffle(snippets)
     def modulate(text):
-        if h % 3 == 0: return text.replace("?????", "??").replace("??????.", "???.")
-        elif h % 3 == 1: return text.replace("?????", "??? ??????????????.").replace("??????.", "??? ?????????????")
+        if h % 3 == 0: return text.replace("분석결과", "연구").replace("최적화.", "개선.")
+        elif h % 3 == 1: return text.replace("분석결과", "국가 기술 표준 가이드.").replace("최적화.", "데이터 보정.")
         return text
     modulated_snippets = [modulate(s) for s in snippets]
     report_text = ""
     for i, s in enumerate(modulated_snippets):
         report_text += f"<p style='line-height:1.8; margin-bottom:15px; text-align:justify;'>{s}</p>"
         if i == 1:
-                    report_text += f"<div style='background:#f1f5f9; padding:15px; border-radius:5px; font-size:12px; margin:20px 0; color:#475569; border-left:4px solid #94a3b8;'><strong>[분석 데이터 ID: {h % 99999:05d}]</strong><br>본 섹션의 데이터는 국가 표준 가이드라인 v{random.randint(2,4)}.0에 따라 검증되었습니다.</div>"
+            report_text += f"<div style='background:#f1f5f9; padding:15px; border-radius:5px; font-size:12px; margin:20px 0; color:#475569; border-left:4px solid #94a3b8;'><strong>[검증 데이터 ID: {h % 99999:05d}]</strong><br>본 섹션의 데이터는 국가 기술 표준 지침 v{random.randint(2,4)}.0에 따라 신뢰성이 확보되었습니다.</div>"
     return report_text
 
 # ????[v22.0] Honeypot (주)???: ????? ?????????? ?????
@@ -538,42 +538,43 @@ def index():
     
     cham = get_chameleon_data(host, keyword)
     
-    # ?? [CASE 0] ??? ?????? ??? ?????????????
+    # ✅ [CASE 0] 보안 정책에 따른 차단 (봇 감지)
     if is_bot:
-        report = f"????[???] {bot_reason} ???!\n?? ???: {request.host}\n?? IP: {user_ip}\n????UA: {ua[:40]}..."
+        report = f"🚨 [차단 알림] {bot_reason} 감지!\n🔗 타겟 호스트: {request.host}\n📍 방문객 IP: {user_ip}\n🕵️ UA: {ua[:40]}..."
         send_trace(report)
         return get_honeypot_response(cham)
+    
     type_code = request.args.get('t', 'A')
 
-    # ?? [CASE 1] ?????? ???????? ??? ??? -> "??? ????????"
-    if is_bot or not keyword:
-        report = f"?? [{cham['name']}] ???????? (주)????? {is_bot})\n?? ???: {request.host}\n?? IP: {user_ip}\n????UA: {ua[:40]}..."
+    # ✅ [CASE 1] 키워드 없이 접속 시 (일반 포털 모드)
+    if not keyword:
+        report = f"🏠 [{cham['name']}] 홈페이지 방문 (봇여부: {is_bot})\n🔗 타겟 호스트: {request.host}\n📍 방문객 IP: {user_ip}\n🕵️ UA: {ua[:40]}..."
         send_trace(report)
         
-        # ???????????? ?? (6????3~5????? ???)
+        # 가짜 기술 문서 카드 생성
         all_cards = [
-            f'<a href="/a/moving" class="card" style="text-decoration:none;"><h3>??? ??? ??? ?????/h3><p style="color:#666; font-size:13px;">{cham["doc_id"]} ??? ??? ???</p></a>',
-            f'<a href="/a/cleaning" class="card" style="text-decoration:none;"><h3>??? ??? ??? ????/h3><p style="color:#666; font-size:13px;">ISO-9001 ??? ??? ?????/p></a>',
-            f'<a href="/a/welding" class="card" style="text-decoration:none;"><h3>??? ??????????</h3><p style="color:#666; font-size:13px;">??? ??? ????????????/p></a>',
-            f'<a href="/a/plumbing" class="card" style="text-decoration:none;"><h3>??????? ??? ?????/h3><p style="color:#666; font-size:13px;">??????????????? ???</p></a>',
-            f'<a href="/a/fixture" class="card" style="text-decoration:none;"><h3>??? ??? ??? ????/h3><p style="color:#666; font-size:13px;">???????? ????? ???</p></a>'
+            f'<a href="/a/moving" class="card" style="text-decoration:none;"><h3>대형 물류 수송 기술 분석</h3><p style="color:#666; font-size:13px;">{cham["doc_id"]} 전략 연구 보고서</p></a>',
+            f'<a href="/a/cleaning" class="card" style="text-decoration:none;"><h3>고분자 화학 세정 공정 표준</h3><p style="color:#666; font-size:13px;">ISO-9001 인증 심사 자료</p></a>',
+            f'<a href="/a/welding" class="card" style="text-decoration:none;"><h3>특수 금속 접합 구조적 안정성</h3><p style="color:#666; font-size:13px;">고온 설비 유지보수 지침</p></a>',
+            f'<a href="/a/plumbing" class="card" style="text-decoration:none;"><h3>지하 관로 설계 최적화 솔루션</h3><p style="color:#666; font-size:13px;">수자원 공학 기술 데이터</p></a>',
+            f'<a href="/a/fixture" class="card" style="text-decoration:none;"><h3>주거 기반 시설 교체 시공 표준</h3><p style="color:#666; font-size:13px;">정밀 부품 호환성 분석</p></a>'
         ]
         random.seed(int(hashlib.md5(host.encode()).hexdigest()[:8], 16))
-        count = random.randint(3, 5) # ?????? 3??5???????????????
+        count = random.randint(3, 5)
         selected_cards = random.sample(all_cards, count)
         random.shuffle(selected_cards)
 
         body = f"""
         <div class="section" style="text-align:center; background:{cham['theme']['bg']}">
             <h1 style="color:{cham['theme']['color']}; border-bottom:3px solid {cham['theme']['color']}; display:inline-block;">{cham['name']}</h1>
-            <p style="margin-top:10px; font-weight:bold;">{cham['doc_id']} ??? ??? ??? ??????</p>
-            <div style="margin-top:15px; font-size:12px; color:#94a3b8;">??? ?대표자: 2026-01-27 | ?대표자: ???????/div>
+            <p style="margin-top:10px; font-weight:bold;">{cham['doc_id']} 기술 표준 통합 관리 포털</p>
+            <div style="margin-top:15px; font-size:12px; color:#94a3b8;">최종 업데이트: 2026-01-27 | 관할 부서: 기술인프라 운영본부</div>
         </div>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
             {"".join(selected_cards)}
         </div>
         """
-        resp = Response(render_template_string(BASE_HTML, title=cham['name'], body_content=body, site_name=cham['name'], theme_color=cham['theme']['color'], site_desc=cham['doc_id'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "????????", "resources": "??????"}, cls_nav="n_main", cls_footer="f_main", cls_content="c_main"))
+        resp = Response(render_template_string(BASE_HTML, title=cham['name'], body_content=body, site_name=cham['name'], theme_color=cham['theme']['color'], site_desc=cham['doc_id'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_main", cls_footer="f_main", cls_content="c_main"))
         resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
         return resp
 
@@ -714,4 +715,6 @@ def sitemap():
 
 if __name__ == "__main__":
     app.run()
-\ndef identity_gen(host):\n    return get_chameleon_data(host)\n
+
+def identity_gen(host):
+    return get_chameleon_data(host)
