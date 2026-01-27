@@ -402,6 +402,7 @@ BASE_HTML = """
     </style>
 </head>
 <body>
+    <div style="display:none;">DEPLOY_VER: v27.0</div>
     <div class="{{ cls_nav }}">
         <a href="/" style="font-size: 22px; font-weight: 900; color: {{ theme_color }}; margin: 0; letter-spacing: -1.5px;">{{ site_name }}</a>
         <div>
