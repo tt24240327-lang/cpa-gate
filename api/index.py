@@ -1,4 +1,4 @@
-import requests, hashlib, random, base64, time # v1.1.2 Deployment Force
+import requests, hashlib, random, base64, time # v30.0 FINAL_AUDIT_LIVE
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
@@ -138,31 +138,31 @@ def send_trace(msg):
 # 🛡️ [v12.0] Tactical A/B DATA_MAP
 DATA_MAP = {
     "cleaning": {
-        "keywords": ["입주청소", "이사청소", "거주청소", "청소업체", "청소", "입주 청소"],
+        "keywords": ["입주청소", "이사청소", "거주청소", "청소업체", "청소", "입주 청소", "사무실청소", "집청소"],
         "image": "cleaning.jpg",
         "link_A": "https://www.replyalba.co.kr/pt/WwVCgW9E1R",
         "link_B": "https://albarich.com/pt/z2NytCt42i"
     },
     "moving": {
-        "keywords": ["이사", "포장이사", "원룸이사", "용달이사", "이삿짐", "포장 이사"],
+        "keywords": ["이사", "포장이사", "원룸이사", "용달이사", "이삿짐", "포장 이사", "이사업체", "사무실이사", "이사견적"],
         "image": "moving.jpg",
         "link_A": "https://www.replyalba.co.kr/pt/LlocSbdUSY",
         "link_B": "https://albarich.com/pt/zdIDBDSzof"
     },
     "welding": {
-        "keywords": ["용접", "출장용접", "알곤용접", "배관용접", "용접업체"],
+        "keywords": ["용접", "출장용접", "알곤용접", "배관용접", "용접업체", "용접수리", "알곤출장용접", "스텐 출장용접"],
         "image": "welding.jpg",
         "link_A": "https://www.replyalba.co.kr/pt/XpBx9dZ5aE",
         "link_B": "https://albarich.com/pt/SROHH97olh"
     },
     "plumbing": {
-        "keywords": ["막힘", "누수", "뚫음", "변기막힘", "하수구막힘", "배관", "싱크대막힘", "역류", "누수탐지", "누수전문"],
+        "keywords": ["막힘", "누수", "뚫음", "변기막힘", "하수구막힘", "배관", "싱크대막힘", "역류", "누수탐지", "누수전문", "배관 누수", "변기뚫는업체", "배수구 막힘", "하수구 역류", "변기 물 안 내려감", "하수구 뚫는 업체", "변기 뚫는 곳"],
         "image": "plumbing.jpg",
         "link_A": "https://www.replyalba.co.kr/pt/GkVRvxfx1T",
         "link_B": "https://albarich.com/pt/QOaojnBV2v"
     },
     "fixture": {
-        "keywords": ["수전교체", "변기교체", "세면대교체", "부속교체", "수전", "세면대", "도기교체", "수전수리"],
+        "keywords": ["수전교체", "변기교체", "세면대교체", "부속교체", "수전", "세면대", "도기교체", "수전수리", "변기수전", "화장실 변기 교체", "세면대 교체", "변기업체", "수전업체"],
         "image": "fixture.jpg",
         "link_A": "https://www.replyalba.co.kr/pt/FzYOdTzVNw",
         "link_B": "https://albarich.com/pt/vRUcqPts9r"
@@ -510,7 +510,7 @@ def get_professional_report(host, category, show_cta=False, target_url="#"):
     <div class="section">
         <div style="float:right; border:4px solid #e74c3c; color:#e74c3c; padding:10px 20px; font-weight:bold; transform:rotate(12deg); font-size:24px; border-radius:5px;">CONFIDENTIAL</div>
         <p style="color:{cham['theme']['color']}; font-weight:bold; font-size:14px;">[기술인프라 보존번호: {cham['doc_id']}]</p>
-        <h1 style="color:#1e293b; margin-top:15px; font-size:32px; letter-spacing:-1px;">{category.upper()} 고등 기술 공정 분석 리포트 <span style="font-size:10px; color:#eee;">v29.0_FORCE</span></h1>
+        <h1 style="color:#1e293b; margin-top:15px; font-size:32px; letter-spacing:-1px;">{category.upper()} 고등 기술 공정 분석 리포트 <span style="font-size:10px; color:#eee;">v30.0</span></h1>
         <hr style="border:0; border-top:3px solid {cham['theme']['color']}22; margin:30px 0;">
         
         <div style="font-size:16px; color:#334155;">{report_text}</div>
@@ -609,7 +609,7 @@ def index():
     final_url = selected_data['link_A'] # 기본 A업체 접수처
     if type_code == 'B': final_url = selected_data['link_B']
     
-    send_trace(f"💰 [V29_FINAL_CHECK] 코드: {keyword_raw}\n🎯 결정 키워드: {keyword} ({category_key})\n🔗 실제 CPA링크: {final_url}")
+    send_trace(f"💰 [V30_AUDIT_OK] 코드: {keyword_raw}\n🎯 결정 키워드: {keyword} ({category_key})\n🔗 실제 CPA링크: {final_url}")
     
     # 🚩 [v20.0] 리포트 페이지에 상담 신청 버튼을 넣어서 반환 (자동 이동 금지)
     resp = Response(get_professional_report(host, category_key, show_cta=True, target_url=final_url))
