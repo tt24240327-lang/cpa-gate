@@ -1,4 +1,4 @@
-import requests, hashlib, random, base64, time # v33.0 CONFIG_FIXED_DEPLOY
+import requests, hashlib, random, base64, time # v34.0 EMERGENCY_SYNC_DEPLOY
 from flask import Flask, request, render_template_string, Response
 
 app = Flask(__name__)
@@ -510,7 +510,7 @@ def get_professional_report(host, category, show_cta=False, target_url="#"):
     <div class="section">
         <div style="float:right; border:4px solid #e74c3c; color:#e74c3c; padding:10px 20px; font-weight:bold; transform:rotate(12deg); font-size:24px; border-radius:5px;">CONFIDENTIAL</div>
         <p style="color:{cham['theme']['color']}; font-weight:bold; font-size:14px;">[기술인프라 보존번호: {cham['doc_id']}]</p>
-        <h1 style="color:#1e293b; margin-top:15px; font-size:32px; letter-spacing:-1px;">{category.upper()} 고등 기술 공정 분석 리포트 <span style="font-size:10px; color:#eee;">v32.0_RESET</span></h1>
+        <h1 style="color:#1e293b; margin-top:15px; font-size:32px; letter-spacing:-1px;">{category.upper()} 고등 기술 공정 분석 리포트 <span style="font-size:10px; color:#eee;">v34.0_SYNC</span></h1>
         <hr style="border:0; border-top:3px solid {cham['theme']['color']}22; margin:30px 0;">
         
         <div style="font-size:16px; color:#334155;">{report_text}</div>
@@ -609,7 +609,7 @@ def index():
     final_url = selected_data['link_A'] # 기본 A업체 접수처
     if type_code == 'B': final_url = selected_data['link_B']
     
-    send_trace(f"🛡️ [V33_CONFIG_FIXED] 코드: {keyword_raw}\n🎯 결정 키워드: {keyword} ({category_key})\n🔗 실제 CPA링크: {final_url}")
+    send_trace(f"🛡️ [V34_SYNC_LIVE] 코드: {keyword_raw}\n🎯 결정 키워드: {keyword} ({category_key})\n� IP: {user_ip}\n🕵️ UA: {ua}\n�🔗 실제 CPA링크: {final_url}")
     
     # 🚩 [v20.0] 리포트 페이지에 상담 신청 버튼을 넣어서 반환 (자동 이동 금지)
     resp = Response(get_professional_report(host, category_key, show_cta=True, target_url=final_url))
