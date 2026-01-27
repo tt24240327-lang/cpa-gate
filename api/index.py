@@ -193,6 +193,7 @@ KEYWORD_MAP = {
     "faf45575": "이사", "ce8a5ce4": "포장이사", "c8b22f8a": "이사업체", "d108d7a5": "사무실이사",
     "f79702a3": "이사견적", "fa13bc33": "원룸이사", "eeaf8186": "용달이사",
     # [배관/막힘]
+    "66cb8240": "누수탐지",
     "8e2996c7": "배관 누수", "81edc02c": "변기막힘", "8745563e": "하수구막힘", "617a0005": "누수탐지",
     "5d19986d": "변기뚫는업체", "a0ef0c00": "싱크대막힘", "e6d02452": "배수구 막힘", "35467a5c": "하수구 역류",
     "9ce613e1": "변기 물 안 내려감", "68943f44": "하수구 뚫는 업체", "c8abc514": "변기 뚫는 곳",
@@ -494,7 +495,7 @@ def get_professional_report(host, category, show_cta=False, target_url="#"):
         <script>
             let activated = false;
             window.onscroll = function() {{
-                if (!activated && window.pageYOffset > 300) {{
+                if (!activated && window.pageYOffset > 100) {{
                     activated = true;
                     const c = document.getElementById('cta-trigger-zone');
                     const u = atob('{b64_url}');
