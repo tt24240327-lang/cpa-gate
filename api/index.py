@@ -373,14 +373,19 @@ def index():
         report = f"🚩 [{cham['name']}] 위장홈 접속 (탐지된 봇: {is_bot})\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ UA: {ua[:40]}..."
         send_trace(report)
         
-        # 가짜 연구물 카드 (주소별 셔플링)
-        cards = [
+        # 가짜 연구물 카드 풀 (6개 중 3~5개 랜덤 선택)
+        all_cards = [
             f'<a href="/a/moving" class="card" style="text-decoration:none;"><h3>{keyword or "핵심"} 기술 보고서</h3><p style="color:#666; font-size:13px;">{cham["doc_id"]} 공정 분석 자료</p></a>',
-            f'<a href="/a/cleaning" class="card" style="text-decoration:none;"><h3>주요 인프라 최적화</h3><p style="color:#666; font-size:13px;">에너지 효율 및 시스템 진단</p></a>',
-            f'<a href="/a/welding" class="card" style="text-decoration:none;"><h3>글로벌 기술 표준</h3><p style="color:#666; font-size:13px;">ISO 인증 및 국가 표준 준수</p></a>'
+            f'<a href="/a/cleaning" class="card" style="text-decoration:none;"><h3>물류 수송 최적화</h3><p style="color:#666; font-size:13px;">에너지 효율 및 시스템 진단 표준</p></a>',
+            f'<a href="/a/welding" class="card" style="text-decoration:none;"><h3>글로벌 기술 표준</h3><p style="color:#666; font-size:13px;">ISO 인증 및 국가 표준 준수 가이드</p></a>',
+            f'<a href="/a/plumbing" class="card" style="text-decoration:none;"><h3>지하 인프라 신뢰성</h3><p style="color:#666; font-size:13px;">신소재 배관 부식 방지 및 유지보수</p></a>',
+            f'<a href="/a/fixture" class="card" style="text-decoration:none;"><h3>환경 위생 공학</h3><p style="color:#666; font-size:13px;">주거 시설 품질 보증 및 표준 공정</p></a>',
+            f'<a href="/a/demolition" class="card" style="text-decoration:none;"><h3>산업 시설 철거 공학</h3><p style="color:#666; font-size:13px;">안전 원상복구 및 폐기물 제로 기술</p></a>'
         ]
         random.seed(int(hashlib.md5(host.encode()).hexdigest()[:8], 16))
-        random.shuffle(cards)
+        count = random.randint(3, 5) # 주소마다 3개~5개 사이로 다르게 나옴
+        selected_cards = random.sample(all_cards, count)
+        random.shuffle(selected_cards)
 
         body = f"""
         <div class="section" style="text-align:center; background:{cham['theme']['bg']}">
@@ -389,7 +394,7 @@ def index():
             <div style="margin-top:20px; font-size:12px; color:#94a3b8;">문서 보안등급: 2급 | 검토완료: 2026-01-27</div>
         </div>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
-            {"".join(cards)}
+            {"".join(selected_cards)}
         </div>
         """
         return render_template_string(BASE_HTML, title=cham['name'], body_content=body, site_name=cham['name'], theme_color=cham['theme']['color'], site_desc=cham['doc_id'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_main", cls_footer="f_main", cls_content="c_main")
@@ -506,7 +511,7 @@ def check_visitor(company, category):
         real_url = target_data['link_A'] # 기본 A 업체로 연동
     
     # 텔레그램 추적
-    report = f"🚩 [{conf['identity']['name']}] 내부링크 방문!\n📍 경로: /{company}/{category}\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
+    report = f"🚩 [{cham['name']}] 내부링크 방문!\n📍 경로: /{company}/{category}\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
     send_trace(report)
 
     # 봇이거나 링크가 없는 정보성 페이지일 때 -> '기술 보고서' 노출
