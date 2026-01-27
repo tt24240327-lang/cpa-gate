@@ -9,22 +9,23 @@ CHAT_ID = "1898653696"
 GA_ID = "G-1VH7D6BJTD"
 
 # 🛡️ [v19.0] Iron Dome Defense Constants (강력봇 차단 대역)
+WHITELIST_IPS = ['61.83.9.20'] # 형님 아이피 (무조건 프리패스)
+
 BOT_UA_KEYWORDS = [
     'bot', 'crawl', 'slurp', 'spider', 'naver', 'daum', 'google', 'phantom', 'headless',
     'vercel-screenshot', 'req/v3', 'python-requests', 'aiohttp', 'curl', 'wget',
     'selenium', 'playwright', 'cypress', 'go-http-client', 'okhttp', 'axios', 'guava'
 ]
 BLOCKED_IP_PREFIXES = [
-    # [Naver/Cloud] 
     '110.93.', '114.111.', '125.209.', '211.249.', '210.89.', '223.130.', 
-    # [Common Cloud]
     '216.73.', '34.', '35.', '52.', '54.', '13.107.', '20.', '192.30.', '140.82.', '185.199.'
 ]
-
-# 🕵️ [v19.0] Behavioral Tracker (실시간 행동 분석용 장부)
 VISITOR_LOGS = {} 
 
 def is_bot_detected(ip, ua):
+    if ip in WHITELIST_IPS:
+        return False, None
+    
     ua_lower = ua.lower()
     # 1. User-Agent 블랙리스트 (vercel-screenshot, headless 등)
     if any(keyword in ua_lower for keyword in BOT_UA_KEYWORDS):
