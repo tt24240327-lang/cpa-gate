@@ -144,20 +144,67 @@ def get_auto_code(keyword):
     # MD5 해시 생성 후 앞 6자리만 사용
     return hashlib.md5(full_str.encode()).hexdigest()[:6]
 
-# 🔑 [v14.0] SMART KEYWORD DECODER: 무한 확장형 키워드 엔진
+# 🔑 [v18.0] KEYWORD_MAP: 클라이언트 주소 축소 및 한글 복구 엔진
+# 행님이 직접 정한 코드를 여기에 추가하시면 됩니더.
 KEYWORD_MAP = {
     # [청소]
     "cln-01": "입주청소", "cln-02": "이사청소", "cln-03": "거주청소", "cln-04": "청소업체",
+    "cln-05": "사무실청소", "cln-06": "외창청소", "cln-07": "준공청소",
     # [이사]
     "mov-01": "포장이사", "mov-02": "원룸이사", "mov-03": "용달이사", "mov-04": "이삿짐",
+    "mov-05": "사무실이사", "mov-06": "보관이사", "mov-07": "해외이사",
     # [용접]
-    "wld-01": "용접", "wld-02": "출장용접", "wld-03": "알곤용접",
+    "wld-01": "용접", "wld-02": "출장용접", "wld-03": "알곤용접", "wld-04": "배관용접",
     # [설비/막힘]
-    "pip-01": "하수구막힘", "pip-02": "변기막힘", "pip-03": "싱크대막힘",
+    "pip-01": "하수구막힘", "pip-02": "변기막힘", "pip-03": "싱크대막힘", "pip-04": "누수탐지",
+    "pip-05": "배관청소", "pip-06": "고압세척", "pip-07": "수도수리",
     # [교체/수리]
-    "fix-01": "수전교체", "fix-02": "변기교체", "fix-03": "세면대교체",
+    "fix-01": "수전교체", "fix-02": "변기교체", "fix-03": "세면대교체", "fix-04": "환풍기교체",
     # [철거]
-    "dem-01": "철거", "dem-02": "원상복구", "dem-03": "상가철거"
+    "dem-01": "철거", "dem-02": "원상복구", "dem-03": "상가철거", "dem-04": "부분철거",
+    # [신규 추가 구역]
+    "a1b2c3d4": "누수탐지",
+    "e5f6g7h8": "입주청소",
+    "i9j0k1l2": "포장이사"
+}
+
+# 🤖 [v18.0] REPORT_SNIPPETS: 문서 변조용 재료 창고
+REPORT_SNIPPETS = {
+    "cleaning": [
+        "고분자 화학 성분을 활용한 정밀 세정 공정은 주거 환경의 위생 표준을 획기적으로 개선합니다.",
+        "미세먼지 및 잔류 오염물질 제거를 위해 나노 단위의 계면활성제 반응 최적화가 필수적입니다.",
+        "화학적 거동 분석을 통해 산성 및 알칼리성 세제의 중화 과정을 정밀하게 제어해야 합니다.",
+        "주거 공간의 공기질 개선을 위한 항균 코팅 기술은 박테리아 증식을 효율적으로 제어하는 성과를 보였습니다.",
+        "표면 장력 제어 공법을 통한 코팅막 형성은 오염 방지 및 유지관리 비용 절감의 핵심입니다."
+    ],
+    "moving": [
+        "화물 적재 하중의 동역학적 분산 알고리즘은 운송 중 파손율을 실시간으로 저감하는 공학적 기초가 됩니다.",
+        "이동 경로의 최적 최단 경로 탐색 알고리즘은 에너지 효율 증대와 운영 비용 최적화에 기여합니다.",
+        "고충 부하 분배 시스템을 통한 중량물 상하차 공정은 작업자의 안전 보건 및 시설 보호를 보장합니다.",
+        "물류 수송 체계의 표준화 작업은 체계적인 자산 보호 및 운송 신뢰성을 높이는 핵심 지표입니다.",
+        "충격 흡수 프레임워크를 적용한 특수 적재 공법은 정밀 기기 및 가구 보호에 탁월한 효능을 보입니다."
+    ],
+    "welding": [
+        "금속 접합부의 열변형 제어 알고리즘은 구조물의 장기적 신뢰성과 내구성을 보장하는 핵심 기술입니다.",
+        "분자 조직 결합 메커니즘 분석을 통해 용접 HAZ 구간의 물리적 변형을 최소화하는 공정을 수립했습니다.",
+        "비파괴 탐상 기술(UT/RT) 기반의 품질 검증 시스템은 미세 균열 전파를 사전 차단하는 역할을 수행합니다.",
+        "특수 합금용 플럭스 최적 배합비는 산화 방지 및 접합 강도 극대화를 위한 필수 연구 결과입니다.",
+        "고온 고압 환경 하에서의 금속 결합 안정성 테스트를 통해 안전 계수 2.5 이상의 표준을 달성했습니다."
+    ],
+    "plumbing": [
+        "도시 지하 관로 유체 흐름 분석을 통해 배관 내부의 압력 강하와 역류 현상을 정밀하게 진단합니다.",
+        "비굴착 복구 공학을 적용한 고압 제팅 공법은 기존 매설물의 손상 없이 내부 이물질을 완벽히 제거합니다.",
+        "레이놀즈 수 기반의 유체 역학 시뮬레이션은 배관 설계의 최적 구배 및 유속 결정에 활용됩니다.",
+        "초음파 누수 탐지 알고리즘은 미세한 음향 파형의 변이를 감지하여 0.01mm 급의 균열 위치를 특정합니다.",
+        "배관 내벽 나노 코팅 기술은 이물질 흡착을 방지하고 유체 저항을 최소화하여 펌핑 효율을 높입니다."
+    ],
+    "fixture": [
+        "노후 설비의 기기 보수 및 교체 표준 가이드라인은 안정적인 주거 수자원 관리를 위한 필수 지침입니다.",
+        "수압 제어 밸브의 압력 평형 최적 설계는 급격한 온도 변화 및 유량 변동 요인을 사전 차단합니다.",
+        "환경 친화적 절수 기술 표준은 ISO 인증 기준에 부합하는 수자원 보존 효율을 입증하였습니다.",
+        "시설 교체 시 발생하는 소음 및 진동 차단 공법은 주거 쾌적성 향상을 위한 핵심 시공 표준입니다.",
+        "부위별 부품 호환성 표준화(Standardization)는 유지보수 편의성과 장기 운영 안정성을 보장합니다."
+    ]
 }
 
 # 🔐 [v15.0] 역방향 조회를 위한 자동 해시 맵 생성
@@ -353,34 +400,62 @@ def get_config():
     
     return conf
 
+# 🛡️ [v18.0] Deep Deception: 무한 문서 변조 엔진
+def get_unique_report_content(host, category):
+    h = int(hashlib.md5(host.encode()).hexdigest(), 16)
+    random.seed(h)
+    
+    # 해당 카테고리의 조각들 가져오기 (없으면 청소 기본값)
+    snippets = REPORT_SNIPPETS.get(category, REPORT_SNIPPETS["cleaning"])
+    
+    # 문장 순서 섞기
+    random.shuffle(snippets)
+    
+    # 문장 끝처리 변조 (시드 기반 고정)
+    def modulate(text):
+        if h % 3 == 0:
+            return text.replace("합니다.", "함.").replace("있습니다.", "있음.")
+        elif h % 3 == 1:
+            return text.replace("합니다.", "하는 것으로 나타났습니다.").replace("있습니다.", "있는 것으로 판단됩니다.")
+        return text
+
+    modulated_snippets = [modulate(s) for s in snippets]
+    
+    # 사이사이 가짜 데이터(Noise) 삽입
+    report_text = ""
+    for i, s in enumerate(modulated_snippets):
+        report_text += f"<p style='line-height:1.8; margin-bottom:15px; text-align:justify;'>{s}</p>"
+        if i == 1:
+            report_text += f"<div style='background:#f1f5f9; padding:15px; border-radius:5px; font-size:12px; margin:20px 0; color:#475569; border-left:4px solid #94a3b8;'><strong>[분석 데이터 ID: {h % 99999:05d}]</strong><br>본 섹션의 데이터는 국가 표준 가이드라인 v{random.randint(2,4)}.0에 따라 검증되었습니다.</div>"
+
+    return report_text
+
 @app.route('/')
 def index():
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
     host = request.host.split(':')[0].replace('www.', '')
     
-    # 🕵️ [v17.0] 실시간 키워드 추출 및 봇 탐지 (네이버 Yeti/G-bot/IP 차단)
+    # 🕵️ [v18.0] 실시간 키워드 추출 및 봇 탐지
     keyword_raw = request.args.get('k', '')
     keyword = get_keyword(keyword_raw) or ""
     is_bot = any(bot in ua for bot in ['bot', 'crawl', 'slurp', 'spider', 'naver', 'daum', 'google', 'phantom', 'headless'])
     
-    # 카멜레온 데이터 생성 (주소 + 키워드 기반 고정 랜덤)
     cham = get_chameleon_data(host, keyword)
     type_code = request.args.get('t', 'A')
 
-    # 🚩 [CASE 1] 봇이거나 키워드 없는 직접 접속 -> "전문 연구소"로 위장
+    # 🚩 [CASE 1] 봇이거나 키워드 없는 직접 접속 -> "전문 연구소 메인"
     if is_bot or not keyword:
         report = f"🚩 [{cham['name']}] 위장홈 접속 (탐지된 봇: {is_bot})\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ UA: {ua[:40]}..."
         send_trace(report)
         
         # 가짜 연구물 카드 풀 (6개 중 3~5개 랜덤 선택)
         all_cards = [
-            f'<a href="/a/moving" class="card" style="text-decoration:none;"><h3>{keyword or "핵심"} 기술 보고서</h3><p style="color:#666; font-size:13px;">{cham["doc_id"]} 공정 분석 자료</p></a>',
-            f'<a href="/a/cleaning" class="card" style="text-decoration:none;"><h3>물류 수송 최적화</h3><p style="color:#666; font-size:13px;">에너지 효율 및 시스템 진단 표준</p></a>',
-            f'<a href="/a/welding" class="card" style="text-decoration:none;"><h3>글로벌 기술 표준</h3><p style="color:#666; font-size:13px;">ISO 인증 및 국가 표준 준수 가이드</p></a>',
-            f'<a href="/a/plumbing" class="card" style="text-decoration:none;"><h3>지하 인프라 신뢰성</h3><p style="color:#666; font-size:13px;">신소재 배관 부식 방지 및 유지보수</p></a>',
-            f'<a href="/a/fixture" class="card" style="text-decoration:none;"><h3>환경 위생 공학</h3><p style="color:#666; font-size:13px;">주거 시설 품질 보증 및 표준 공정</p></a>',
-            f'<a href="/a/demolition" class="card" style="text-decoration:none;"><h3>산업 시설 철거 공학</h3><p style="color:#666; font-size:13px;">안전 원상복구 및 폐기물 제로 기술</p></a>'
+            f'<a href="/a/moving" class="card" style="text-decoration:none;"><h3>물류 수송 체계 보고서</h3><p style="color:#666; font-size:13px;">{cham["doc_id"]} 공계 분석 자료</p></a>',
+            f'<a href="/a/cleaning" class="card" style="text-decoration:none;"><h3>환경 세정 기술 지침</h3><p style="color:#666; font-size:13px;">ISO-9001 인증 표준 매뉴얼</p></a>',
+            f'<a href="/a/welding" class="card" style="text-decoration:none;"><h3>접합 신뢰성 검증서</h3><p style="color:#666; font-size:13px;">안전 진단 및 비파괴 테스트</p></a>',
+            f'<a href="/a/plumbing" class="card" style="text-decoration:none;"><h3>관로 유체 역학 데이터</h3><p style="color:#666; font-size:13px;">지하 시설물 유지보수 공학</p></a>',
+            f'<a href="/a/fixture" class="card" style="text-decoration:none;"><h3>주거 보건 위생 지표</h3><p style="color:#666; font-size:13px;">친환경 자재 및 시공 표준</p></a>'
         ]
         random.seed(int(hashlib.md5(host.encode()).hexdigest()[:8], 16))
         count = random.randint(3, 5) # 주소마다 3개~5개 사이로 다르게 나옴
@@ -390,8 +465,8 @@ def index():
         body = f"""
         <div class="section" style="text-align:center; background:{cham['theme']['bg']}">
             <h1 style="color:{cham['theme']['color']}; border-bottom:3px solid {cham['theme']['color']}; display:inline-block;">{cham['name']}</h1>
-            <p style="margin-top:15px; font-weight:bold;">{keyword or "차세대"} {cham['doc_id']} 운영 표준 가이드라인</p>
-            <div style="margin-top:20px; font-size:12px; color:#94a3b8;">문서 보안등급: 2급 | 검토완료: 2026-01-27</div>
+            <p style="margin-top:10px; font-weight:bold;">{cham['doc_id']} 기술 표준 통합 아카이브</p>
+            <div style="margin-top:15px; font-size:12px; color:#94a3b8;">최종 업데이트: 2026-01-27 | 보안등급: 대외주의</div>
         </div>
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
             {"".join(selected_cards)}
@@ -399,40 +474,46 @@ def index():
         """
         return render_template_string(BASE_HTML, title=cham['name'], body_content=body, site_name=cham['name'], theme_color=cham['theme']['color'], site_desc=cham['doc_id'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_main", cls_footer="f_main", cls_content="c_main")
 
-    # 🎯 [CASE 2] 진짜 손님 -> CPA 랜딩에 카멜레온 위장막 입히기
+    # 🎯 [CASE 2] 진짜 손님 -> CPA 랜딩 (연구소 위장막 유지)
     selected_data = None
+    category_key = "moving"
     for category, data in DATA_MAP.items():
         if any(k in keyword for k in data['keywords']):
             selected_data = data
+            category_key = category
             break
     if not selected_data:
         selected_data = DATA_MAP["moving"]
     
     final_link = selected_data['link_B'] if type_code == 'B' else selected_data['link_A']
-    send_trace(f"💰 [{selected_data['image'].split('.')[0]}] 진입 - {keyword} ({request.host})")
+    send_trace(f"💰 [{category_key}] 진입 - {keyword} ({request.host})")
 
     return render_template_string(f"""
     <!DOCTYPE html>
-    <html>
+    <html lang="ko">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{keyword} {cham['name']}</title>
+        <title>{keyword} - {cham['name']}</title>
         <style>
-            body {{ margin: 0; padding: 0; background: {cham['theme']['bg']}; overflow-x: auto; }}
-            .header {{ background: white; padding: 15px 5%; border-bottom: 2px solid {cham['theme']['color']}; display: flex; justify-content: space-between; align-items: center; }}
-            .container {{ width: 100%; min-width: 1000px; margin: 0 auto; }}
+            body {{ margin: 0; padding: 0; background: {cham['theme']['bg']}; font-family: sans-serif; }}
+            .header {{ background: white; padding: 15px 10%; border-bottom: 3px solid {cham['theme']['color']}; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }}
+            .container {{ width: 100%; min-width: 1000px; margin: 0 auto; background: white; }}
             @media (max-width: 768px) {{ .container {{ min-width: 100%; }} }}
             .cpa-frame {{ width: 100%; height: 6000px; border: none; display: block; }}
+            .footer {{ background: #0f172a; color: #94a3b8; padding: 30px 10%; text-align: center; font-size: 11px; }}
         </style>
     </head>
     <body>
         <div class="header">
-            <div style="font-weight:900; color:{cham['theme']['color']};">{cham['name']}</div>
-            <div style="font-size:12px; color:#666;">ID: {cham['doc_id']}</div>
+            <div style="font-weight:900; color:{cham['theme']['color']}; font-size:20px;">{cham['name']}</div>
+            <div style="font-size:12px; color:#666;">공식 접수 센터 (ID: {cham['doc_id']})</div>
         </div>
         <div class="container">
             <iframe class="cpa-frame" src="{final_link}"></iframe>
+        </div>
+        <div class="footer">
+            (주){{ cham['name'] }} | {{ cham['addr'] }} | 대표자: {{ cham['ceo'] }} | 데이터 보안 암호화 적용됨
         </div>
     </body>
     </html>
@@ -496,42 +577,39 @@ def contact():
     return render_template_string(BASE_HTML, title="고객센터", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_con", cls_footer="f_con", cls_content="c_con")
 
 @app.route('/<company>/<category>')
-def check_visitor(company, category):
+@app.route('/a/<category>')
+def check_visitor(category, company=None):
     host = request.host.split(':')[0].replace('www.', '')
     cham = get_chameleon_data(host)
     user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
     ua = request.headers.get('User-Agent', '').lower()
     is_bot = any(prefix in user_ip for prefix in ['110.93.', '114.111.', '125.209.', '211.249.', '210.89.']) or any(bot in ua for bot in ['naver', 'yeti', 'bot', 'crawl', 'google'])
-    host = request.host.split(':')[0].replace('www.', '')
-
-    # 🕵️ [v12.0] 기존 CPA_DATA 대신 DATA_MAP에서 카테고리 매칭 (하위 호환성)
+    
+    # 카테고리 매칭
     target_data = DATA_MAP.get(category.lower())
-    real_url = None
-    if target_data:
-        real_url = target_data['link_A'] # 기본 A 업체로 연동
+    real_url = target_data['link_A'] if target_data else None
     
-    # 텔레그램 추적
-    report = f"🚩 [{cham['name']}] 내부링크 방문!\n📍 경로: /{company}/{category}\n🌐 주소: {request.host}\n📍 IP: {user_ip}\n🕵️ 신분: {ua[:50]}..."
-    send_trace(report)
-
-    # 봇이거나 링크가 없는 정보성 페이지일 때 -> '기술 보고서' 노출
-    if not real_url or is_bot:
-        doc = next((d for d in DOC_DATABASE if d['cat'] == category), None)
-        title = doc['title'] if doc else category.upper() + " 기술 표준"
-        text = text_stylist(doc['desc'] if doc else "국가 표준(KS) 및 국제 규격(ISO)에 따른 전문 기술 지침입니다.", request.host)
-        chart = get_dynamic_chart(host)
-        doc_content = f"""
-        <div class="section">
-            <div style="float:right; border:2px solid #e74c3c; color:#e74c3c; padding:4px 10px; font-weight:bold; transform:rotate(12deg);">APPROVED</div>
-            <p style="color:{conf['color']}; font-weight:bold;">[{conf['terms']['report']}]</p>
-            <h1 style="color:#1e293b; margin-top:10px;">{title}</h1>{chart}
-            <p style="text-align:justify; line-height:2; color:#334155;">{text}</p>
-            <p style="font-size:12px; color:#888; margin-top:30px; border-top:1px solid #f1f5f9; padding-top:15px;">※ 본 문서는 인가된 시스템에 의해 생성된 기술 보안 문서입니다. (ID: {hashlib.md5(host.encode()).hexdigest()[:8].upper()})</p>
+    report_text = get_unique_report_content(host, category.lower())
+    
+    # 🚩 모든 내부 링크 방문은 '기술 보고서' 형식으로 출력 (Deep Deception)
+    doc_content = f"""
+    <div class="section">
+        <div style="float:right; border:3px solid #e74c3c; color:#e74c3c; padding:8px 15px; font-weight:bold; transform:rotate(12deg); font-size:20px;">CONFIDENTIAL</div>
+        <p style="color:{cham['theme']['color']}; font-weight:bold; font-size:14px;">[발행번호: {cham['doc_id']}]</p>
+        <h1 style="color:#1e293b; margin-top:10px; font-size:28px;">{category.upper()} 분야 정밀 기술 분석 보고서</h1>
+        <hr style="border:0; border-top:2px solid #eee; margin:25px 0;">
+        <div style="color:#334155;">{report_text}</div>
+        
+        <div style="margin-top:50px; padding:30px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; text-align:center;">
+            <h3 style="margin-bottom:15px; color:#1e293b;">본 분석 결과에 따른 유관 부서 지원 요청</h3>
+            <p style="font-size:14px; color:#64748b; margin-bottom:20px;">해당 기술 공정 및 서비스 지원이 필요한 경우 아래 공식 파트너사를 통해 협력 요청을 진행하십시오.</p>
+            <a href="{real_url or '#'}" target="_blank" style="display:inline-block; padding:15px 40px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:5px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">공식 서비스 협력 요청하기</a>
         </div>
-        """
-        return render_template_string(BASE_HTML, title=conf['terms']['report'], body_content=doc_content, site_name=conf['name'], theme_color=conf['color'], site_desc=conf['desc'], ga_id=GA_ID, font_family=conf['font'], identity=conf['identity'], cls_nav=conf['cls_nav'], cls_footer=conf['cls_footer'], cls_content=conf['cls_content'], terms=conf['terms'])
-    
-    return render_template_string(f'<html><head><meta http-equiv="refresh" content="0.5;url={{{{ real_url }}}}"></head><body style="text-align:center; padding-top:150px; font-family:sans-serif;"><h3>데이터 보안 검사 중...</h3></body></html>', real_url=real_url)
+        
+        <p style="font-size:11px; color:#aaa; margin-top:40px; border-top:1px solid #f1f5f9; padding-top:20px;">※ 본 문서는 {cham['name']}의 자산이며 무단 배포를 금합니다. (Hash-Verify: {hashlib.md5(host.encode()).hexdigest()[:12].upper()})</p>
+    </div>
+    """
+    return render_template_string(BASE_HTML, title=category.upper() + " 기술 보고서", body_content=doc_content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_doc", cls_footer="f_doc", cls_content="c_doc")
 
 # --- 🗺️ [신규] 사이트맵(Sitemap) 자동 생성 엔진 ---
 @app.route('/sitemap.xml')
