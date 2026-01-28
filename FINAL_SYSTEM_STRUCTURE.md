@@ -87,4 +87,30 @@ This system is designed as a **Hybrid-Camouflage System** that behaves different
     *   **Solution:** Commented out interception (Line 521) to allow direct POST to affiliate providers.
 
 ---
+
+## 🛡️ 5. Anti-Fingerprinting & Stealth Protocol (보안 및 지문 삭제)
+To prevent "Clone Site" detection by Naver Yeti/Google Bots, the following randomization features are enforced:
+
+### 1. Footer & Business Info Randomization
+*   **Objective:** No two domains share the same footer info.
+*   **Implementation:**
+    *   **Locations:** Random selection from major tech hubs (Gangnam, Pangyo, Haeundae, Songdo, etc.).
+    *   **Biz Number:** Generated pattern `XXX-XX-XXXXX` seeded by domain.
+    *   **Text Variance:** Privacy policy and terms links use varied phrasings (e.g., '개인정보처리방침', 'Privacy', '정보보호정책').
+
+### 2. Code Obfuscation (CSS/HTML)
+*   **Objective:** Eliminate structural footprints.
+*   **Implementation:**
+    *   **Class Names:** Instead of fixed names like `.nav`, the system generates seeded class names (e.g., `.nav-8f2`, `.wrap-b21`).
+    *   **Structure:** Layouts (A/B/C/D) provide structural diversity.
+
+### 3. Metadata & Asset Variation
+*   **Favicons:** Geometrically generated SVGs specific to the domain hash.
+*   **Meta Tags:** Descriptions and OG tags are assembled from random fragments to avoid duplication.
+
+### 4. Tracking Isolation
+*   **GA4:** Supports server-side injection (`send_ga_event`) which hides the tracking ID from the client-side source code (unless specifically exposed).
+*   **Isolation:** Each deployment can theoretically hold different tracking IDs via environment variables.
+
+---
 **This document serves as the master blueprint. Any modifications should respect this 3-part structure.**

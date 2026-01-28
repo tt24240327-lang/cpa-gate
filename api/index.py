@@ -90,6 +90,41 @@ class GeneEngine:
             links.append(f"<a href='#' style='color:inherit;text-decoration:none;opacity:0.5;'>[Ref: {t_node}]</a>")
         return " | ".join(links)
 
+    def cls(self, base_name):
+        # [Security] CSS Class Obfuscation
+        # e.g., 'nav' -> 'nv_a1b2', 'container' -> 'ct_x9z1'
+        suffix = hashlib.md5(f"{self.niche}-{base_name}".encode()).hexdigest()[:4]
+        prefix = base_name[:2] + base_name[-1] if len(base_name) > 3 else base_name
+        return f"{prefix}_{suffix}"
+
+    def get_footer_info(self):
+        # [Security] Footer Randomization
+        cities = ["서울 강남구 테헤란로", "경기 성남시 판교역로", "서울 금천구 가산디지털", 
+                  "부산 해운대구 센텀중앙로", "인천 연수구 송도과학로", "대전 유성구 대덕대로"]
+        positions = ["대표", "책임연구원", "센터장", "CEO", "기술이사"]
+        last_names = ["김", "이", "박", "최", "정", "강", "조", "윤"]
+        first_names = ["철수", "민수", "지훈", "도현", "서준", "하준", "우진", "시우"]
+        
+        city = self.r.choice(cities)
+        addr_detail = f"{self.r.randint(10,999)}번길 {self.r.randint(1,50)}"
+        biz_num = f"{self.r.randint(100,999)}-{self.r.randint(10,99)}-{self.r.randint(10000,99999)}"
+        rep_name = f"{self.r.choice(last_names)}{self.r.choice(first_names)}"
+        rep_pos = self.r.choice(positions)
+        
+        return f"""
+        <div style="font-size:12px; color:#888; line-height:1.8;">
+            <p><strong>{self.niche.upper()} LABORATORY</strong> | {rep_pos}: {rep_name}</p>
+            <p>ADDR: {city} {addr_detail} (Bldg #{self.r.randint(100,900)})</p>
+            <p>BIZ: {biz_num} | TEL: 0507-{self.r.randint(1000,9999)}-{self.r.randint(1000,9999)}</p>
+            <p style="margin-top:10px;">
+                <a href="#" style="color:inherit;">개인정보처리방침</a> | 
+                <a href="#" style="color:inherit;">이용약관</a> | 
+                <a href="#" style="color:inherit;">법적효력고지</a>
+            </p>
+            <p style="font-size:11px; margin-top:5px; opacity:0.6;">COPYRIGHT (C) {self.r.randint(2023,2025)} ALL RIGHTS RESERVED.</p>
+        </div>
+        """
+
     def get_favicon_url(self):
         shape = self.r.choice(['rect', 'circle', 'poly', 'diamond'])
         svg = f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>"
@@ -424,7 +459,7 @@ def render_genesis_imperial(host, k_val, path, info=""):
             "title": title_main,
             "company": f"{title_main.replace(' ','')} 기술연구센터",
             "page_content": page_content,
-            "footer_info": f"대표: {pr.choice(['김','이','박','정','최'])}철수 | 사업자: {pr.randint(100,999)}-{pr.randint(10,99)}",
+            "footer_info": ge.get_footer_info(),
             "backlinks": ge.get_backlinks()
         }
 
