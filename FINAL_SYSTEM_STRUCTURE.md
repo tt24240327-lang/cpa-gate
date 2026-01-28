@@ -33,16 +33,15 @@ This system is designed as a **Hybrid-Camouflage System** that behaves different
 *   **Purpose:** Monetization via CPA landing pages.
 *   **Location:** `api/index.py` (Lines 487 - 527)
 *   **Workflow:**
-    1.  **Notification:** Sends a Telegram alert (`💰 [Keyword] 유입`) upon human entry (Lines 501-502).
+    1.  **Synchronous Notification (Critical):**
+        *   Upon detecting a human user, the system **Synchronously** sends a Telegram alert (`💰 [Keyword] 유입`).
+        *   The system *waits* for the Telegram API to acknowledge receipt (Blocking Call) to ensure the message is sent before the user leaves.
     2.  **Dual Target Selection (A/B):**
-        *   Checks `t` parameter.
-        *   `t=A` (Default) -> **ReplyAlba (이사방)**
-        *   `t=B` -> **AlbaRich (모두클린)**
-        *   (Lines 504-513)
-    3.  **Direct Redirect (Updated):**
-        *   Instead of proxying (which causes white screens due to blocking), the system now **Redirects (302)** the user directly to the Target URL.
-        *   This guarantees the page loads 100% of the time.
-        *   Cookies are set before redirection to maintain session tracking.
+        *   Checks `t` parameter (`t=A` for ReplyAlba, `t=B` for AlbaRich).
+    3.  **Direct Redirect (Final Action):**
+        *   Once the Telegram message is confirmed sent, the system returns a **302 Redirect** response.
+        *   The user is immediately moved to the official target landing page.
+        *   (Proxying was removed to prevent 'White Screen' blocking issues).
 
 ---
 

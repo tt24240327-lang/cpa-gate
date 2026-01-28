@@ -98,7 +98,7 @@ class GeneEngine:
         elif shape == 'poly':
             svg += f"<polygon points='32,4 60,56 4,56' fill='{self.theme_color}'/>"
         elif shape == 'diamond':
-             svg += f"<polygon points='32,4 60,32 32,60 4,32' fill='{self.theme_color}'/>"
+            svg += f"<polygon points='32,4 60,32 32,60 4,32' fill='{self.theme_color}'/>"
         
         if self.r.choice([True, False]):
              char = self.niche[0].upper()
@@ -148,7 +148,7 @@ def render_layout(ge, pr, dna):
             {staff_btn_html}
         </nav>"""
     else:
-         nav = f"""<nav>
+        nav = f"""<nav>
             {staff_btn_html}
             <a href='/?bot=1'>HOME</a>
             <a href='/network?bot=1'>NETWORK</a>
@@ -497,8 +497,12 @@ def proxy_master_final(path):
             # Domain Info
             domain_clean = host.replace("www.", "")
             
+            # Vendor Info
+            t_param = request.args.get('t', 'A')
+            vendor_name = "B-모두클린" if t_param == 'B' else "A-이사방"
+
             # One-Line Notification
-            msg = f"💰 [{kw}] � {ip} | {device} | 🔗 {domain_clean}"
+            msg = f"💰 [{vendor_name}] [{kw}] -> {ip} | {device} | 🔗 {domain_clean}"
             send_telegram(msg)
 
         # [Dual Target Routing]
