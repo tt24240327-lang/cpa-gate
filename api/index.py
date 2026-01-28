@@ -16,6 +16,8 @@ app = Flask(__name__)
 # [v100.Global] EMPIRE GENESIS-AI: Multi-Layout Logic
 TELEGRAM_TOKEN = "7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0"
 CHAT_ID = "1898653696"
+GA_MEASUREMENT_ID = "G-1VH7D6BJTD"
+GA_API_SECRET = "" # Optional for basic hits
 
 # 🛡️ [CORE PRESERVED: Data & Security]
 G_GUARDIAN = {}
@@ -436,6 +438,19 @@ def send_telegram(msg):
     try: requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage", json={"chat_id": CHAT_ID, "text": msg, "disable_web_page_preview": True}, timeout=10)
     except: pass
 
+def send_ga_event(client_id, event_name, params):
+    try:
+        url = f"https://www.google-analytics.com/mp/collect?measurement_id={GA_MEASUREMENT_ID}&api_secret={GA_API_SECRET}"
+        payload = {
+            "client_id": client_id,
+            "events": [{
+                "name": event_name,
+                "params": params
+            }]
+        }
+        requests.post(url, json=payload, timeout=5)
+    except: pass
+
 @app.route('/api/secure/verify')
 def honey_pot_trap():
     ua, ip = request.headers.get('User-Agent', '').lower(), request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
@@ -504,6 +519,14 @@ def proxy_master_final(path):
             # One-Line Notification
             msg = f"💰 [{vendor_name}] [{kw}] -> {ip} | {device} | 🔗 {domain_clean}"
             send_telegram(msg)
+            
+            # [GA4] Send Event
+            send_ga_event(f_print, "start_cpa", {
+                "keyword": kw,
+                "vendor": vendor_name,
+                "domain": domain_clean,
+                "device_type": device
+            })
 
         # [Dual Target Routing]
         t_param = request.args.get('t', 'A')

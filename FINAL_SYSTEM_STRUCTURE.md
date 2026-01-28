@@ -35,7 +35,8 @@ This system is designed as a **Hybrid-Camouflage System** that behaves different
 *   **Workflow:**
     1.  **Synchronous Notification (Critical):**
         *   Upon detecting a human user, the system **Synchronously** sends a Telegram alert (`💰 [Keyword] 유입`).
-        *   The system *waits* for the Telegram API to acknowledge receipt (Blocking Call) to ensure the message is sent before the user leaves.
+        *   **[NEW] Google Analytics Reporting:** Sends a server-side hit to GA4 (`G-1VH7D6BJTD`) with the event `CPA_Click`, including parameters for `keyword` and `vendor`.
+        *   The system *waits* for these API calls to ensure tracking is recorded before the user leaves.
     2.  **Dual Target Selection (A/B):**
         *   Checks `t` parameter (`t=A` for ReplyAlba, `t=B` for AlbaRich).
     3.  **Direct Redirect (Final Action):**
@@ -48,6 +49,8 @@ This system is designed as a **Hybrid-Camouflage System** that behaves different
 ## 📊 3. Data & Configuration (데이터 및 설정)
 
 ### Global Variables
+*   **`GA_MEASUREMENT_ID` (New):** `G-1VH7D6BJTD`
+    *   Used for server-side Google Analytics tracking via Measurement Protocol.
 *   **`CPA_DATA` (Lines 24-55):** The central mapping table.
     *   Format: `Key (Hash)`: [`Keyword`, `Code A (ReplyAlba)`, `Code B (AlbaRich)`]
     *   Example: `"8cf12edf": ["이사청소", "WwVCgW9E1R", "z2NytCt42i"]`
