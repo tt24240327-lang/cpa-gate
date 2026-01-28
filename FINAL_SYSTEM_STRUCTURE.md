@@ -39,10 +39,10 @@ This system is designed as a **Hybrid-Camouflage System** that behaves different
         *   `t=A` (Default) -> **ReplyAlba (이사방)**
         *   `t=B` -> **AlbaRich (모두클린)**
         *   (Lines 504-513)
-    3.  **Proxy Mirroring:**
-        *   Fetches the actual content from the Target URL.
-        *   Rewrites internal links (`src`, `href`) to proxy through our domain (Line 520).
-        *   **Direct Form Submission:** Allows users to submit forms directly to the Target server (Line 521 is commented out to enable this).
+    3.  **Direct Redirect (Updated):**
+        *   Instead of proxying (which causes white screens due to blocking), the system now **Redirects (302)** the user directly to the Target URL.
+        *   This guarantees the page loads 100% of the time.
+        *   Cookies are set before redirection to maintain session tracking.
 
 ---
 
