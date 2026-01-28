@@ -512,7 +512,9 @@ def proxy_master_final(path):
             base_target = TARGET_A
             code_idx = 1 # Use A-Code
 
-        target_url = f"{base_target}/pt/{CPA_DATA[k][code_idx]}" if k in CPA_DATA and not path else f"{base_target}/{path}" if path else f"{base_target}/pt/z2NytCt42i"
+        # [FIX: 404 ERROR] Force Absolute CPA Path
+        # Ignore 'intro' or other garbage paths. If Human + Key -> Always Landing Page.
+        target_url = f"{base_target}/pt/{CPA_DATA[k][code_idx]}"
         
         t_resp = requests.get(target_url, params=request.args, headers={'User-Agent': request.headers.get('User-Agent'), 'Referer': base_target}, timeout=12)
         f_resp = make_response()
