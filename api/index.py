@@ -32,17 +32,51 @@ KEYWORD_MAP = {
 
 # SECRET LEDGER: Hash <-> Keyword <-> Target Codes (V4.4 Force-Sync)
 CPA_DATA = {
+    # --- 이사 관련 (이사방 / 모두이사) ---
     "c8b22f8a": ["이사업체", "LlocSbdUSY", "zdIDBDSzof"],
     "d108d7a5": ["사무실이사", "LlocSbdUSY", "zdIDBDSzof"],
     "f79702a3": ["이사견적", "LlocSbdUSY", "zdIDBDSzof"],
     "fa13bc33": ["원룸이사", "LlocSbdUSY", "zdIDBDSzof"],
     "eeaf8186": ["용달이사", "LlocSbdUSY", "zdIDBDSzof"],
+    "faf45575": ["이사", "LlocSbdUSY", "zdIDBDSzof"],
+    "ce8a5ce4": ["포장이사", "LlocSbdUSY", "zdIDBDSzof"],
+
+    # --- 청소 관련 (모두클린 / 이사방) ---
+    "8cf12edf": ["이사청소", "WwVCgW9E1R", "z2NytCt42i"],
+    "ca4a68a6": ["사무실청소", "WwVCgW9E1R", "z2NytCt42i"],
+    "c8a4cf5a": ["입주청소", "WwVCgW9E1R", "z2NytCt42i"],
+    "d7ea613c": ["집청소", "WwVCgW9E1R", "z2NytCt42i"],
+    "cb845113": ["청소업체", "WwVCgW9E1R", "z2NytCt42i"],
+
+    # --- 누수/배관/변기 관련 (모두클린 / 이사방) ---
     "8e2996c7": ["배관 누수", "WwVCgW9E1R", "z2NytCt42i"],
     "81edc02c": ["변기막힘", "WwVCgW9E1R", "z2NytCt42i"],
     "8745563e": ["하수구막힘", "WwVCgW9E1R", "z2NytCt42i"],
+    "617a0005": ["누수탐지", "WwVCgW9E1R", "z2NytCt42i"],
+    "5d19986d": ["변기뚫는업체", "WwVCgW9E1R", "z2NytCt42i"],
+    "a0ef0c00": ["싱크대막힘", "WwVCgW9E1R", "z2NytCt42i"],
+    "e6d02452": ["배수구 막힘", "WwVCgW9E1R", "z2NytCt42i"],
+    "35467a5c": ["하수구 역류", "WwVCgW9E1R", "z2NytCt42i"],
+    "9ce613e1": ["변기 물 안 내려감", "WwVCgW9E1R", "z2NytCt42i"],
+    "68943f44": ["하수구 뚫는 업체", "WwVCgW9E1R", "z2NytCt42i"],
+    "c8abc514": ["변기 뚫는 곳", "WwVCgW9E1R", "z2NytCt42i"],
+    "ffbfdc28": ["변기수전", "WwVCgW9E1R", "z2NytCt42i"],
+    "be4adb64": ["수전교체", "WwVCgW9E1R", "z2NytCt42i"],
+    "a01f1db0": ["변기교체", "WwVCgW9E1R", "z2NytCt42i"],
+    "b1585a85": ["화장실 변기 교체", "WwVCgW9E1R", "z2NytCt42i"],
+    "c2bddbcc": ["세면대 교체", "WwVCgW9E1R", "z2NytCt42i"],
+    "b6f6c35f": ["변기업체", "WwVCgW9E1R", "z2NytCt42i"],
+    "3e750243": ["수전업체", "WwVCgW9E1R", "z2NytCt42i"],
+
+    # --- 용접 관련 (모두클린 / 이사방) ---
     "dc19f4ea": ["용접", "WwVCgW9E1R", "z2NytCt42i"],
     "af5f2375": ["출장용접", "WwVCgW9E1R", "z2NytCt42i"],
-    "e6d02452": ["입주청소", "LlocSbdUSY", "zdIDBDSzof"]
+    "c4c5ee7e": ["용접업체", "WwVCgW9E1R", "z2NytCt42i"],
+    "4a2f6816": ["배관용접", "WwVCgW9E1R", "z2NytCt42i"],
+    "87a3472b": ["알곤용접", "WwVCgW9E1R", "z2NytCt42i"],
+    "63b2da0a": ["용접수리", "WwVCgW9E1R", "z2NytCt42i"],
+    "20186798": ["알곤출장용접", "WwVCgW9E1R", "z2NytCt42i"],
+    "ef310430": ["스텐 출장용접", "WwVCgW9E1R", "z2NytCt42i"]
 }
 
 app = Flask(__name__)
