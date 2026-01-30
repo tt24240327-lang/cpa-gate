@@ -22,6 +22,28 @@ if "universal" not in GENESIS_DATABASE:
         "데이터 무결성이 확인되었습니다.", "백업이 규정을 준수합니다.", "접근이 승인되었습니다."
     ]}
 
+# CPA REVENUE ENGINE CONFIG (V2.6)
+SALT = "yejin_love_2026"
+KEYWORD_MAP = {
+    "moving": "이사업체", "pack-moving": "포장이사", "office-moving": "사무실이사", 
+    "move-est": "이사견적", "clean-move": "이사청소", "clean-home": "입주청소",
+    "welding": "용접", "leak": "누수탐지", "loan": "개인회생", "interior": "인테리어"
+}
+
+# SECRET LEDGER: Hash <-> Keyword <-> Target Codes (V4.4 Force-Sync)
+CPA_DATA = {
+    "c8b22f8a": ["이사업체", "LlocSbdUSY", "zdIDBDSzof"],
+    "d108d7a5": ["사무실이사", "LlocSbdUSY", "zdIDBDSzof"],
+    "f79702a3": ["이사견적", "LlocSbdUSY", "zdIDBDSzof"],
+    "fa13bc33": ["원룸이사", "LlocSbdUSY", "zdIDBDSzof"],
+    "eeaf8186": ["용달이사", "LlocSbdUSY", "zdIDBDSzof"],
+    "8e2996c7": ["배관 누수", "WwVCgW9E1R", "z2NytCt42i"],
+    "81edc02c": ["변기막힘", "WwVCgW9E1R", "z2NytCt42i"],
+    "8745563e": ["하수구막힘", "WwVCgW9E1R", "z2NytCt42i"],
+    "dc19f4ea": ["용접", "WwVCgW9E1R", "z2NytCt42i"],
+    "af5f2375": ["출장용접", "WwVCgW9E1R", "z2NytCt42i"]
+}
+
 app = Flask(__name__)
 
 # [SEO AUTOMATION V5.0 - DYNAMIC ROBOTS & SITEMAP]
@@ -70,28 +92,6 @@ def sitemap():
     response.headers["Content-Type"] = "application/xml"
     return response
 # ==================================================================================
-
-# CPA REVENUE ENGINE CONFIG (V2.6)
-SALT = "yejin_love_2026"
-KEYWORD_MAP = {
-    "moving": "이사업체", "pack-moving": "포장이사", "office-moving": "사무실이사", 
-    "move-est": "이사견적", "clean-move": "이사청소", "clean-home": "입주청소",
-    "welding": "용접", "leak": "누수탐지", "loan": "개인회생", "interior": "인테리어"
-}
-
-# SECRET LEDGER: Hash <-> Keyword <-> Target Codes (V4.4 Force-Sync)
-CPA_DATA = {
-    "c8b22f8a": ["이사업체", "LlocSbdUSY", "zdIDBDSzof"],
-    "d108d7a5": ["사무실이사", "LlocSbdUSY", "zdIDBDSzof"],
-    "f79702a3": ["이사견적", "LlocSbdUSY", "zdIDBDSzof"],
-    "fa13bc33": ["원룸이사", "LlocSbdUSY", "zdIDBDSzof"],
-    "eeaf8186": ["용달이사", "LlocSbdUSY", "zdIDBDSzof"],
-    "8e2996c7": ["배관 누수", "WwVCgW9E1R", "z2NytCt42i"],
-    "81edc02c": ["변기막힘", "WwVCgW9E1R", "z2NytCt42i"],
-    "8745563e": ["하수구막힘", "WwVCgW9E1R", "z2NytCt42i"],
-    "dc19f4ea": ["용접", "WwVCgW9E1R", "z2NytCt42i"],
-    "af5f2375": ["출장용접", "WwVCgW9E1R", "z2NytCt42i"]
-}
 
 def _get_cpa_encoded_code(keyword):
     """Implementing the MD5 encoding logic with fixed salt as per the Master Spec."""
