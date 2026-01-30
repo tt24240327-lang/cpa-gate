@@ -7,3 +7,10 @@ env/
 venv/
 .vercel
 .env*.local
+
+service_key.json
+gen-lang-client-*.json
+*.log
+
+service_key.json
+gen-lang-client-*.json

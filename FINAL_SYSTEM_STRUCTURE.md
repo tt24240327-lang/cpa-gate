@@ -112,5 +112,42 @@ To prevent "Clone Site" detection by Naver Yeti/Google Bots, the following rando
 *   **GA4:** Supports server-side injection (`send_ga_event`) which hides the tracking ID from the client-side source code (unless specifically exposed).
 *   **Isolation:** Each deployment can theoretically hold different tracking IDs via environment variables.
 
+## 🤖 6. Bot Watcher & Logging (봇 감시 및 기록)
+To persist bot traffic data (specifically Naver/Yeti), the system integrates with **Google Sheets**.
+
+### Configuration
+*   **Credential File:** `service_key.json` (Service Account Key)
+*   **Target Sheet ID:** `1RedTw8l_tdGyXqKL-6WrLosYuu_MGoBFX9dkaiTZdCM`
+*   **Library:** `gspread` (Python)
+
+### Logging Workflow
+1.  **Detection:** If a visitor is identified as `Yeti` or `NaverBot` (Line 487).
+2.  **Notification:** Sends Telegram alert (`🤖 [네이버 봇 침입 감지]`).
+3.  **Recording:** Appends a row to the Google Sheet with:
+    *   Timestamp (KST)
+    *   Bot Name (User-Agent)
+    *   Target Path
+    *   Action Taken (e.g., "Layout-C Served")
+
+## 🌐 7. Wildcard Subdomain & Stealth Engine (와일드카드 및 스텔스 엔진)
+Programmable subdomains are used to create thousands of unique-looking entry points for a single domain.
+
+### Subdomain Generation Rule
+*   **Format:** `[Keyword1]-[Keyword2]-[4-digit-Random].[Domain]`
+*   **Example:** `clean-pro-a3x9.link-us.shop`
+
+### Smart Contextual Rendering
+The `GeneEngine` analyzes the subdomain string to serve category-specific "fake" content:
+*   **Keywords Detected:**
+    *   `cleaning`: clean, wash, home-care, vacuum, etc.
+    *   `moving`: move, express, cargo, box, truck, etc.
+    *   `fix/weld`: weld, build, steel, iron, repair, etc.
+    *   `plumbing`: pipe, leak, drain, water, toilet, etc.
+*   **Behavior:** If `move` is in the URL, the bot sees an "Industrial Moving Logistics" portal. If `clean` is detected, it sees a "Laboratory Hygiene Control" site.
+
+### High-Entropy Seeding
+*   The **entire subdomain string** is used as the random seed.
+*   **Effect:** `clean-1.domain.com` and `clean-2.domain.com` will have different theme colors, different sidebar positions, and unique CSS class names, ensuring absolute structural variance.
+
 ---
-**This document serves as the master blueprint. Any modifications should respect this 3-part structure.**
+**This document serves as the master blueprint. Any modifications should respect this structure.**
