@@ -455,22 +455,73 @@ def render_page(ge, content_blocks, title_suffix=""):
     emoji = ge.r.choice(["📊", "📈", "🛡️", "🏗️", "📋", "📁", "🏢", "🚛", "🧹", "🔬"])
     favicon = f'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">{emoji}</text></svg>'
     
+    # [MOBILE OPTIMIZATION V5.0 - PRO UX]
+    # Viewport: Block zoom, Force default width
+    viewport_meta = "<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>"
+    
     css = f"""<style>
-        * {{ box-sizing: border-box; }}
-        body {{ margin:0; font-family:'Inter', -apple-system, sans-serif; background:{ge.bg_color}; color:{ge.text_color}; overflow-x:hidden; line-height:1.6; font-size:16px; {type_css} }}
-        h1, h2, h3, h4 {{ color: {ge.primary_color}; margin-top:0; font-weight:900; letter-spacing:-1px; }}
-        .btn {{ display:inline-block; padding:15px 35px; border-radius:{ge.btn_radius}; box-shadow:{ge.btn_shadow}; background:{ge.primary_color}; color:#fff !important; text-decoration:none; font-weight:bold; transition:0.2s; border:none; cursor:pointer; }}
-        .btn:hover {{ transform:translateY(-2px); filter:brightness(1.2); }}
-        section {{ padding: 80px 5%; position:relative; z-index:1; border-bottom:1px solid rgba(0,0,0,0.05); }}
-        .card {{ background:{'rgba(255,255,255,0.06)' if ge.is_dark_bg else '#ffffff'}; padding:40px; border-radius:{ge.btn_radius}; box-shadow:{ge.btn_shadow}; border:1px solid rgba(0,0,0,0.05); transition:0.3s; }}
-        .card:hover {{ transform:translateY(-5px); box-shadow:0 15px 50px rgba(0,0,0,0.12); }}
+        * {{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }}
+        body {{ 
+            margin:0; 
+            font-family:'Inter', -apple-system, system-ui, sans-serif; 
+            background:{ge.bg_color}; 
+            color:{ge.text_color}; 
+            overflow-x:hidden; 
+            line-height:1.7; 
+            font-size:17px; 
+            {type_css} 
+        }}
+        h1 {{ font-size: 2.2rem; line-height: 1.2; word-break: keep-all; }}
+        h2, h3, h4 {{ color: {ge.primary_color}; margin-top:0; font-weight:900; letter-spacing:-0.5px; word-break: keep-all; }}
+        
+        /* Mobile-First Button Design */
+        .btn {{ 
+            display:block; 
+            width:100%; 
+            max-width:400px;
+            margin: 10px auto;
+            padding:18px 20px; 
+            border-radius:12px; 
+            box-shadow:{ge.btn_shadow}; 
+            background:{ge.primary_color}; 
+            color:#fff !important; 
+            text-decoration:none; 
+            font-weight:800; 
+            font-size: 18px;
+            text-align:center;
+            transition:0.2s; 
+            border:none; 
+            cursor:pointer; 
+        }}
+        .btn:active {{ transform:scale(0.98); opacity:0.9; }}
+        
+        section {{ padding: 60px 5%; position:relative; z-index:1; border-bottom:1px solid rgba(0,0,0,0.05); }}
+        
+        /* Responsive Card Layout */
+        .card {{ 
+            background:{'rgba(255,255,255,0.06)' if ge.is_dark_bg else '#ffffff'}; 
+            padding:30px; 
+            border-radius:16px; 
+            box-shadow:{ge.btn_shadow}; 
+            border:1px solid rgba(0,0,0,0.05); 
+            transition:0.3s; 
+            margin-bottom: 20px;
+        }}
+        
+        img {{ max-width: 100%; height: auto; border-radius: 12px; }}
+        
         a {{ color: {ge.primary_color}; font-weight:bold; text-decoration:none; }}
-        a:hover {{ text-decoration:underline; }}
+        
+        @media (min-width: 768px) {{
+            body {{ font-size: 16px; }}
+            .btn {{ display:inline-block; width:auto; margin:0; }}
+            section {{ padding: 80px 10%; }}
+        }}
     </style>"""
     
     body = f'{block_header(ge)}<main style="{main_style}">{" ".join(content_blocks)}</main>{block_footer(ge)}'
     filtered_body = ge.filter_commercial(body)
-    return f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>{ge.filter_commercial(page_title)}</title><meta name='viewport' content='width=device-width,initial-scale=1'><link rel='icon' href='{favicon}'>{css}</head><body>{filtered_body}</body></html>"
+    return f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>{ge.filter_commercial(page_title)}</title>{viewport_meta}<link rel='icon' href='{favicon}'>{css}</head><body>{filtered_body}</body></html>"
 
 def block_about(ge):
     # [Imperial About Block V4.0]
