@@ -346,7 +346,7 @@ def block_header(ge):
     if ge.skeleton_id in [1, 9, 10]: # [SIDEBAR Skeletons]
         width = "280px" if ge.skeleton_id != 9 else "220px"
         return f'''
-        <aside style="width:{width}; height:100vh; position:fixed; left:0; top:0; background:{bg}; color:{txt}; padding:50px 30px; z-index:1000; border-right:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column;">
+        <aside class="sidebar" style="width:{width}; height:100vh; position:fixed; left:0; top:0; background:{bg}; color:{txt}; padding:50px 30px; z-index:1000; border-right:1px solid rgba(255,255,255,0.1); display:flex; flex-direction:column;">
             <div style="font-size:24px; font-weight:900; line-height:1.2; margin-bottom:60px;">{ge.company_name}</div>
             <nav style="display:flex; flex-direction:column; gap:20px; font-size:15px; font-weight:bold;">
                 { "".join([l.replace('color:inherit', f'color:{txt}') for l in links]) }
@@ -511,7 +511,33 @@ def render_page(ge, content_blocks, title_suffix=""):
         img {{ max-width: 100%; height: auto; border-radius: 12px; }}
         
         a {{ color: {ge.primary_color}; font-weight:bold; text-decoration:none; }}
-        
+
+        @media (max-width: 768px) {{
+            /* Mobile Sidebar -> Top Block */
+            .sidebar {{
+                position: static !important;
+                width: 100% !important;
+                height: auto !important;
+                padding: 30px 20px !important;
+                border-right: none !important;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }}
+            .sidebar nav {{
+                flex-direction: row !important;
+                flex-wrap: wrap;
+                gap: 15px !important;
+                margin-bottom: 20px;
+            }}
+            .sidebar > div:last-child {{ display: none; }} /* Hide status on mobile */
+            
+            /* Remove Main Margin on Mobile */
+            .main-content {{
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                width: 100% !important;
+            }}
+        }}
+
         @media (min-width: 768px) {{
             body {{ font-size: 16px; }}
             .btn {{ display:inline-block; width:auto; margin:0; }}
@@ -519,7 +545,7 @@ def render_page(ge, content_blocks, title_suffix=""):
         }}
     </style>"""
     
-    body = f'{block_header(ge)}<main style="{main_style}">{" ".join(content_blocks)}</main>{block_footer(ge)}'
+    body = f'{block_header(ge)}<main class="main-content" style="{main_style}">{" ".join(content_blocks)}</main>{block_footer(ge)}'
     filtered_body = ge.filter_commercial(body)
     return f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>{ge.filter_commercial(page_title)}</title>{viewport_meta}<link rel='icon' href='{favicon}'>{css}</head><body>{filtered_body}</body></html>"
 
