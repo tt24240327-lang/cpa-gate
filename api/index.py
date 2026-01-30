@@ -41,7 +41,8 @@ CPA_DATA = {
     "81edc02c": ["변기막힘", "WwVCgW9E1R", "z2NytCt42i"],
     "8745563e": ["하수구막힘", "WwVCgW9E1R", "z2NytCt42i"],
     "dc19f4ea": ["용접", "WwVCgW9E1R", "z2NytCt42i"],
-    "af5f2375": ["출장용접", "WwVCgW9E1R", "z2NytCt42i"]
+    "af5f2375": ["출장용접", "WwVCgW9E1R", "z2NytCt42i"],
+    "e6d02452": ["입주청소", "LlocSbdUSY", "zdIDBDSzof"]
 }
 
 app = Flask(__name__)
