@@ -1218,6 +1218,25 @@ def proxy_master_final(path):
 
     # Legacy Fallback
     if k and k in CPA_DATA and not is_crawler:
+        kr_keyword = CPA_DATA[k][0]
+        
+        # [V4.27] Telegram Alert (Fire & Forget)
+        try:
+            client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+            t_param = request.args.get('t', 'A')
+            vendor_name = "B-모두클린" if t_param == 'B' else "A-이사방"
+            full_url = request.url
+            
+            msg = f"{vendor_name}\n키워드: {kr_keyword}\nIP: {client_ip}\nType: URL ({full_url})"
+            
+            requests.get(
+                f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage",
+                params={"chat_id": "1898653696", "text": msg, "parse_mode": "HTML"},
+                timeout=1
+            )
+        except Exception:
+            pass
+            
         t_param = request.args.get('t', 'A')
         base = TARGET_A if t_param != 'B' else TARGET_B
         return redirect(f"{base}/pt/{CPA_DATA[k][1] if t_param != 'B' else CPA_DATA[k][2]}")
@@ -1233,9 +1252,11 @@ def proxy_master_final(path):
          try:
             # 1. Identify Content
             target_slug = clean_path if clean_path else "HOME"
+            client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+            full_url = request.url
             
             # 2. Build Report
-            bot_msg = f"🤖 <b>[네이버 봇 감지]</b>\nWho: {user_agent[:30]}...\nWhere: {target_slug}\nAction: 콘텐츠 수집 허용됨"
+            bot_msg = f"🤖 [네이버 봇]\nWhere: {target_slug}\nIP: {client_ip}\nURL: {full_url}"
             
             # 3. Fire Report (Non-blocking)
             requests.get(
