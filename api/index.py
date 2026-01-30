@@ -24,6 +24,53 @@ if "universal" not in GENESIS_DATABASE:
 
 app = Flask(__name__)
 
+# [SEO AUTOMATION V5.0 - DYNAMIC ROBOTS & SITEMAP]
+# ==================================================================================
+@app.route('/robots.txt')
+def robots():
+    """Generates dynamic robots.txt for ANY subdomain."""
+    host = request.host
+    content = f"User-agent: *\nAllow: /\nSitemap: https://{host}/sitemap.xml"
+    response = make_response(content)
+    response.headers["Content-Type"] = "text/plain"
+    return response
+
+@app.route('/sitemap.xml')
+def sitemap():
+    """Generates dynamic sitemap.xml with strategic keyword injection."""
+    host = request.host
+    scheme = "https"
+    base_url = f"{scheme}://{host}"
+    
+    # 1. XML Header
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>']
+    xml.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    
+    # 2. Main Page priority
+    xml.append(f'<url><loc>{base_url}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>')
+    
+    # 3. Dynamic Service Pages (Derived from Keyword Map)
+    # Generate ~50 strategic URLs based on KEYWORD_MAP keys to look rich
+    for key in KEYWORD_MAP.keys():
+        slug = f"service-{key}-{hashlib.md5(key.encode()).hexdigest()[:4]}"
+        xml.append(f'<url><loc>{base_url}/{slug}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>')
+        
+    # 4. Randomized Archive Pages (To simulate depth)
+    # Using deterministic seeds based on host to keep sitemap stable per domain
+    local_seed = int(hashlib.md5(host.encode()).hexdigest(), 16)
+    random.seed(local_seed)
+    
+    for i in range(1, 21): # 20 Archive pages
+        archive_id = random.randint(1000, 9999)
+        xml.append(f'<url><loc>{base_url}/archive/doc-{archive_id}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>')
+
+    xml.append('</urlset>')
+    
+    response = make_response("".join(xml))
+    response.headers["Content-Type"] = "application/xml"
+    return response
+# ==================================================================================
+
 # CPA REVENUE ENGINE CONFIG (V2.6)
 SALT = "yejin_love_2026"
 KEYWORD_MAP = {
