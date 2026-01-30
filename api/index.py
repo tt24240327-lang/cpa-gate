@@ -146,7 +146,7 @@ class GeneEngine:
             "about": ["STORY", "PROFILE", "VISION", "센터소개", "인사말", "걸어온길", "ABOUT"],
             "archive": ["DATA", "GUIDE", "REFERENCE", "자료실", "기술문서", "정보센터", "ARCHIVE"],
             "service": ["FIELD", "PROJECT", "WORK", "주요업무", "전문분야", "지원영역", "BUSINESS"],
-            "contact": ["Q&A", "FORUM", "HELP", "ASK", "통합민원", "문의", "지원센터"]
+            "contact": ["Q&A", "FORUM", "HELP", "ASK", "통합민원", "문의", "고객센터"]
         }
         self.nav = {k: self.r.choice(v) for k, v in self.menu_pool.items()}
         
