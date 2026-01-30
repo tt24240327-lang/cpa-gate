@@ -1184,13 +1184,7 @@ def block_data_visualization(ge, mode="comprehensive"):
     chart = ge.gen_chart('bar')
     return f'<section><div class="card"><h3>📊 {ge.target_keyword} 실시간 통계</h3>{chart}</div></section>'
 
-@app.route('/robots.txt')
-def robots():
-    return "User-agent: *\nAllow: /\nSitemap: /sitemap.xml", 200, {'Content-Type': 'text/plain'}
 
-@app.route('/sitemap.xml')
-def sitemap():
-    return "<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'><url><loc>/</loc></url></urlset>", 200, {'Content-Type': 'application/xml'}
 
 def get_ge():
     host = request.host.lower().replace("www.", "").split(':')[0]
