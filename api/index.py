@@ -368,10 +368,10 @@ def block_header(ge):
     if ge.skeleton_id == 12: max_w = "1400px"
     
     return f'''
-    <header style="background:{bg}; color:{txt}; padding:20px 5%; border-bottom:1px solid rgba(0,0,0,0.1); position:sticky; top:0; z-index:1000;">
-        <div style="display:flex; justify-content:space-between; align-items:center; max-width:{max_w}; margin:0 auto;">
-            <b style="font-size:1.2rem;">{ge.company_name}</b>
-            <nav style="display:flex; gap:30px; font-size:14px; font-weight:bold;">{" ".join(links)}</nav>
+    <header style="background:{bg}; color:{txt}; padding:15px 5%; border-bottom:1px solid rgba(0,0,0,0.1); position:sticky; top:0; z-index:1000;">
+        <div style="display:flex; justify-content:space-between; align-items:center; max-width:{max_w}; margin:0 auto; flex-wrap:wrap; gap:10px;">
+            <b style="font-size:1.2rem; white-space:nowrap;">{ge.company_name}</b>
+            <nav style="display:flex; gap:15px; font-size:13px; font-weight:bold; flex-wrap:wrap; justify-content:center;">{" ".join(links)}</nav>
         </div>
     </header>
     '''
