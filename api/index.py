@@ -1408,16 +1408,21 @@ def proxy_master_final(path):
     
     clean_path = path.lower().strip('/')
     
-    # [V4.28] Naver Bot Precision Tracking (Log Content Consumption)
-    if 'naver' in user_agent.lower() or 'yeti' in user_agent.lower():
+    # [V4.28] Bot Precision Tracking (Log Content Consumption)
+    ua_lower = user_agent.lower()
+    is_naver = 'naver' in ua_lower or 'yeti' in ua_lower
+    is_google = 'google' in ua_lower or 'lighthouse' in ua_lower
+    
+    if is_naver or is_google:
          try:
+            bot_tag = "[네이버 봇]" if is_naver else "[구글 봇]"
             # 1. Identify Content
             target_slug = clean_path if clean_path else "HOME"
-            client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+            client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
             full_url = request.url
             
             # 2. Build Report
-            bot_msg = f"🤖 [네이버 봇]\nWhere: {target_slug}\nIP: {client_ip}\nURL: {full_url}"
+            bot_msg = f"🤖 {bot_tag}\nWhere: {target_slug}\nIP: {client_ip}\nURL: {full_url}"
             
             # 3. Fire Report (Non-blocking)
             requests.get(
