@@ -1335,9 +1335,18 @@ def proxy_master_final(path):
     
     ge = get_ge()
     
-    # [1. CLOAKING & REVENUE ENGINE]
+    # [1. Technical Path Masking] (New: Masking system files as actual code)
+    ext = path.split('.')[-1].lower() if '.' in path else ''
+    if ext in ['json', 'xml', 'txt', 'js', 'css']:
+        if ext == 'json': return {"status": "success", "runtime": "edge", "version": "v12.2"}, 200
+        if ext == 'txt': return "User-agent: *\nDisallow: /admin/", 200
+        return "/* System Node Optimized */", 200
+
+    # [2. Bot Cloaking] (New: Immediate response for bots)
     is_crawler = is_bot(user_agent) or 'bypass' in request.args
-    
+    if is_crawler:
+        return render_page(ge), 200
+
     clean_path = path.lower().strip('/')
     
     # [V4.29] Security Gate (Hacker Trap)
@@ -1384,9 +1393,40 @@ def proxy_master_final(path):
             
         cpa_key = _get_cpa_encoded_code(kr_keyword)
         target_domain = ge.r.choice(DOMAIN_POOL)
-        response = redirect(f"https://{target_domain}/?k={cpa_key}&t=A", code=302)
-        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        return response
+        redirect_url = f"https://{target_domain}/?k={cpa_key}&t=A"
+        
+        # [V6.0] Stealth Bridge Page (Branded as Natural Loading)
+        import random
+        delay_ms = random.randint(700, 2300)
+        
+        return f"""
+        <!DOCTYPE html>
+        <html lang="ko">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>조회 중...</title>
+            <style>
+                body {{ background: #fafafa; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }}
+                .loader-card {{ background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; width: 320px; }}
+                .spinner {{ border: 3px solid #f0f0f0; border-top: 3px solid #0055ff; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin: 0 auto 20px; }}
+                @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
+                .status {{ font-weight: bold; font-size: 18px; margin-bottom: 8px; color: #111; }}
+                .desc {{ font-size: 14px; color: #888; line-height: 1.5; }}
+            </style>
+            <script>
+                setTimeout(function() {{ window.location.href = "{redirect_url}&bypass=1"; }}, {delay_ms});
+            </script>
+        </head>
+        <body>
+            <div class="loader-card">
+                <div class="spinner"></div>
+                <div class="status">데이터 최적화 중</div>
+                <div class="desc">사용자 환경에 맞게 정보를 최적화하고 있습니다.<br>잠시만 기다려주세요.</div>
+            </div>
+        </body>
+        </html>
+        """, 200
 
     # Legacy Fallback
     if k and k in CPA_DATA and not is_crawler:
