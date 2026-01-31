@@ -430,7 +430,7 @@ def block_hero(ge):
         sub_title = f"범용 기술 가이드라인에 따른 {ge.target_keyword} 분야 연구 데이터 센터입니다."
         
     return f'''
-    <section style="background:linear-gradient(135deg, {ge.primary_color}, {ge.dark_accent}); color:#fff; padding:120px 5%; text-align:center;">
+    <section style="background:linear-gradient(135deg, {ge.primary_color}, {ge.accent_color}); color:#fff; padding:120px 5%; text-align:center;">
         <h1 style="font-size:3.5rem; margin:0; line-height:1.2; word-break:keep-all;">{ge.target_keyword}<br>디지털 기술 아카이브</h1>
         <p style="font-size:1.25rem; margin:40px auto; max-width:800px; color:#ffffff; line-height:1.8; font-weight:500;">{sub_title}</p>
         <div style="display:flex; justify-content:center; gap:20px; margin-top:40px;">
