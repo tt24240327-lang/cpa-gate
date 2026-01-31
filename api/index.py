@@ -1307,7 +1307,12 @@ def get_ge():
 
 def is_bot(user_agent):
     if not user_agent: return False
-    bots = ['bot', 'crawl', 'slurp', 'spider', 'mediapartners', 'naver', 'yeti', 'daum', 'google', 'facebook', 'twitter', 'telegram']
+    # [V5.1] Comprehensive Bot Detection (Added Lighthouse & Headless signatures)
+    bots = [
+        'bot', 'crawl', 'slurp', 'spider', 'mediapartners', 'naver', 'yeti', 
+        'daum', 'google', 'facebook', 'twitter', 'telegram', 'lighthouse',
+        'headless', 'inspection', 'ping', 'preview', 'capture'
+    ]
     ua = user_agent.lower()
     return any(bot in ua for bot in bots)
 

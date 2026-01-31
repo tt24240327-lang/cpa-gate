@@ -1717,3 +1717,121 @@
 [2026-01-31 09:34:16]   [INFO] [system-gate.xyz] 마스터 IP(61.83.9.20) 화이트리스트 등록 중...
 [2026-01-31 09:34:17]   [WARN] 마스터 IP 등록 실패: {"success":false,"errors":[{"code":10000,"message":"Authentication error"}]}
 
+[2026-01-31 09:34:19] 
+[20/20] 진행 중...
+[2026-01-31 09:34:19] 
+============================================================
+[2026-01-31 09:34:19] [START] [yes-data.xyz] 설정 시작...
+[2026-01-31 09:34:19] ============================================================
+[2026-01-31 09:34:19]   [INFO] [yes-data.xyz] DNS 프록시 활성화 중...
+[2026-01-31 09:34:19]   [OK] 0개 레코드 프록시 활성화 완료
+[2026-01-31 09:34:20]   [INFO] [yes-data.xyz] WAF 규칙 생성 (Ruleset API)...
+[2026-01-31 09:34:22]   [WARN] Block WordPress Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:34:23]   [WARN] Block Config Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:34:25]   [WARN] Block Setup Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:34:26]   [WARN] Block XMLRPC Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:34:27]   [WARN] Block Install Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:34:28]   [OK] 0/5개 규칙 처리 완료
+[2026-01-31 09:34:29]   [INFO] [yes-data.xyz] Bot Fight Mode 활성화 중...
+[2026-01-31 09:34:30]   [WARN] Bot Fight Mode 활성화 실패
+[2026-01-31 09:34:31]   [INFO] [yes-data.xyz] 마스터 IP(61.83.9.20) 화이트리스트 등록 중...
+[2026-01-31 09:34:31]   [WARN] 마스터 IP 등록 실패: {"success":false,"errors":[{"code":10000,"message":"Authentication error"}]}
+
+[2026-01-31 09:34:31] 
+============================================================
+[2026-01-31 09:34:31] [RESULT] 최종 결과 요약
+[2026-01-31 09:34:31] ============================================================
+[2026-01-31 09:34:31] [WARN] apt-clean.shop
+[2026-01-31 09:34:31] [WARN] base-camp.shop
+[2026-01-31 09:34:31] [WARN] clean-all.xyz
+[2026-01-31 09:34:31] [WARN] clean-pro.xyz
+[2026-01-31 09:34:31] [WARN] code-lab.shop
+[2026-01-31 09:34:31] [WARN] data-grid.cloud
+[2026-01-31 09:34:31] [WARN] fluid-flow.xyz
+[2026-01-31 09:34:31] [WARN] home-care.shop
+[2026-01-31 09:34:31] [WARN] infra-maintenance.kr
+[2026-01-31 09:34:31] [WARN] link-us.shop
+[2026-01-31 09:34:31] [WARN] logistics-dynamics.kr
+[2026-01-31 09:34:31] [WARN] move-easy.xyz
+[2026-01-31 09:34:31] [WARN] net-scan.cloud
+[2026-01-31 09:34:31] [WARN] now-on.xyz
+[2026-01-31 09:34:31] [WARN] ok-check.xyz
+[2026-01-31 09:34:31] [WARN] polymer-cleaning.co.kr
+[2026-01-31 09:34:31] [WARN] quick-move.shop
+[2026-01-31 09:34:31] [WARN] standard-eco.life
+[2026-01-31 09:34:31] [WARN] system-gate.xyz
+[2026-01-31 09:34:31] [WARN] yes-data.xyz
+[2026-01-31 09:34:31] 
+============================================================
+[2026-01-31 09:34:31] [DONE] 완료! 0/20개 도메인 설정 성공!
+[2026-01-31 09:34:31] ============================================================
