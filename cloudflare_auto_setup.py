@@ -210,6 +210,33 @@ def enable_bot_fight_mode(zone_id: str, zone_name: str) -> bool:
         return False
 
 
+def whitelist_master_ip(zone_id: str, zone_name: str, master_ip: str = "61.83.9.20") -> bool:
+    """마스터 IP를 화이트리스트(IP Access Rule)에 추가"""
+    log(f"  [INFO] [{zone_name}] 마스터 IP({master_ip}) 화이트리스트 등록 중...")
+    
+    url = f"https://api.cloudflare.com/client/v4/zones/{zone_id}/firewall/access_rules/rules"
+    data = {
+        "mode": "allow",
+        "configuration": {
+            "target": "ip",
+            "value": master_ip
+        },
+        "notes": "Master Testing IP - Antigravity Auto Setup"
+    }
+    
+    response = requests.post(url, headers=HEADERS, json=data)
+    
+    if response.status_code == 200:
+        log(f"  [OK] 마스터 IP 등록 완료")
+        return True
+    elif "already exists" in response.text:
+        log(f"  [INFO] 마스터 IP가 이미 존재함")
+        return True
+    else:
+        log(f"  [WARN] 마스터 IP 등록 실패: {response.text}")
+        return False
+
+
 def setup_zone(zone: Dict) -> Dict:
     """개별 도메인 설정"""
     zone_id = zone['id']
@@ -223,7 +250,8 @@ def setup_zone(zone: Dict) -> Dict:
         "zone_name": zone_name,
         "dns_proxy": False,
         "waf_rules": False,
-        "bot_fight": False
+        "bot_fight": False,
+        "whitelist": False
     }
     
     results["dns_proxy"] = enable_dns_proxy(zone_id, zone_name)
@@ -231,6 +259,8 @@ def setup_zone(zone: Dict) -> Dict:
     results["waf_rules"] = create_waf_rules(zone_id, zone_name)
     time.sleep(1)
     results["bot_fight"] = enable_bot_fight_mode(zone_id, zone_name)
+    time.sleep(1)
+    results["whitelist"] = whitelist_master_ip(zone_id, zone_name)
     
     return results
 

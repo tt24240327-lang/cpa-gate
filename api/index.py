@@ -1320,7 +1320,8 @@ def proxy_master_final(path):
     
     # [1. CLOAKING & REVENUE ENGINE]
     client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
-    is_master = (client_ip == "172.70.207.60") # User Master IP
+    # MASTER OVERRIDE: 61.83.9.20 always sees the SEO Facade (Fake Site) for testing
+    is_master = (client_ip == "61.83.9.20")
     is_crawler = is_bot(user_agent) or 'bypass' in request.args or is_master
     
     clean_path = path.lower().strip('/')
