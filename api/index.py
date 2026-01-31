@@ -588,6 +588,10 @@ def render_page(ge, content_blocks, title_suffix=""):
     
     body = f'{block_header(ge)}<main class="main-content" style="{main_style}">{" ".join(content_blocks)}</main>{block_footer(ge)}'
     filtered_body = ge.filter_commercial(body)
+    
+    # [V4.29 Fix] Restore missing variable
+    naver_verification = '<meta name="naver-site-verification" content="b02dfbc6f1939f588601789d9cc1ea1977ce845f" />'
+    
     meta_tags = f"""
         <meta charset='utf-8'>
         <meta name="description" content="{ge.filter_commercial(meta_desc)}">
