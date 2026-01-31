@@ -1263,3 +1263,457 @@
 
 [2026-01-31 09:33:00]   [OK] 0/5개 규칙 처리 완료
 [2026-01-31 09:33:01]   [INFO] [now-on.xyz] Bot Fight Mode 활성화 중...
+[2026-01-31 09:33:02]   [WARN] Bot Fight Mode 활성화 실패
+[2026-01-31 09:33:03]   [INFO] [now-on.xyz] 마스터 IP(61.83.9.20) 화이트리스트 등록 중...
+[2026-01-31 09:33:04]   [WARN] 마스터 IP 등록 실패: {"success":false,"errors":[{"code":10000,"message":"Authentication error"}]}
+
+[2026-01-31 09:33:06] 
+[15/20] 진행 중...
+[2026-01-31 09:33:06] 
+============================================================
+[2026-01-31 09:33:06] [START] [ok-check.xyz] 설정 시작...
+[2026-01-31 09:33:06] ============================================================
+[2026-01-31 09:33:06]   [INFO] [ok-check.xyz] DNS 프록시 활성화 중...
+[2026-01-31 09:33:06]   [OK] 0개 레코드 프록시 활성화 완료
+[2026-01-31 09:33:07]   [INFO] [ok-check.xyz] WAF 규칙 생성 (Ruleset API)...
+[2026-01-31 09:33:09]   [WARN] Block WordPress Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:10]   [WARN] Block Config Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:12]   [WARN] Block Setup Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:13]   [WARN] Block XMLRPC Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:14]   [WARN] Block Install Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:15]   [OK] 0/5개 규칙 처리 완료
+[2026-01-31 09:33:16]   [INFO] [ok-check.xyz] Bot Fight Mode 활성화 중...
+[2026-01-31 09:33:16]   [WARN] Bot Fight Mode 활성화 실패
+[2026-01-31 09:33:17]   [INFO] [ok-check.xyz] 마스터 IP(61.83.9.20) 화이트리스트 등록 중...
+[2026-01-31 09:33:18]   [WARN] 마스터 IP 등록 실패: {"success":false,"errors":[{"code":10000,"message":"Authentication error"}]}
+
+[2026-01-31 09:33:20] 
+[16/20] 진행 중...
+[2026-01-31 09:33:20] 
+============================================================
+[2026-01-31 09:33:20] [START] [polymer-cleaning.co.kr] 설정 시작...
+[2026-01-31 09:33:20] ============================================================
+[2026-01-31 09:33:20]   [INFO] [polymer-cleaning.co.kr] DNS 프록시 활성화 중...
+[2026-01-31 09:33:20]   [OK] 0개 레코드 프록시 활성화 완료
+[2026-01-31 09:33:21]   [INFO] [polymer-cleaning.co.kr] WAF 규칙 생성 (Ruleset API)...
+[2026-01-31 09:33:23]   [WARN] Block WordPress Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:24]   [WARN] Block Config Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:26]   [WARN] Block Setup Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:27]   [WARN] Block XMLRPC Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:28]   [WARN] Block Install Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:29]   [OK] 0/5개 규칙 처리 완료
+[2026-01-31 09:33:30]   [INFO] [polymer-cleaning.co.kr] Bot Fight Mode 활성화 중...
+[2026-01-31 09:33:30]   [WARN] Bot Fight Mode 활성화 실패
+[2026-01-31 09:33:31]   [INFO] [polymer-cleaning.co.kr] 마스터 IP(61.83.9.20) 화이트리스트 등록 중...
+[2026-01-31 09:33:32]   [WARN] 마스터 IP 등록 실패: {"success":false,"errors":[{"code":10000,"message":"Authentication error"}]}
+
+[2026-01-31 09:33:34] 
+[17/20] 진행 중...
+[2026-01-31 09:33:34] 
+============================================================
+[2026-01-31 09:33:34] [START] [quick-move.shop] 설정 시작...
+[2026-01-31 09:33:34] ============================================================
+[2026-01-31 09:33:34]   [INFO] [quick-move.shop] DNS 프록시 활성화 중...
+[2026-01-31 09:33:35]   [OK] 0개 레코드 프록시 활성화 완료
+[2026-01-31 09:33:36]   [INFO] [quick-move.shop] WAF 규칙 생성 (Ruleset API)...
+[2026-01-31 09:33:38]   [WARN] Block WordPress Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:39]   [WARN] Block Config Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:40]   [WARN] Block Setup Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:42]   [WARN] Block XMLRPC Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:43]   [WARN] Block Install Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:44]   [OK] 0/5개 규칙 처리 완료
+[2026-01-31 09:33:45]   [INFO] [quick-move.shop] Bot Fight Mode 활성화 중...
+[2026-01-31 09:33:45]   [WARN] Bot Fight Mode 활성화 실패
+[2026-01-31 09:33:46]   [INFO] [quick-move.shop] 마스터 IP(61.83.9.20) 화이트리스트 등록 중...
+[2026-01-31 09:33:47]   [WARN] 마스터 IP 등록 실패: {"success":false,"errors":[{"code":10000,"message":"Authentication error"}]}
+
+[2026-01-31 09:33:49] 
+[18/20] 진행 중...
+[2026-01-31 09:33:49] 
+============================================================
+[2026-01-31 09:33:49] [START] [standard-eco.life] 설정 시작...
+[2026-01-31 09:33:49] ============================================================
+[2026-01-31 09:33:49]   [INFO] [standard-eco.life] DNS 프록시 활성화 중...
+[2026-01-31 09:33:49]   [OK] 0개 레코드 프록시 활성화 완료
+[2026-01-31 09:33:50]   [INFO] [standard-eco.life] WAF 규칙 생성 (Ruleset API)...
+[2026-01-31 09:33:52]   [WARN] Block WordPress Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:54]   [WARN] Block Config Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:55]   [WARN] Block Setup Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:56]   [WARN] Block XMLRPC Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:58]   [WARN] Block Install Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:33:58]   [OK] 0/5개 규칙 처리 완료
+[2026-01-31 09:33:59]   [INFO] [standard-eco.life] Bot Fight Mode 활성화 중...
+[2026-01-31 09:34:00]   [WARN] Bot Fight Mode 활성화 실패
+[2026-01-31 09:34:01]   [INFO] [standard-eco.life] 마스터 IP(61.83.9.20) 화이트리스트 등록 중...
+[2026-01-31 09:34:02]   [WARN] 마스터 IP 등록 실패: {"success":false,"errors":[{"code":10000,"message":"Authentication error"}]}
+
+[2026-01-31 09:34:04] 
+[19/20] 진행 중...
+[2026-01-31 09:34:04] 
+============================================================
+[2026-01-31 09:34:04] [START] [system-gate.xyz] 설정 시작...
+[2026-01-31 09:34:04] ============================================================
+[2026-01-31 09:34:04]   [INFO] [system-gate.xyz] DNS 프록시 활성화 중...
+[2026-01-31 09:34:04]   [OK] 0개 레코드 프록시 활성화 완료
+[2026-01-31 09:34:05]   [INFO] [system-gate.xyz] WAF 규칙 생성 (Ruleset API)...
+[2026-01-31 09:34:07]   [WARN] Block WordPress Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:34:08]   [WARN] Block Config Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:34:10]   [WARN] Block Setup Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:34:12]   [WARN] Block XMLRPC Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:34:13]   [WARN] Block Install Scanners 생성 실패: {
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 50001,
+      "message": "exceeded the maximum number of rules in the phase http_request_firewall_custom: 6 out of 5",
+      "source": {
+        "pointer": "/rules"
+      }
+    }
+  ],
+  "messages": []
+}
+
+[2026-01-31 09:34:13]   [OK] 0/5개 규칙 처리 완료
+[2026-01-31 09:34:14]   [INFO] [system-gate.xyz] Bot Fight Mode 활성화 중...
+[2026-01-31 09:34:15]   [WARN] Bot Fight Mode 활성화 실패
+[2026-01-31 09:34:16]   [INFO] [system-gate.xyz] 마스터 IP(61.83.9.20) 화이트리스트 등록 중...
+[2026-01-31 09:34:17]   [WARN] 마스터 IP 등록 실패: {"success":false,"errors":[{"code":10000,"message":"Authentication error"}]}
+
