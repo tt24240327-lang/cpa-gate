@@ -490,9 +490,9 @@ def render_page(ge, content_blocks, title_suffix=""):
     emoji = ge.r.choice(["📊", "📈", "🛡️", "🏗️", "📋", "📁", "🏢", "🚛", "🧹", "🔬"])
     favicon = f'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">{emoji}</text></svg>'
     
-    # [MOBILE OPTIMIZATION V5.0 - PRO UX]
-    # Viewport: Block zoom, Force default width
-    viewport_meta = "<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>"
+    # [MOBILE OPTIMIZATION V5.1 - PRO UX & ACCESSIBILITY]
+    # Viewport: Allow zoom for accessibility score, but set initial scale
+    viewport_meta = "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
     
     css = f"""<style>
         * {{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }}
@@ -582,7 +582,7 @@ def render_page(ge, content_blocks, title_suffix=""):
     
     body = f'{block_header(ge)}<main class="main-content" style="{main_style}">{" ".join(content_blocks)}</main>{block_footer(ge)}'
     filtered_body = ge.filter_commercial(body)
-    return f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>{ge.filter_commercial(page_title)}</title>{viewport_meta}<link rel='icon' href='{favicon}'>{css}</head><body>{filtered_body}</body></html>"
+    return f"<!DOCTYPE html><html lang='ko'><head><meta charset='utf-8'><title>{ge.filter_commercial(page_title)}</title>{viewport_meta}<link rel='icon' href='{favicon}'>{css}</head><body>{filtered_body}</body></html>"
 
 def block_about(ge):
     # [Imperial About Block V4.0]
@@ -1282,15 +1282,11 @@ def block_data_visualization(ge, mode="comprehensive"):
         '''
         return f'<section>{svg}</section>'
 
-    # 2. Terminal Logic (restored)
-    elif layout == 'terminal_hack' or ge.major_type == 'D':
-        logs = "".join([f'<div style="margin-bottom:5px;">[{time.strftime("%H:%M:%S")}] SYSTEM_AUDIT: {x[:30]}... <span style="color:#0f0;">[OK]</span></div>' for x in ge.get_data(10)])
-        return f'<section><div style="background:#000; color:#0f0; padding:30px; font-family:monospace; border-radius:10px; height:300px; overflow-y:scroll; font-size:13px;">{logs}</div></section>'
-
     # 3. Access Logs (restored)
     elif layout == 'access_log':
-        rows = "".join([f'<div style="padding:10px; border-bottom:1px solid rgba(0,0,0,0.05); font-size:12px;">User_{ge.r.randint(100,999)} 접속: {ge.r.choice(["문서 열람", "자료 다운로드", "필터링 수행"])}</div>' for _ in range(10)])
-        return f'<section><div class="card"><h3>👥 {ge.nav["contact"]} 로그</h3>{rows}</div></section>'
+        # Enhanced contrast for accessibility (color #444 instead of #777)
+        rows = "".join([f'<div style="padding:10px; border-bottom:1px solid rgba(0,0,0,0.05); font-size:12px; color:#333;">User_{ge.r.randint(100,999)} 접속: {ge.r.choice(["문서 열람", "자료 다운로드", "필터링 수행"])}</div>' for _ in range(10)])
+        return f'<section><div class="card"><h3 style="color:#000;">👥 {ge.nav["contact"]} 로그</h3>{rows}</div></section>'
 
     # Fallback to Simple Chart
     chart = ge.gen_chart('bar')
