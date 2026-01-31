@@ -791,15 +791,15 @@ def block_home_overview(ge):
     <section style="background:rgba(0,0,0,0.02); padding:100px 5%;">
         <div style="max-width:{layout_w}; margin:0 auto;">
             <div style="display:flex; gap:50px; flex-wrap:wrap;">
-                <div style="flex:{'2' if ge.has_widgets else '1.5'}; min-width:350px;">
-                    <div style="background:{primary}; color:#fff; padding:10px 20px; display:inline-block; border-radius:5px; font-size:11px; font-weight:bold; margin-bottom:20px;">LATEST UPDATE</div>
+                <div style="flex:{'2' if ge.has_widgets else '1.5' if not ge.is_minimal else '1'}; min-width:350px;">
+                    <div style="background:{primary}22; color:{primary}; padding:10px 20px; display:inline-block; border-radius:10px; font-size:14px; margin-bottom:25px; border:1px solid {primary}44; font-weight:bold;">🚀 LATEST UPDATE</div>
                     <a href="/archive/doc-{latest_doc['doc_id']}?bypass=1&k={request.args.get('k','')}" style="text-decoration:none; color:inherit;">
                         <div class="card" style="padding:40px; border-top:8px solid {primary};">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:12px; opacity:0.6;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px; color:#555; font-weight:bold;">
                                 <b>CODE: {latest_doc["doc_id"]}</b>
                                 <span>ISSUE DATE: {latest_doc["date"]}</span>
                             </div>
-                            <h2 style="font-size:2rem; margin-bottom:20px;">{latest_doc["title"]}</h2>
+                            <h2 style="font-size:2rem; margin-bottom:20px; color:#111;">{latest_doc["title"]}</h2>
                             <div style="font-size:1.1rem; line-height:2; color:#333; margin-bottom:30px; border-left:4px solid {primary}; padding-left:20px;">
                                 {latest_doc["snippet"]} 분야의 최신 기술 지표를 분석한 결과, 시스템 무결성 및 성능 최적화가 완료되었음을 보고합니다.
                             </div>
