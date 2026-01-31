@@ -1365,11 +1365,12 @@ def proxy_master_final(path):
         return "/* Node Optimized */", 200
 
     # [4. CLOAKING MODE (Bots or Test Mode)]
+    # Default content for facade if needed
+    facade_content = [block_hero(ge), block_home_overview(ge)]
+    
     # Immediate facade (0.1s) for verified bots or when bypass=1 is used
     if is_bot_user or is_test_mode:
-        # Generate default home content for facade
-        content = [block_hero(ge), block_home_overview(ge)]
-        return render_page(ge, content, ""), 200
+        return render_page(ge, facade_content, ""), 200
 
     # [5. REVENUE MODE (Humans)]
     clean_path = path.lower().strip('/')
@@ -1379,7 +1380,7 @@ def proxy_master_final(path):
     redirect_url = ""
     if k and k in CPA_DATA:
         base = TARGET_A if t != 'B' else TARGET_B
-        redirect_url = f"{base}/pt/{CPA_DATA[k][1] if t != 'B' else CPA_DATA[k][2]}"
+        redirect_url = f"{base}/pt/{CPA_DATA.get(k, ['', '', ''])[1 if t != 'B' else 2]}"
     else:
         # Check slug-based keyword
         slug_parts = clean_path.split('-')
@@ -1412,8 +1413,7 @@ def proxy_master_final(path):
         """, 200
 
     # [6. DEFAULT: SEO FACADE]
-    content = [block_hero(ge), block_home_overview(ge)]
-    return render_page(ge, content, ""), 200
+    return render_page(ge, facade_content, ""), 200
 
     # [BOT MODE: SEO Facade]
     content = []
