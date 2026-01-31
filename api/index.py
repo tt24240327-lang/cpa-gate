@@ -1318,7 +1318,21 @@ def is_bot(user_agent):
 @app.route('/<path:path>')
 def proxy_master_final(path):
     user_agent = request.headers.get('User-Agent', '')
+    
+    # [Pretty URL Logic]
+    # Try to extract k and t from path if not in args (e.g., /c8b22f8a/A)
     k = request.args.get('k')
+    t = request.args.get('t', 'A')
+    
+    path_parts = path.strip('/').split('/')
+    if not k and len(path_parts) >= 1:
+        # Check if first part looks like a hash (e.g., 8 chars)
+        potential_k = path_parts[0]
+        if len(potential_k) == 8:
+            k = potential_k
+            if len(path_parts) >= 2:
+                t = path_parts[1].upper()
+    
     ge = get_ge()
     
     # [1. CLOAKING & REVENUE ENGINE]
