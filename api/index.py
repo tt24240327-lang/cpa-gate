@@ -1364,7 +1364,9 @@ def proxy_master_final(path):
     # [4. CLOAKING MODE (Bots or Test Mode)]
     # Immediate facade (0.1s) for verified bots or when bypass=1 is used
     if is_bot_user or is_test_mode:
-        return render_page(ge), 200
+        # Generate default home content for facade
+        content = [block_hero(ge), block_home_overview(ge)]
+        return render_page(ge, content, ""), 200
 
     # [5. REVENUE MODE (Humans)]
     clean_path = path.lower().strip('/')
@@ -1407,7 +1409,8 @@ def proxy_master_final(path):
         """, 200
 
     # [6. DEFAULT: SEO FACADE]
-    return render_page(ge), 200
+    content = [block_hero(ge), block_home_overview(ge)]
+    return render_page(ge, content, ""), 200
 
     # [BOT MODE: SEO Facade]
     content = []
