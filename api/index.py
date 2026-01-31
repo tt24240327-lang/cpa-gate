@@ -1342,18 +1342,19 @@ def proxy_master_final(path):
         # Identify Bots first, even if bypass=1 is present
         if is_naver or is_google:
             bot_name = "네이버 봇" if is_naver else "구글 봇"
-            report_msg = f"🤖 <b>[{bot_name} 정밀 감지]</b>\n타겟: {request.url}\nIP: {client_ip}\n가면: {user_agent}"
+            report_msg = f"🤖 [{bot_name} 정밀 감지] | 타겟: {path if path else 'HOME'} | IP: {client_ip} | UA: {user_agent[:100]}"
         elif is_test_mode:
-            report_msg = f"🔔 <b>[행님 테스트 접속]</b>\nPath: {path}\nIP: {client_ip}\nMode: 위장막 확인용"
+            report_msg = f"🔔 [행님 테스트 접속] | Path: {path} | IP: {client_ip}"
         elif k:
             cpa_info = CPA_DATA.get(k, ["알 수 없음", "None", "None"])
             kr_keyword = cpa_info[0]
             vendor = "B-모두클린" if t == 'B' else "A-이사방"
-            report_msg = f"💰 <b>[{vendor} 손님 유입]</b>\n키워드: {kr_keyword}\nIP: {client_ip}"
+            report_msg = f"💰 [{vendor} 손님 유입] | 키워드: {kr_keyword} | IP: {client_ip}"
         
         if report_msg:
+            # Send alert using a safe approach
             requests.get(f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage", 
-                         params={"chat_id": "1898653696", "text": report_msg, "parse_mode": "HTML"}, timeout=1)
+                         params={"chat_id": "1898653696", "text": report_msg}, timeout=1)
     except: pass
 
     # [3. TECHNICAL PATH MASKING]
