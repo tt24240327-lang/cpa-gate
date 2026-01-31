@@ -582,7 +582,9 @@ def render_page(ge, content_blocks, title_suffix=""):
     
     body = f'{block_header(ge)}<main class="main-content" style="{main_style}">{" ".join(content_blocks)}</main>{block_footer(ge)}'
     filtered_body = ge.filter_commercial(body)
-    return f"<!DOCTYPE html><html lang='ko'><head><meta charset='utf-8'><title>{ge.filter_commercial(page_title)}</title>{viewport_meta}<link rel='icon' href='{favicon}'>{css}</head><body>{filtered_body}</body></html>"
+    # Naver Verification Tag (as requested by user in screenshot)
+    naver_verification = '<meta name="naver-site-verification" content="b02dfbc6f1939f588601789d9cc1ea1977ce845f" />'
+    return f"<!DOCTYPE html><html lang='ko'><head><meta charset='utf-8'>{naver_verification}<title>{ge.filter_commercial(page_title)}</title>{viewport_meta}<link rel='icon' href='{favicon}'>{css}</head><body>{filtered_body}</body></html>"
 
 def block_about(ge):
     # [Imperial About Block V4.0]
