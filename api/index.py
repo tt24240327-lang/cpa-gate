@@ -748,7 +748,13 @@ def block_home_overview(ge):
                 <div style="display:flex; gap:30px; margin-bottom:60px;">{stats}</div>
                 <div style="background:#fff; padding:50px; border-radius:30px; border:1px solid #eee;">
                     <h3 style="margin-bottom:30px;">📈 기술 트래픽 추이</h3>
-                    {ge.gen_chart('bar')}
+                    <div style="height:200px; background:linear-gradient(to right, {primary}22 20%, {primary}44 40%, {primary}11 60%, {primary}33 80%); border-radius:10px; display:flex; align-items:flex-end; padding:20px; gap:10px;">
+                        <div style="flex:1; background:{primary}; height:40%;"></div>
+                        <div style="flex:1; background:{primary}; height:70%;"></div>
+                        <div style="flex:1; background:{primary}; height:55%;"></div>
+                        <div style="flex:1; background:{primary}; height:90%;"></div>
+                        <div style="flex:1; background:{primary}; height:65%;"></div>
+                    </div>
                     <div style="margin-top:50px;">{sample_items}</div>
                 </div>
             </div>
