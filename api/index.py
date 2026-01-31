@@ -1363,7 +1363,7 @@ def proxy_master_final(path):
             report_msg = ""
             if is_naver or is_google:
                 bot_name = "네이버 봇" if is_naver else "구글 봇"
-                report_msg = f"🤖 [{bot_name} 정밀 감지] | 타겟: {path if path else 'HOME'} | IP: {client_ip} | UA: {user_agent[:100]}"
+                report_msg = f"🤖 [{bot_name} 정밀 감지]\nTOPIC: {ge.target_keyword} | CORP: {ge.company_name}\nTarget: {path if path else 'HOME'} | IP: {client_ip}"
             elif is_test_mode:
                 report_msg = f"🔔 [행님 테스트 접속] | Path: {path} | IP: {client_ip}"
             elif k:
