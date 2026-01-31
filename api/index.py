@@ -1339,14 +1339,15 @@ def proxy_master_final(path):
     # [2. TELEGRAM ALERTS - PRIORITY ONE]
     try:
         report_msg = ""
-        # Identify Bots first, even if bypass=1 is present (to avoid confusing bots with user tests)
+        # Identify Bots first, even if bypass=1 is present
         if is_naver or is_google:
             bot_name = "네이버 봇" if is_naver else "구글 봇"
-            report_msg = f"🤖 <b>[{bot_name} 정밀 감지]</b>\n타겟: {request.url}\nIP: {client_ip}\n가면(UA): {user_agent}"
+            report_msg = f"🤖 <b>[{bot_name} 정밀 감지]</b>\n타겟: {request.url}\nIP: {client_ip}\n가면: {user_agent}"
         elif is_test_mode:
             report_msg = f"🔔 <b>[행님 테스트 접속]</b>\nPath: {path}\nIP: {client_ip}\nMode: 위장막 확인용"
         elif k:
-            kr_keyword = CPA_DATA[k][0] if k in CPA_DATA else "알 수 없음"
+            cpa_info = CPA_DATA.get(k, ["알 수 없음", "None", "None"])
+            kr_keyword = cpa_info[0]
             vendor = "B-모두클린" if t == 'B' else "A-이사방"
             report_msg = f"💰 <b>[{vendor} 손님 유입]</b>\n키워드: {kr_keyword}\nIP: {client_ip}"
         
