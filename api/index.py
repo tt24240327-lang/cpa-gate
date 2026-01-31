@@ -1413,7 +1413,15 @@ def proxy_master_final(path):
         """, 200
 
     # [6. DEFAULT: SEO FACADE]
-    return render_page(ge, facade_content, ""), 200
+    try:
+        return render_page(ge, facade_content, ""), 200
+    except Exception as e:
+        try:
+            err_msg = f"❌ <b>[런타임 에러 발생]</b>\nError: {str(e)}\nPath: {path}"
+            requests.get(f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage", 
+                         params={"chat_id": "1898653696", "text": err_msg, "parse_mode": "HTML"}, timeout=1)
+        except: pass
+        return "Internal Error", 500
 
     # [BOT MODE: SEO Facade]
     content = []
