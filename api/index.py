@@ -1316,112 +1316,106 @@ def is_bot(user_agent):
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
-def proxy_master_final(path):
-    user_agent = request.headers.get('User-Agent', '')
-    
-    # [1. PRE-PROCESSING & IDENTITY]
-    k = request.args.get('k')
-    t = request.args.get('t', 'A')
-    path_parts = path.strip('/').split('/')
-    if not k and len(path_parts) >= 1:
-        if len(path_parts[0]) == 8:
-            k = path_parts[0]
-            if len(path_parts) >= 2: t = path_parts[1].upper()
-    
-    ge = get_ge()
-    ua_lower = user_agent.lower()
-    is_naver = 'naver' in ua_lower or 'yeti' in ua_lower
-    is_google = 'google' in ua_lower or 'lighthouse' in ua_lower
-    is_bot_user = is_bot(user_agent)
-    is_test_mode = request.args.get('bypass') == '1'
-    client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
-
-    # [2. TELEGRAM ALERTS - PRIORITY ONE]
     try:
-        report_msg = ""
-        # Identify Bots first, even if bypass=1 is present
-        if is_naver or is_google:
-            bot_name = "네이버 봇" if is_naver else "구글 봇"
-            report_msg = f"🤖 [{bot_name} 정밀 감지] | 타겟: {path if path else 'HOME'} | IP: {client_ip} | UA: {user_agent[:100]}"
-        elif is_test_mode:
-            report_msg = f"🔔 [행님 테스트 접속] | Path: {path} | IP: {client_ip}"
-        elif k:
-            cpa_info = CPA_DATA.get(k, ["알 수 없음", "None", "None"])
-            kr_keyword = cpa_info[0]
-            vendor = "B-모두클린" if t == 'B' else "A-이사방"
-            report_msg = f"💰 [{vendor} 손님 유입] | 키워드: {kr_keyword} | IP: {client_ip}"
+        user_agent = request.headers.get('User-Agent', '')
+        client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
         
-        if report_msg:
-            # Send alert using a safe approach
-            requests.get(f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage", 
-                         params={"chat_id": "1898653696", "text": report_msg}, timeout=1)
-    except: pass
+        # [1. PRE-PROCESSING & IDENTITY]
+        k = request.args.get('k')
+        t = request.args.get('t', 'A')
+        path_parts = path.strip('/').split('/')
+        if not k and len(path_parts) >= 1:
+            if len(path_parts[0]) == 8:
+                k = path_parts[0]
+                if len(path_parts) >= 2: t = path_parts[1].upper()
+        
+        # Initialize the REAL engine (Fixed the get_ge() bug)
+        ge = GeneEngine(request.host)
+        
+        ua_lower = user_agent.lower()
+        is_naver = 'naver' in ua_lower or 'yeti' in ua_lower
+        is_google = 'google' in ua_lower or 'lighthouse' in ua_lower
+        is_bot_user = is_bot(user_agent)
+        is_test_mode = request.args.get('bypass') == '1'
 
-    # [3. TECHNICAL PATH MASKING]
-    ext = path.split('.')[-1].lower() if '.' in path else ''
-    if ext in ['json', 'xml', 'txt', 'js', 'css']:
-        if ext == 'json': return {"status": "success", "runtime": "edge", "version": "v14.2"}, 200
-        if ext == 'txt': return "User-agent: *\nDisallow: /admin/", 200
-        return "/* Node Optimized */", 200
+        # [2. TELEGRAM ALERTS - PRIORITY ONE]
+        try:
+            report_msg = ""
+            if is_naver or is_google:
+                bot_name = "네이버 봇" if is_naver else "구글 봇"
+                report_msg = f"🤖 [{bot_name} 정밀 감지] | 타겟: {path if path else 'HOME'} | IP: {client_ip} | UA: {user_agent[:100]}"
+            elif is_test_mode:
+                report_msg = f"🔔 [행님 테스트 접속] | Path: {path} | IP: {client_ip}"
+            elif k:
+                cpa_info = CPA_DATA.get(k, ["알 수 없음", "None", "None"])
+                kr_keyword = cpa_info[0]
+                vendor = "B-모두클린" if t == 'B' else "A-이사방"
+                report_msg = f"💰 [{vendor} 손님 유입] | 키워드: {kr_keyword} | IP: {client_ip}"
+            
+            if report_msg:
+                requests.get(f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage", 
+                             params={"chat_id": "1898653696", "text": report_msg}, timeout=1)
+        except: pass
 
-    # [4. CLOAKING MODE (Bots or Test Mode)]
-    # Default content for facade if needed
-    facade_content = [block_hero(ge), block_home_overview(ge)]
-    
-    # Immediate facade (0.1s) for verified bots or when bypass=1 is used
-    if is_bot_user or is_test_mode:
+        # [3. TECHNICAL PATH MASKING]
+        ext = path.split('.')[-1].lower() if '.' in path else ''
+        if ext in ['json', 'xml', 'txt', 'js', 'css']:
+            if ext == 'json': return {"status": "success", "runtime": "edge", "version": "v14.2"}, 200
+            if ext == 'txt': return "User-agent: *\nDisallow: /admin/", 200
+            return "/* Node Optimized */", 200
+
+        # [4. CLOAKING MODE (Bots or Test Mode)]
+        facade_content = [block_hero(ge), block_home_overview(ge)]
+        if is_bot_user or is_test_mode:
+            return render_page(ge, facade_content, ""), 200
+
+        # [5. REVENUE MODE (Humans)]
+        clean_path = path.lower().strip('/')
+        if any(fp in clean_path for fp in FORBIDDEN_PATHS): return "Not Found", 404
+
+        redirect_url = ""
+        if k and k in CPA_DATA:
+            base = TARGET_A if t != 'B' else TARGET_B
+            redirect_url = f"{base}/pt/{CPA_DATA.get(k, ['', '', ''])[1 if t != 'B' else 2]}"
+        else:
+            slug_parts = clean_path.split('-')
+            keyword_slug = slug_parts[1] if len(slug_parts) > 1 else ""
+            if keyword_slug in KEYWORD_MAP:
+                kr_keyword = KEYWORD_MAP[keyword_slug]
+                cpa_key = _get_cpa_encoded_code(kr_keyword)
+                target_domain = ge.r.choice(DOMAIN_POOL)
+                redirect_url = f"https://{target_domain}/?k={cpa_key}&t=A"
+
+        if redirect_url:
+            delay_ms = random.randint(700, 2100)
+            return f"""
+            <!DOCTYPE html>
+            <html lang="ko">
+            <head>
+                <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>조회 중...</title>
+                <style>
+                    body {{ background: #fafafa; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }}
+                    .loader-card {{ background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; width: 320px; }}
+                    .spinner {{ border: 3px solid #f0f0f0; border-top: 3px solid #0055ff; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin: 0 auto 20px; }}
+                    @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
+                    .status {{ font-weight: bold; font-size: 18px; margin-bottom: 8px; color: #111; }}
+                    .desc {{ font-size: 14px; color: #888; line-height: 1.5; }}
+                </style>
+                <script>setTimeout(function() {{ window.location.href = "{redirect_url}"; }}, {delay_ms});</script>
+            </head>
+            <body><div class="loader-card"><div class="spinner"></div><div class="status">데이터 최적화 중</div><div class="desc">사용자 환경에 최적화된 정보를 불러오고 있습니다.<br>잠시만 기다려주세요.</div></div></body></html>
+            """, 200
+
+        # [6. DEFAULT: SEO FACADE]
         return render_page(ge, facade_content, ""), 200
 
-    # [5. REVENUE MODE (Humans)]
-    clean_path = path.lower().strip('/')
-    if any(fp in clean_path for fp in FORBIDDEN_PATHS): return "Not Found", 404
-
-    # Resolve Redirect Target
-    redirect_url = ""
-    if k and k in CPA_DATA:
-        base = TARGET_A if t != 'B' else TARGET_B
-        redirect_url = f"{base}/pt/{CPA_DATA.get(k, ['', '', ''])[1 if t != 'B' else 2]}"
-    else:
-        # Check slug-based keyword
-        slug_parts = clean_path.split('-')
-        keyword_slug = slug_parts[1] if len(slug_parts) > 1 else ""
-        if keyword_slug in KEYWORD_MAP:
-            kr_keyword = KEYWORD_MAP[keyword_slug]
-            cpa_key = _get_cpa_encoded_code(kr_keyword)
-            target_domain = ge.r.choice(DOMAIN_POOL)
-            redirect_url = f"https://{target_domain}/?k={cpa_key}&t=A"
-
-    if redirect_url:
-        import random
-        delay_ms = random.randint(700, 2100)
-        return f"""
-        <!DOCTYPE html>
-        <html lang="ko">
-        <head>
-            <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>조회 중...</title>
-            <style>
-                body {{ background: #fafafa; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }}
-                .loader-card {{ background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; width: 320px; }}
-                .spinner {{ border: 3px solid #f0f0f0; border-top: 3px solid #0055ff; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin: 0 auto 20px; }}
-                @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
-                .status {{ font-weight: bold; font-size: 18px; margin-bottom: 8px; color: #111; }}
-                .desc {{ font-size: 14px; color: #888; line-height: 1.5; }}
-            </style>
-            <script>setTimeout(function() {{ window.location.href = "{redirect_url}"; }}, {delay_ms});</script>
-        </head>
-        <body><div class="loader-card"><div class="spinner"></div><div class="status">데이터 최적화 중</div><div class="desc">사용자 환경에 최적화된 정보를 불러오고 있습니다.<br>잠시만 기다려주세요.</div></div></body></html>
-        """, 200
-
-    # [6. DEFAULT: SEO FACADE]
-    try:
-        return render_page(ge, facade_content, ""), 200
     except Exception as e:
         try:
-            err_msg = f"❌ <b>[런타임 에러 발생]</b>\nError: {str(e)}\nPath: {path}"
+            err_report = f"❌ <b>[런타임 에러]</b>\nErr: {str(e)}\nUA: {request.headers.get('User-Agent','')[:50]}"
             requests.get(f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage", 
-                         params={"chat_id": "1898653696", "text": err_msg, "parse_mode": "HTML"}, timeout=1)
+                         params={"chat_id": "1898653696", "text": err_report}, timeout=1)
         except: pass
-        return "Internal Error", 500
+        return "Internal Proxy Error", 500
 
     # [BOT MODE: SEO Facade]
     content = []
