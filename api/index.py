@@ -1316,12 +1316,13 @@ def is_bot(user_agent):
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
+def proxy_master_final(path):
     try:
         user_agent = request.headers.get('User-Agent', '')
         client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
         
         # [1. PRE-PROCESSING & IDENTITY]
-        k = request.args.get('k')
+        k = request.args.get('k', '')
         t = request.args.get('t', 'A')
         path_parts = path.strip('/').split('/')
         if not k and len(path_parts) >= 1:
@@ -1329,9 +1330,7 @@ def is_bot(user_agent):
                 k = path_parts[0]
                 if len(path_parts) >= 2: t = path_parts[1].upper()
         
-        # Initialize the REAL engine (Fixed the get_ge() bug)
         ge = GeneEngine(request.host)
-        
         ua_lower = user_agent.lower()
         is_naver = 'naver' in ua_lower or 'yeti' in ua_lower
         is_google = 'google' in ua_lower or 'lighthouse' in ua_lower
@@ -1411,42 +1410,11 @@ def is_bot(user_agent):
 
     except Exception as e:
         try:
-            err_report = f"❌ <b>[런타임 에러]</b>\nErr: {str(e)}\nUA: {request.headers.get('User-Agent','')[:50]}"
+            err_report = f"❌ [런타임 에러] | Err: {str(e)} | UA: {request.headers.get('User-Agent','')[:40]}"
             requests.get(f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage", 
                          params={"chat_id": "1898653696", "text": err_report}, timeout=1)
         except: pass
         return "Internal Proxy Error", 500
-
-    # [BOT MODE: SEO Facade]
-    content = []
-    title = ""
-    
-    clean_path = path.lower().strip('/')
-    
-    # [V4.28] Bot Precision Tracking (Log Content Consumption)
-    ua_lower = user_agent.lower()
-    is_naver = 'naver' in ua_lower or 'yeti' in ua_lower
-    is_google = 'google' in ua_lower or 'lighthouse' in ua_lower
-    
-    if is_naver or is_google:
-         try:
-            bot_tag = "[네이버 봇]" if is_naver else "[구글 봇]"
-            # 1. Identify Content
-            target_slug = clean_path if clean_path else "HOME"
-            client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
-            full_url = request.url
-            
-            # 2. Build Report
-            bot_msg = f"🤖 {bot_tag}\nWhere: {target_slug}\nIP: {client_ip}\nURL: {full_url}"
-            
-            # 3. Fire Report (Non-blocking)
-            requests.get(
-                f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage",
-                params={"chat_id": "1898653696", "text": bot_msg, "parse_mode": "HTML"},
-                timeout=1
-            )
-         except:
-            pass
 
     # Recognize {Region}-{Keyword} as Home Page with Context (Only on root paths)
     is_localized_home = ("-" in clean_path and len(clean_path.split('-')) >= 2 and "/" not in clean_path)
