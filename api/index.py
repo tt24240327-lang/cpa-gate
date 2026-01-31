@@ -458,6 +458,9 @@ def render_page(ge, content_blocks, title_suffix=""):
     # [V4.28] Fix: Define page_title to prevent NameError
     page_title = f"{ge.target_keyword} {title_suffix or '국가 표준 기술 아카이브'}"
     
+    # [V4.29] SEO Enhancement: Dynamic Meta Description
+    meta_desc = f"{ge.company_name}에서 제공하는 {ge.target_keyword} 분야 연구 데이터 및 실시간 기술 지표 통합 아카이브입니다. 무결성 검증을 거친 최신 표준 문서를 확인하세요."
+    
     main_style = "min-height: 80vh; transition: 0.3s;"
     # [V4.25] Extreme Structural CSS
     if ge.skeleton_id in [1, 9, 10]: # Side Menu Types
@@ -585,9 +588,14 @@ def render_page(ge, content_blocks, title_suffix=""):
     
     body = f'{block_header(ge)}<main class="main-content" style="{main_style}">{" ".join(content_blocks)}</main>{block_footer(ge)}'
     filtered_body = ge.filter_commercial(body)
-    # Naver Verification Tag (as requested by user in screenshot)
-    naver_verification = '<meta name="naver-site-verification" content="b02dfbc6f1939f588601789d9cc1ea1977ce845f" />'
-    return f"<!DOCTYPE html><html lang='ko'><head><meta charset='utf-8'>{naver_verification}<title>{ge.filter_commercial(page_title)}</title>{viewport_meta}<link rel='icon' href='{favicon}'>{css}</head><body>{filtered_body}</body></html>"
+    meta_tags = f"""
+        <meta charset='utf-8'>
+        <meta name="description" content="{ge.filter_commercial(meta_desc)}">
+        {naver_verification}
+        {viewport_meta}
+    """
+    
+    return f"<!DOCTYPE html><html lang='ko'><head>{meta_tags}<title>{ge.filter_commercial(page_title)}</title><link rel='icon' href='{favicon}'>{css}</head><body>{filtered_body}</body></html>"
 
 def block_about(ge):
     # [Imperial About Block V4.0]
