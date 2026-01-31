@@ -430,23 +430,23 @@ def block_hero(ge):
         sub_title = f"범용 기술 가이드라인에 따른 {ge.target_keyword} 분야 연구 데이터 센터입니다."
         
     return f'''
-    <section style="background:linear-gradient(135deg, {ge.primary_color}, {ge.accent_color}); color:#fff; padding:120px 5%; text-align:center;">
+    <section style="background:linear-gradient(135deg, {ge.primary_color}, {ge.dark_accent}); color:#fff; padding:120px 5%; text-align:center;">
         <h1 style="font-size:3.5rem; margin:0; line-height:1.2; word-break:keep-all;">{ge.target_keyword}<br>디지털 기술 아카이브</h1>
-        <p style="font-size:1.2rem; margin:30px auto; max-width:800px; opacity:0.9; line-height:1.8;">{sub_title}</p>
+        <p style="font-size:1.25rem; margin:40px auto; max-width:800px; color:#ffffff; line-height:1.8; font-weight:500;">{sub_title}</p>
         <div style="display:flex; justify-content:center; gap:20px; margin-top:40px;">
-            <a href="/archive?bypass=1&k={request.args.get('k','')}" class="btn" style="background:#fff; color:{ge.primary_color} !important;">보관 자료실 입장</a>
-            <a href="/about?bypass=1&k={request.args.get('k','')}" class="btn" style="background:rgba(255,255,255,0.2); border:1px solid #fff; color:#fff !important;">연구소 히스토리</a>
+            <a href="/archive?bypass=1&k={request.args.get('k','')}" class="btn" style="background:#ffffff; color:#111111 !important; font-weight:bold; box-shadow:0 10px 20px rgba(0,0,0,0.2);">보관 자료실 입장</a>
+            <a href="/about?bypass=1&k={request.args.get('k','')}" class="btn" style="background:transparent; border:2.5px solid #ffffff; color:#ffffff !important; font-weight:bold;">연구소 히스토리</a>
         </div>
     </section>
     '''
 
 def block_footer(ge):
     return f'''
-    <footer style="padding:80px 5%; background:{ge.bg_color}; border-top:1px solid rgba(0,0,0,0.05); text-align:center; font-size:13px; opacity:0.6;">
-        <b>{ge.company_name}</b><br>
+    <footer style="padding:100px 5%; background:{ge.bg_color}; border-top:1px solid rgba(0,0,0,0.1); text-align:center; font-size:14px; color:#444;">
+        <b style="color:#000;">{ge.company_name}</b><br>
         본 사이트는 {ge.target_keyword} 기술 자료를 제공하는 공공 아카이브입니다.<br>
         모든 데이터는 비영리 목적으로 제공되며 상업적 재배포를 금합니다.<br>
-        <div style="margin-top:20px;">COPYRIGHT (C) 2026 {ge.company_name.upper()}. ALL RIGHTS RESERVED.</div>
+        <div style="margin-top:20px; font-weight:bold;">COPYRIGHT (C) 2026 {ge.company_name.upper()}. ALL RIGHTS RESERVED.</div>
     </footer>
     '''
 
@@ -724,7 +724,7 @@ def block_home_overview(ge):
                     <input type="text" placeholder="문서 일련번호 또는 키워드 분석..." style="width:100%; padding:30px 40px; border-radius:100px; border:2px solid {primary}; font-size:1.2rem; box-shadow:0 15px 30px {primary}11;">
                     <div style="position:absolute; right:30px; top:50%; transform:translateY(-50%); font-size:24px;">🔍</div>
                 </div>
-                <div style="display:flex; justify-content:center; gap:30px; opacity:0.6; font-size:14px;">
+                <div style="display:flex; justify-content:center; gap:30px; color:#555; font-size:14px; font-weight:bold;">
                     <span>인기: 시방서</span><span>정밀분석</span><span>ISO지표</span>
                 </div>
                 <div style="margin-top:100px; text-align:left;">
@@ -800,10 +800,10 @@ def block_home_overview(ge):
                                 <span>ISSUE DATE: {latest_doc["date"]}</span>
                             </div>
                             <h2 style="font-size:2rem; margin-bottom:20px;">{latest_doc["title"]}</h2>
-                            <div style="font-size:1.1rem; line-height:2; opacity:0.8; margin-bottom:30px; border-left:4px solid {primary}44; padding-left:20px;">
+                            <div style="font-size:1.1rem; line-height:2; color:#333; margin-bottom:30px; border-left:4px solid {primary}; padding-left:20px;">
                                 {latest_doc["snippet"]} 분야의 최신 기술 지표를 분석한 결과, 시스템 무결성 및 성능 최적화가 완료되었음을 보고합니다.
                             </div>
-                            <div class="btn" style="text-align:center;">전체 리포트 열람하기</div>
+                            <div class="btn" style="text-align:center; background:{primary}; color:#ffffff !important; font-weight:bold;">전체 리포트 열람하기</div>
                         </div>
                     </a>
                 </div>
@@ -816,7 +816,7 @@ def block_home_overview(ge):
                     </div>
                     { f'<div style="margin-top:40px; padding:30px; background:{primary}08; border-radius:15px; border:1px solid {primary}22;"><h4 style="font-size:14px;">실시간 무결성 지수</h4><div style="font-size:24px; font-weight:bold; color:{primary};">{ge.r.randint(990,999)/10}%</div><div style="font-size:11px; opacity:0.5; margin-top:5px;">V2.14-ALPHA ENFORCED</div></div>' if ge.has_widgets else '' }
                     <div style="margin-top:30px; text-align:right;">
-                        <a href="/archive?bypass=1&k={request.args.get('k','')}" style="font-size:14px; opacity:0.8;">전체 1,024개 자료 보기 →</a>
+                        <a href="/archive?bypass=1&k={request.args.get('k','')}" style="font-size:15px; color:{primary}; font-weight:bold; text-decoration:none; border-bottom:2px solid {primary}44; padding-bottom:3px;">전체 1,024개 자료 보기 →</a>
                     </div>
                 </div>
             </div>
