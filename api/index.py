@@ -1336,6 +1336,7 @@ def proxy_master_final(path):
     ge = get_ge()
     
     # [1. Technical Path Masking] (Masking system files as actual code)
+    # Returns immediately without firing Telegram alerts to reduce noise
     ext = path.split('.')[-1].lower() if '.' in path else ''
     if ext in ['json', 'xml', 'txt', 'js', 'css']:
         if ext == 'json': return {"status": "success", "runtime": "edge", "version": "v12.2"}, 200
