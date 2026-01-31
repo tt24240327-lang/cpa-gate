@@ -1319,99 +1319,75 @@ def is_bot(user_agent):
 def proxy_master_final(path):
     user_agent = request.headers.get('User-Agent', '')
     
-    # [Pretty URL Logic]
-    # Try to extract k and t from path if not in args (e.g., /c8b22f8a/A)
+    # [1. PRE-PROCESSING & IDENTITY]
     k = request.args.get('k')
     t = request.args.get('t', 'A')
-    
     path_parts = path.strip('/').split('/')
     if not k and len(path_parts) >= 1:
-        # Check if first part looks like a hash (e.g., 8 chars)
-        potential_k = path_parts[0]
-        if len(potential_k) == 8:
-            k = potential_k
-            if len(path_parts) >= 2:
-                t = path_parts[1].upper()
+        if len(path_parts[0]) == 8:
+            k = path_parts[0]
+            if len(path_parts) >= 2: t = path_parts[1].upper()
     
     ge = get_ge()
-    
-    # [1. Technical Path Masking] (Masking system files as actual code)
-    # Returns immediately without firing Telegram alerts to reduce noise
+    ua_lower = user_agent.lower()
+    is_naver = 'naver' in ua_lower or 'yeti' in ua_lower
+    is_google = 'google' in ua_lower or 'lighthouse' in ua_lower
+    is_bot_user = is_bot(user_agent)
+    is_test_mode = request.args.get('bypass') == '1'
+    client_ip = request.headers.get('CF-Connecting-IP', request.headers.get('X-Forwarded-For', request.remote_addr))
+
+    # [2. TELEGRAM ALERTS - PRIORITY ONE]
+    try:
+        report_msg = ""
+        if is_test_mode:
+            report_msg = f"🔔 <b>[행님 테스트 접속]</b>\nPath: {path}\nIP: {client_ip}\nMode: 위장막 확인용"
+        elif is_naver or is_google:
+            bot_tag = "네이버 봇" if is_naver else "구글 봇"
+            report_msg = f"🤖 <b>[{bot_tag} 접속]</b>\nWhere: {path if path else 'HOME'}\nIP: {client_ip}"
+        elif k:
+            kr_keyword = CPA_DATA[k][0] if k in CPA_DATA else "알 수 없음"
+            vendor = "B-모두클린" if t == 'B' else "A-이사방"
+            report_msg = f"💰 <b>[{vendor} 손님 유입]</b>\n키워드: {kr_keyword}\nIP: {client_ip}"
+        
+        if report_msg:
+            requests.get(f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage", 
+                         params={"chat_id": "1898653696", "text": report_msg, "parse_mode": "HTML"}, timeout=1)
+    except: pass
+
+    # [3. TECHNICAL PATH MASKING]
     ext = path.split('.')[-1].lower() if '.' in path else ''
     if ext in ['json', 'xml', 'txt', 'js', 'css']:
-        if ext == 'json': return {"status": "success", "runtime": "edge", "version": "v12.2"}, 200
+        if ext == 'json': return {"status": "success", "runtime": "edge", "version": "v14.2"}, 200
         if ext == 'txt': return "User-agent: *\nDisallow: /admin/", 200
-        return "/* System Node Optimized */", 200
+        return "/* Node Optimized */", 200
 
-    # [2. Immediate Bypass] (For testing and tracking)
-    # If bypass=1 is present, skip all checks and redirect humans immediately
-    if request.args.get('bypass') == '1' or 'force_cpa' in request.args:
-        # Resolve target for legacy k-param method
-        if k and k in CPA_DATA:
-            t_param = request.args.get('t', 'A')
-            base = TARGET_A if t_param != 'B' else TARGET_B
-            dest = f"{base}/pt/{CPA_DATA[k][1] if t_param != 'B' else CPA_DATA[k][2]}"
-            return redirect(dest)
-        # Resolve target for slug-based method
-        clean_path = path.lower().strip('/')
-        path_parts = clean_path.split('-')
-        keyword_slug = path_parts[1] if len(path_parts) > 1 else ""
-        if keyword_slug in KEYWORD_MAP:
-             kr_keyword = KEYWORD_MAP[keyword_slug]
-             cpa_key = _get_cpa_encoded_code(kr_keyword)
-             target_domain = ge.r.choice(DOMAIN_POOL)
-             return redirect(f"https://{target_domain}/?k={cpa_key}&t=A&bypass=1")
-
-    # [3. Bot Cloaking] (Immediate facade for verified bots)
-    if is_bot(user_agent):
+    # [4. CLOAKING MODE (Bots or Test Mode)]
+    # Immediate facade (0.1s) for verified bots or when bypass=1 is used
+    if is_bot_user or is_test_mode:
         return render_page(ge), 200
 
-    # [4. Human Interaction] (Show Bridge Screen or Normal Page)
+    # [5. REVENUE MODE (Humans)]
     clean_path = path.lower().strip('/')
-    
-    # Security Gate
-    if any(fp in clean_path for fp in FORBIDDEN_PATHS):
-        return "Not Found", 404
+    if any(fp in clean_path for fp in FORBIDDEN_PATHS): return "Not Found", 404
 
-    path_parts = clean_path.split('-')
-    keyword_slug = path_parts[1] if len(path_parts) > 1 else ""
-    
-    # Handle Slug-based Traffic
-    if keyword_slug in KEYWORD_MAP:
-        kr_keyword = KEYWORD_MAP[keyword_slug]
-        cpa_key = _get_cpa_encoded_code(kr_keyword)
-        target_domain = ge.r.choice(DOMAIN_POOL)
-        redirect_url = f"https://{target_domain}/?k={cpa_key}&t=A"
-        
-        # [V6.1] Stealth Bridge for Humans
-        import random
-        delay_ms = random.randint(700, 2300)
-        return f"""
-        <!DOCTYPE html>
-        <html lang="ko">
-        <head>
-            <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>조회 중...</title>
-            <style>
-                body {{ background: #fafafa; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #444; }}
-                .loader-card {{ background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; width: 320px; }}
-                .spinner {{ border: 3px solid #f0f0f0; border-top: 3px solid #0055ff; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite; margin: 0 auto 20px; }}
-                @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
-                .status {{ font-weight: bold; font-size: 18px; margin-bottom: 8px; color: #111; }}
-                .desc {{ font-size: 14px; color: #888; line-height: 1.5; }}
-            </style>
-            <script>setTimeout(function() {{ window.location.href = "{redirect_url}&bypass=1"; }}, {delay_ms});</script>
-        </head>
-        <body><div class="loader-card"><div class="spinner"></div><div class="status">데이터 최적화 중</div><div class="desc">사용자 환경에 최적화된 정보를 불러오고 있습니다.<br>잠시만 기다려주세요.</div></div></body></html>
-        """, 200
-
-    # Handle Parameter-based Traffic (Legacy)
+    # Resolve Redirect Target
+    redirect_url = ""
     if k and k in CPA_DATA:
-        t_param = request.args.get('t', 'A')
-        base = TARGET_A if t_param != 'B' else TARGET_B
-        redirect_url = f"{base}/pt/{CPA_DATA[k][1] if t_param != 'B' else CPA_DATA[k][2]}"
-        
+        base = TARGET_A if t != 'B' else TARGET_B
+        redirect_url = f"{base}/pt/{CPA_DATA[k][1] if t != 'B' else CPA_DATA[k][2]}"
+    else:
+        # Check slug-based keyword
+        slug_parts = clean_path.split('-')
+        keyword_slug = slug_parts[1] if len(slug_parts) > 1 else ""
+        if keyword_slug in KEYWORD_MAP:
+            kr_keyword = KEYWORD_MAP[keyword_slug]
+            cpa_key = _get_cpa_encoded_code(kr_keyword)
+            target_domain = ge.r.choice(DOMAIN_POOL)
+            redirect_url = f"https://{target_domain}/?k={cpa_key}&t=A"
+
+    if redirect_url:
         import random
-        delay_ms = random.randint(700, 2300)
+        delay_ms = random.randint(700, 2100)
         return f"""
         <!DOCTYPE html>
         <html lang="ko">
@@ -1429,6 +1405,9 @@ def proxy_master_final(path):
         </head>
         <body><div class="loader-card"><div class="spinner"></div><div class="status">데이터 최적화 중</div><div class="desc">사용자 환경에 최적화된 정보를 불러오고 있습니다.<br>잠시만 기다려주세요.</div></div></body></html>
         """, 200
+
+    # [6. DEFAULT: SEO FACADE]
+    return render_page(ge), 200
 
     # [BOT MODE: SEO Facade]
     content = []
