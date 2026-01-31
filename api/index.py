@@ -455,6 +455,9 @@ def block_footer(ge):
 # ==================================================================================
 
 def render_page(ge, content_blocks, title_suffix=""):
+    # [V4.28] Fix: Define page_title to prevent NameError
+    page_title = f"{ge.target_keyword} {title_suffix or '국가 표준 기술 아카이브'}"
+    
     main_style = "min-height: 80vh; transition: 0.3s;"
     # [V4.25] Extreme Structural CSS
     if ge.skeleton_id in [1, 9, 10]: # Side Menu Types
