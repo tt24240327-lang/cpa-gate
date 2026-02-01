@@ -1363,7 +1363,23 @@ def proxy_master_final(path):
             report_msg = ""
             if is_naver or is_google:
                 bot_name = "네이버 봇" if is_naver else "구글 봇"
-                report_msg = f"🤖 [{bot_name} 정밀 감지]\nTOPIC: {ge.target_keyword} | CORP: {ge.company_name}\nTarget: {path if path else 'HOME'} | IP: {client_ip}"
+                country = request.headers.get('CF-IPCountry', 'Unknown')
+                ref = request.referrer or 'Direct (직접 접속)'
+                full_url = request.url
+                # Create Shadow Link (Add bypass=1 safely)
+                shadow_link = f"{full_url}&bypass=1" if '?' in full_url else f"{full_url}?bypass=1"
+                
+                report_msg = (
+                    f"🤖 [{bot_name} 정밀 해부]\n"
+                    f"📍 방문: {full_url}\n"
+                    f"🔗 경로: {ref}\n"
+                    f"🌍 위치: {country} | IP: {client_ip}\n\n"
+                    f"📝 콘텐츠 분석:\n"
+                    f"- 주제: {ge.target_keyword}\n"
+                    f"- 업체: {ge.company_name}\n\n"
+                    f"👁️ [봇이 본 화면 똑같이 보기]\n"
+                    f"{shadow_link}"
+                )
             elif is_test_mode:
                 report_msg = f"🔔 [행님 테스트 접속] | Path: {path} | IP: {client_ip}"
             elif k:
