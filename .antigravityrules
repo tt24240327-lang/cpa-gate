@@ -1,0 +1,21 @@
+
+# Anti-Gravity Rules (Strict Enforcement)
+
+## 1. AI Model Usage
+- **ONLY** use `gpt-5.2-pro` for all AI operations.
+- **NEVER** use `gpt-4o`, `gpt-4`, or any other legacy models.
+- **Strictly No Fallback**: If 5.2 fails, halt the process. Do not retry with lower models.
+
+## 2. API Implementation
+- For `gpt-5.2-pro`, you MUST use the **Responses API**:
+  - Code: `client.responses.create(model="gpt-5.2-pro", input=...)`
+  - Do NOT use `client.chat.completions.create` for this model (it will 404).
+
+## 3. Performance & Timeout
+- Timeout: **480 seconds (8 minutes)** per request.
+- Retry Logic: **3 attempts max** (8 mins x 3).
+- Context Handling: Use "Divide and Conquer" for large datasets (>10 items).
+
+## 4. Updates
+- Any changes to `openai_blog_analyzer.py` MUST respect these rules.
+- Do not add "backup" logic that downgrades the model.

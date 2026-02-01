@@ -1357,6 +1357,7 @@ def proxy_master_final(path):
         is_google = 'google' in ua_lower or 'lighthouse' in ua_lower
         is_bot_user = is_bot(user_agent)
         is_test_mode = request.args.get('bypass') == 'showmethemoney'
+        is_telegram_preview = 'telegrambot' in ua_lower
 
         # [2. TELEGRAM ALERTS - PRIORITY ONE]
         try:
@@ -1380,18 +1381,25 @@ def proxy_master_final(path):
                     f"👁️ [봇이 본 화면 똑같이 보기]\n"
                     f"{shadow_link}"
                 )
-            elif is_test_mode:
+            elif is_test_mode and not is_telegram_preview:
                 report_msg = f"🔔 [행님 테스트 접속] | Path: {path} | IP: {client_ip}"
             elif k:
-                cpa_info = CPA_DATA.get(k, ["알 수 없음", "None", "None"])
-                kr_keyword = cpa_info[0]
-                vendor = "B-모두클린" if t == 'B' else "A-이사방"
-                fake_link = f"https://{request.host}/?k={k}&t={t}&bypass=showmethemoney"
-                report_msg = (f"💰 [{vendor}]\n"
-                              f"키워드: {kr_keyword}\n"
-                              f"IP: {client_ip}\n"
-                              f"가면(UA): {user_agent[:50]}...\n"
-                              f"👁️ 가짜사이트: {fake_link}")
+                if k in CPA_DATA:
+                    cpa_info = CPA_DATA[k]
+                    kr_keyword = cpa_info[0]
+                    vendor = "B-모두클린" if t == 'B' else "A-이사방"
+                    fake_link = f"https://{request.host}/?k={k}&t={t}&bypass=showmethemoney"
+                    report_msg = (f"💰 [{vendor}]\n"
+                                  f"키워드: {kr_keyword}\n"
+                                  f"IP: {client_ip}\n"
+                                  f"가면(UA): {user_agent[:50]}...\n"
+                                  f"👁️ 가짜사이트: {fake_link}")
+                else:
+                    # Capture scanners (like k=info.php) without calling them "Visitors"
+                    report_msg = (f"🕵️ [시스템 스캔 탐지]\n"
+                                  f"의심 쿼리: {k}\n"
+                                  f"IP: {client_ip}\n"
+                                  f"UA: {user_agent[:60]}")
             
             if report_msg:
                 requests.get(f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage", 
