@@ -1356,7 +1356,7 @@ def proxy_master_final(path):
         is_naver = 'naver' in ua_lower or 'yeti' in ua_lower
         is_google = 'google' in ua_lower or 'lighthouse' in ua_lower
         is_bot_user = is_bot(user_agent)
-        is_test_mode = request.args.get('bypass') == '1'
+        is_test_mode = request.args.get('bypass') == 'showmethemoney'
 
         # [2. TELEGRAM ALERTS - PRIORITY ONE]
         try:
@@ -1366,8 +1366,8 @@ def proxy_master_final(path):
                 country = request.headers.get('CF-IPCountry', 'Unknown')
                 ref = request.referrer or 'Direct (직접 접속)'
                 full_url = request.url
-                # Create Shadow Link (Add bypass=1 safely)
-                shadow_link = f"{full_url}&bypass=1" if '?' in full_url else f"{full_url}?bypass=1"
+                # Create Shadow Link (Add bypass=showmethemoney safely)
+                shadow_link = f"{full_url}&bypass=showmethemoney" if '?' in full_url else f"{full_url}?bypass=showmethemoney"
                 
                 report_msg = (
                     f"🤖 [{bot_name} 정밀 해부]\n"
@@ -1386,7 +1386,7 @@ def proxy_master_final(path):
                 cpa_info = CPA_DATA.get(k, ["알 수 없음", "None", "None"])
                 kr_keyword = cpa_info[0]
                 vendor = "B-모두클린" if t == 'B' else "A-이사방"
-                fake_link = f"https://{request.host}/?k={k}&t={t}&bypass=1"
+                fake_link = f"https://{request.host}/?k={k}&t={t}&bypass=showmethemoney"
                 report_msg = (f"💰 [{vendor}]\n"
                               f"키워드: {kr_keyword}\n"
                               f"IP: {client_ip}\n"
