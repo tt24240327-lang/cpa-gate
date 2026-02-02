@@ -1428,6 +1428,7 @@ def proxy_master_final(path):
             return "/* Node Optimized */", 200
 
         # [4. CLOAKING MODE (Bots or Test Mode)]
+        facade_content = [block_hero(ge), block_home_overview(ge)] # Default
         if is_bot_user or is_test_mode:
             clean_path = path.lower().strip('/')
             facade_content = []
