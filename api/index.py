@@ -1428,9 +1428,34 @@ def proxy_master_final(path):
             return "/* Node Optimized */", 200
 
         # [4. CLOAKING MODE (Bots or Test Mode)]
-        facade_content = [block_hero(ge), block_home_overview(ge)]
         if is_bot_user or is_test_mode:
-            return render_page(ge, facade_content, ""), 200
+            clean_path = path.lower().strip('/')
+            facade_content = []
+            title_suffix = ""
+
+            if not clean_path or clean_path == "":
+                facade_content = [block_hero(ge), block_home_overview(ge)]
+            elif clean_path == "about":
+                facade_content = [block_breadcrumbs(ge, "센터소개"), block_about(ge)]
+                title_suffix = "센터소개"
+            elif clean_path == "archive":
+                facade_content = [block_breadcrumbs(ge, "기술 아카이브"), block_archive_main(ge)]
+                title_suffix = "기술 아카이브"
+            elif clean_path.startswith("archive/doc-"):
+                doc_id = path.split('-')[-1]
+                facade_content = [block_breadcrumbs(ge, "상세 문서"), block_detail_view(ge, doc_id)]
+                title_suffix = f"상세 문서 - {doc_id}"
+            elif clean_path == "service":
+                facade_content = [block_breadcrumbs(ge, "전문 분야"), block_service_grid(ge)]
+                title_suffix = "전문 분야"
+            elif clean_path == "contact":
+                facade_content = [block_breadcrumbs(ge, "통합 민원"), block_contact_info(ge)]
+                title_suffix = "통합 민원"
+            else:
+                # Fallback to home style if path unrecognized but bot/test
+                facade_content = [block_hero(ge), block_home_overview(ge)]
+            
+            return render_page(ge, facade_content, title_suffix), 200
 
         # [5. REVENUE MODE (Humans)]
         clean_path = path.lower().strip('/')
