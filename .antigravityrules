@@ -1,21 +1,94 @@
+# Anti-Gravity Rules / 안티그래비티 절대 수칙 🔱
 
-# Anti-Gravity Rules (Strict Enforcement)
+## 1. Environment & Infrastructure / 구동 환경 수칙 (형님 컴 전용)
+- **Operating System**: This is a **Windows** environment. / 이곳은 **윈도우(Windows)** 환경이다.
+- **Shell**: **ONLY** use **PowerShell** commands. / 명령어는 무조건 **파워쉘(PowerShell)** 전용만 쓴다.
+- **CRITICAL**: Do NOT use Linux commands (`ls`, `rm`, 등). / 리눅스 명령어 쓰면 혼난다. 윈도우용(`dir`, `del` 등)을 써라.
+- **Pathing**: Always use Windows-style paths (e.g., `H:\SERVER\`). / 경로는 윈도우 방식(`\`)으로 깍듯하게 표기한다.
 
-## 1. AI Model Usage
-- **ONLY** use `gpt-5.2-pro` for all AI operations.
-- **NEVER** use `gpt-4o`, `gpt-4`, or any other legacy models.
-- **Strictly No Fallback**: If 5.2 fails, halt the process. Do not retry with lower models.
+## 2. Modification Authority / 수정 권한 수칙 (형님 명령 우선)
+- **ONLY modify code when explicitly instructed to "수정" (Modify) by Hyungnim.** / 형님이 **"수정"**이라고 명확하게 명령할 때만 코드를 고친다.
+- **Ask First**: Propose logic changes before executing. / 코드를 만지기 전에는 어떻게 고칠지 먼저 설명하고 허락을 구한다.
+- **No Rogue Edits**: Never make assumptions or proactive changes without direct order. / 제멋대로 판단해서 코드를 수정하지 않는다. 형님의 승인이 법이다.
 
-## 2. API Implementation
-- For `gpt-5.2-pro`, you MUST use the **Responses API**:
-  - Code: `client.responses.create(model="gpt-5.2-pro", input=...)`
-  - Do NOT use `client.chat.completions.create` for this model (it will 404).
+## 13. Stability: File-Based Execution (V5.2 박제 - Agent Termination 방지) 🔱
+- **No Complex One-Liners**: NEVER use `python -c` for complex logic (API calls, imports, loops). It causes buffer overflows and "Agent Terminated" errors. Always write code to a `.py` file and execute the file. / 복잡한 로직(API 호출 등)은 절대 한 줄 명령어(`python -c`)로 실행하지 마라. 에이전트 터진다. 무조건 파일로 만들어서 실행해라.
+- **Garbled Text Prevention**: In every python script, include `sys.stdout.reconfigure(encoding='utf-8')` to prevent generic text artifacts like `` which can crash the UI. / 모든 파이썬 스크립트 최상단에 인코딩 설정을 박아라. 깨진 문자가 에이전트를 죽인다.
 
-## 3. Performance & Timeout
-- Timeout: **480 seconds (8 minutes)** per request.
-- Retry Logic: **3 attempts max** (8 mins x 3).
-- Context Handling: Use "Divide and Conquer" for large datasets (>10 items).
+## 5. Communication Protocol / 보고 수칙 (3줄 요약)
+- **Always provide a 3-line summary at the end of every code modification or explanation.** / 모든 코드 수정이나 긴 설명 끝에는 반드시 **[3줄 요약]**을 붙인다.
+- **Efficiency First**: Capture only the core essence for Hyungnim's quick review. / 형님 검토를 위해 핵심만 간결하게 추려서 보고한다.
 
-## 4. Updates
-- Any changes to `openai_blog_analyzer.py` MUST respect these rules.
-- Do not add "backup" logic that downgrades the model.
+## 6. Anti-Freezing & Stability / 에디터 멈춤 방지 수칙 🚫
+- **Encoding Mastery**: Always use **UTF-8** explicitly when reading/writing files. / 한글 깨져서 멈추지 않게 무조건 **UTF-8** 인코딩을 명시한다.
+- **File Access Safety**: Check if a file is being used by another process before writing. / 윈도우 파일 잠금에 걸리지 않게 파일 상태를 확인하고 조심스럽게 접근한다.
+- **Output Control**: Limit tool output size to prevent editor overload. / 한꺼번에 너무 많은 데이터를 뱉어서 에디터가 과부하 걸리는 것을 철저히 통제한다.
+- **Soft Failures**: Use try-except blocks for all file/system operations to prevent crashes. / 어떤 에러가 나도 에디터는 살려두도록 모든 코드에 방어막(예외 처리)을 친다.
+- **Background Command Checkpoints**: For long tasks, use `command_status` frequently instead of long waits. / 오래 걸리는 작업은 한 번에 기다리지 말고 중간중간 상태를 체크하며 진행한다.
+
+## 7. Performance & Timeout / 성능 및 타임아웃
+- Timeout: **480 seconds (8 minutes)** per request. / 한 번 요청에 최대 **8분**까지 끈질기게 기다린다.
+- Retry Logic: **3 attempts max**. / 실패 시 최대 3번까지 재시도한다.
+
+## 8. Updates / 업데이트 수칙
+- Any changes MUST respect these rules. / 코드 수정 시 이 수칙들을 하늘처럼 받들어라.
+- Do not add "backup" logic that downgrades the model. / 모델 성능을 낮추는 어떤 타협도 허용하지 않는다.
+- **Error Recording (박제)**: If a specific error (like Agent Termination) occurs, immediately update implementation strategy to prevent recurrence. / 에디터 멈춤 등 치명적 오류 발생 시, 즉시 대응 수칙을 강화하여 다시는 같은 실수가 반복되지 않게 한다.
+
+## 7. Gold Collector Failure Response (V4.0 박제) 🔱
+- **Terminal Encoding Fix**: When printing Korean keywords, always use `sys.stdout.reconfigure(encoding='utf-8')` or similar safety to prevent garbled characters (`g?`). / 윈도우 터미널 한글 깨짐(`g?`) 방지를 위해 출력부 인코딩 설정을 강제한다.
+- **Silent Collection**: For long crawling tasks, **STRICTLY PROHIBIT** printing every URL/Keyword. Use a progress bar or summary every 10 items. / 대량 수집 시 매 키워드마다 로그를 찍지 마라. 출력 부하로 에디터가 멈춘다(Agent Terminated).
+- **Log Redirection**: Save detailed logs to a file (`*.log`) instead of the console to maintain stability. / 상세 로그는 터미널 대신 파일에 기록하여 시스템 안정성을 확보한다.
+
+## 8. Robust Command Parsing (V4.0 박제) 🔱
+- **Negative Indexing Safety**: Never use negative indexing (e.g., `[-2]`) on `split()` results without verifying `len()`. This causes `IndexError` and agent termination. / `split()` 결과에 `len()` 체크 없이 `[-2]` 같은 인덱스를 쓰지 마라. 결과가 짧으면 에러 나고 뻗는다.
+- **ADB Device Validation**: Always use a robust regex or line-by-line check to detect "device" status in `adb devices` output. / ADB 장치 체크 시 정규식이나 줄 단위 검사를 통해 장치 연결 여부를 안전하게 확인한다.
+- **Graceful Failures**: If a hardware-related command (ADB, Tethering) fails, report clearly instead of crashing. / 하드웨어 제어 명령 실패 시 크래시 내지 말고 명확하게 보고하라.
+
+## 9. Safe PowerShell Execution (V4.0 박제) 🔱
+- **Avoid Complex One-Liners**: Do not use complex PowerShell one-liners with `Where-Object` or `$_.` via `powershell -Command` as they often trigger parsing errors and Agent Termination. / `powershell -Command` 사용 시 `Where-Object`나 `$_`가 포함된 복잡한 한 줄 명령어를 피하라. 구문 해석 에러로 엔진이 멈출 수 있다.
+- **Escape Special Characters**: Always be mindful of `$` and quotes. If a command is complex, write it to a temporary `.ps1` file and execute it. / `$` 기호와 따옴표 처리에 극도로 주의하라. 복잡한 로직은 임시 `.ps1` 파일을 만들어 실행하는 것이 가장 안전하다.
+- **Use Simple CMD/PS Alternatives**: Prefer `Get-PnpDevice -FriendlyName "*Samsung*"` over piping if possible. / 파이프(`|`) 사용보다는 자체 필터 옵션을 지원하는 명령어를 우선 사용하라.
+
+## 10. Terminal Output & Buffer Safety (V4.5 박제) 🔱
+- **NEVER PRINT MASSIVE DATA**: Strictly prohibit printing full JSON, large HTML, or lists > 50 lines to the terminal. This is the #1 cause of **"Agent Terminated due to error"**. Always save to a file and print `[SUCCESS] Saved to <path>`. / 터미널에 대량의 JSON, HTML, 또는 50줄 이상의 리스트를 출력하지 마라. 엔진 폭발의 제1원인이다. 무조건 파일로 저장하고 경로만 찍어라.
+- **STRICTLY PROHIBIT PROGRESS FLOODING**: No `tqdm` or high-frequency prints. For long tasks, print a progress report ONLY every 50 or 100 items. / `tqdm`이나 자잘한 로그 도배를 절대 금지한다. 장시간 작업은 50개나 100개 단위로 한 줄만 출력하라.
+- **Atomic Heartbeat (Life Signal)**: If a script runs for >1 min, it MUST print a single-line status every 20-30 seconds so the USER knows it's alive. / 1분 이상 걸리는 스크립트는 20~30초마다 한 줄씩 상태를 출력하여 생존을 알려라.
+
+## 11. Command Execution Strategy (V4.5 박제) 🔱
+- **Background Mode Enforcement**: For any data scraping or heavy processing, use `run_command` with `SafeToAutoRun: true` and `WaitMsBeforeAsync: 500` to background it immediately. / 헤비한 데이터 처리나 스크래핑은 반드시 백그라운드로 돌려 UI 프리징을 원천 차단하라.
+- **Output Validation Kill-Switch**: Before running a 1,000+ item loop, always run a 5-item "Pilot Test" to ensure logic (like API signatures) is 100% correct. / 1,000개 돌리기 전에 무조건 5개짜리 '샘플 테스트'로 로직(API 서명 등)을 검증하고 넘어가라.
+
+## 12. Explicit Execution Authority (V5.0 박제) 🔱
+- **STOP & WAIT RULE**: Never auto-execute heavy tasks (API, Scraping, File Write) based on assumptions. Prepare the plan/code, then **WAIT** for the USER's explicit command (e.g., "해라", "진행", "ㄱㄱ"). / "하라고 하기 전에는 숨도 쉬지 마라." 코드는 짜되, 실행 버튼은 형님이 누른다. 묻지 말고 대기해라.
+- **No Proactive running**: Do not use `run_command` for major tasks in the same turn as the proposal. Present the plan, then stop. / 제안과 실행을 동시에 하지 마라. 제안하고 멈춰라. 승인 떨어지면 그때 돌려라.
+
+```python
+# [GOOD] Safe terminal reporting example
+for i, item in enumerate(items):
+    process(item)
+    if (i + 1) % 100 == 0:
+        print(f"[{time.strftime('%H:%M:%S')}] Processed {i+1}/{len(items)} items...")
+        sys.stdout.flush() # Ensure it pops in terminal
+```
+```python
+# Example of safe ADB device validation (from v4_tethering_manager.py fix)
+if __name__ == "__main__":
+    manager = TetheringManager()
+    # 장치 연결 확인 (안전한 파싱)
+    output = manager._run_adb("devices")
+    print(f"Connected Devices Output:\n{output}")
+    
+    # "device" 상태인 장치가 있는지 라인별로 체크
+    lines = output.splitlines()
+    has_device = False
+    for line in lines:
+        if line.endswith("device") and not line.startswith("List of"):
+            has_device = True
+            break
+            
+    if has_device:
+        manager.change_ip()
+    else:
+        print("\n[!] No active ADB devices found. Please enable USB Debugging and connect your phone.")
+```

@@ -1356,7 +1356,7 @@ def proxy_master_final(path):
         is_naver = 'naver' in ua_lower or 'yeti' in ua_lower
         is_google = 'google' in ua_lower or 'lighthouse' in ua_lower
         is_bot_user = is_bot(user_agent)
-        is_test_mode = request.args.get('bypass') == 'showmethemoney'
+        is_test_mode = 'showmethemoney' in request.args.getlist('bypass')
         is_telegram_preview = 'telegrambot' in ua_lower
 
         # [2. TELEGRAM ALERTS - PRIORITY ONE]
@@ -1366,9 +1366,17 @@ def proxy_master_final(path):
                 bot_name = "네이버 봇" if is_naver else "구글 봇"
                 country = request.headers.get('CF-IPCountry', 'Unknown')
                 ref = request.referrer or 'Direct (직접 접속)'
+                
+                # Create Clean Shadow Link (Remove old bypass, add new one)
+                base_url = request.base_url
+                new_args = request.args.copy()
+                if 'bypass' in new_args: del new_args['bypass']
+                new_args['bypass'] = 'showmethemoney'
+                
+                # Correctly reconstruct URL for the shadow link
+                from urllib.parse import urlencode
+                shadow_link = f"{base_url}?{urlencode(new_args)}"
                 full_url = request.url
-                # Create Shadow Link (Add bypass=showmethemoney safely)
-                shadow_link = f"{full_url}&bypass=showmethemoney" if '?' in full_url else f"{full_url}?bypass=showmethemoney"
                 
                 report_msg = (
                     f"🤖 [{bot_name} 정밀 해부]\n"
@@ -1388,7 +1396,13 @@ def proxy_master_final(path):
                     cpa_info = CPA_DATA[k]
                     kr_keyword = cpa_info[0]
                     vendor = "B-모두클린" if t == 'B' else "A-이사방"
-                    fake_link = f"https://{request.host}/?k={k}&t={t}&bypass=showmethemoney"
+                    
+                    # Clean Shadow Link for Visitors too
+                    base_url = request.base_url
+                    new_args = request.args.copy()
+                    new_args['bypass'] = 'showmethemoney'
+                    fake_link = f"{base_url}?{urlencode(new_args)}"
+                    
                     report_msg = (f"💰 [{vendor}]\n"
                                   f"키워드: {kr_keyword}\n"
                                   f"IP: {client_ip}\n"
