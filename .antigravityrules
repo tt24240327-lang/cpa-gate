@@ -1,5 +1,9 @@
 # Anti-Gravity Rules / 안티그래비티 절대 수칙 🔱
 
+## 0. First Priority: Rule Familiarization / 최우선 순위: 수칙 숙지 🔱
+- **Read First**: At the start of every session or new task, the AI **MUST** read this file (`.antigravityrules`) first to align with the latest system protocols. / 매 세션이나 새로운 작업 시작 시, AI는 무조건 이 파일(`.antigravityrules`)을 가장 먼저 읽고 최신 수칙을 머리에 박고 시작한다.
+- **Strict Adherence**: These rules override any general AI behavior or assumptions. / 이 수칙은 AI의 일반적인 판단이나 짐작보다 무조건 우선한다.
+
 ## 1. Environment & Infrastructure / 구동 환경 수칙 (형님 컴 전용)
 - **Operating System**: This is a **Windows** environment. / 이곳은 **윈도우(Windows)** 환경이다.
 - **Shell**: **ONLY** use **PowerShell** commands. / 명령어는 무조건 **파워쉘(PowerShell)** 전용만 쓴다.
@@ -10,6 +14,7 @@
 - **ONLY modify code when explicitly instructed to "수정" (Modify) by Hyungnim.** / 형님이 **"수정"**이라고 명확하게 명령할 때만 코드를 고친다.
 - **Ask First**: Propose logic changes before executing. / 코드를 만지기 전에는 어떻게 고칠지 먼저 설명하고 허락을 구한다.
 - **No Rogue Edits**: Never make assumptions or proactive changes without direct order. / 제멋대로 판단해서 코드를 수정하지 않는다. 형님의 승인이 법이다.
+- **DNA Over Ego**: Never assume "better" logic. The user's provided DNA data is the absolute truth. / "내가 더 잘 알지"라는 오만은 금물이다. 사용자가 제공한 DNA 데이터가 절대 진리다.
 
 ## 13. Stability: File-Based Execution (V5.2 박제 - Agent Termination 방지) 🔱
 - **No Complex One-Liners**: NEVER use `python -c` for complex logic (API calls, imports, loops). It causes buffer overflows and "Agent Terminated" errors. Always write code to a `.py` file and execute the file. / 복잡한 로직(API 호출 등)은 절대 한 줄 명령어(`python -c`)로 실행하지 마라. 에이전트 터진다. 무조건 파일로 만들어서 실행해라.
@@ -92,3 +97,17 @@ if __name__ == "__main__":
     else:
         print("\n[!] No active ADB devices found. Please enable USB Debugging and connect your phone.")
 ```
+
+## 15. Infinite Loading & Freeze Prevention (V6.0 박제) 🔱
+- **Limit `view_file` Usage**: NEVER use `view_file` on files > 1,000 lines without a specific range. Use `view_file_outline` first. Oversized file reads are the #1 cause of UI freezing. / 1,000줄 넘는 파일을 범위 지정 없이 통으로 읽지 마라. 무조건 `view_file_outline`으로 간 보고 쪼개서 읽어라. 에디터 멈춤의 주범이다.
+- **No Parallel Tool Calls on Same File**: Never call `replace_file_content` or `write_to_file` on the same file in parallel. This causes Windows file lock errors and infinite "Waiting..." status. / 같은 파일에 여러 수정 명령을 동시에 내리지 마라. 윈도우 파일 잠금 걸려서 에디터 무한 로딩 빠진다.
+- **Force `sys.stdout.flush()`**: Every python script that prints to the console MUST use `sys.stdout.flush()` after every important print/log. This keeps the heartbeat alive. / 모든 파이썬 출력 뒤에는 무조건 `flush()`를 넣어라. 에디터가 "나 살아있소" 하고 인식하게 해야 한다.
+- **Kill-Switch (Retry-of-Death Prevention)**: If a tool call (e.g., `replace_file_content`) fails 3 times consecutively, **ABORT** immediately and ask for Hyungnim's help. Do not keep retrying. / 같은 명령이 3번 연속 실패하면 즉시 중단하고 형님께 보고하라. "죽음의 무한 재시도"에 빠지지 마라.
+- **No Large Object Dumping**: Do not print massive JSON/Lists (>50 lines) to terminal. Save to `.tmp` or a log file instead. / 대량의 데이터를 터미널에 쏟아내지 마라. 무조건 파일로 빼라.
+- **Keep it Simple**: Break complex tasks into small, verifiable chunks (Atomic Steps). / 복잡한 일은 무조건 쪼개서 하나씩 확인하며 진행해라. 한 번에 큰 거 하려다 엔진 뻗는다.
+
+
+## 16. Recent Failure Report (2026-02-03 Incident) / 최근 실패 사례 보고 (2026-02-03) 🔱
+- **Incident**: Agent Terminated due to `python -c` usage for checking API (`requests.get`). / **사고 내용**: API 확인(`requests.get`)을 위해 `python -c` 커맨드를 사용하다가 에이전트가 강제 종료(Terminated)됨.
+- **Cause**: Violation of Rule 20 (No Complex One-Liners). Windows environment often crashes with `ConnectionError` inside `python -c`. / **원인**: 수칙 20조(복잡한 한 줄 명령어 금지) 위반. 윈도우 환경에서 `python -c`로 네트워크 요청 시 잦은 충돌 발생.
+- **Action**: **STRICTLY PROHIBIT** `python -c` for any network execution. proper `.py` script execution is MANDATORY. / **조치**: 네트워크 실행에는 `python -c` 사용을 **엄격히 금지**한다. 무조건 정식 `.py` 파일을 생성해서 실행하라.

