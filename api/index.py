@@ -1391,7 +1391,7 @@ def proxy_master_final(path):
                 )
             elif is_test_mode and not is_telegram_preview:
                 report_msg = f"🔔 [행님 테스트 접속] | Path: {path} | IP: {client_ip}"
-            elif k:
+            elif k and not is_telegram_preview:
                 if k in CPA_DATA:
                     cpa_info = CPA_DATA[k]
                     kr_keyword = cpa_info[0]
