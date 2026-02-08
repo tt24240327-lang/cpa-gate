@@ -1395,9 +1395,29 @@ def proxy_master_final(path):
                 if k in CPA_DATA:
                     cpa_info = CPA_DATA[k]
                     kr_keyword = cpa_info[0]
-                    vendor = "B-모두클린" if t == 'B' else "A-이사방"
                     
-                    # Clean Shadow Link for Visitors too
+                    # [V4.5] Dynamic Vendor Naming based on Category
+                    v_prefix = "B-" if t == 'B' else "A-"
+                    vendor_name = "알 수 없음"
+                    
+                    if any(word in kr_keyword for word in ["이사", "견적", "용달"]):
+                        vendor_name = "모두이사" if t == 'B' else "이사방"
+                    elif any(word in kr_keyword for word in ["청소", "입주"]):
+                        vendor_name = "모두클린" if t == 'B' else "이사방"
+                    elif any(word in kr_keyword for word in ["누수", "변기", "하수구", "배관", "싱크대", "수전", "세면대"]):
+                        vendor_name = "착한환경" if t == 'B' else "뚫뚫배관"
+                    elif any(word in kr_keyword for word in ["용접"]):
+                        vendor_name = "베테랑용접" if t == 'B' else "베테랑용접"
+                    elif any(word in kr_keyword for word in ["홈케어"]):
+                        vendor_name = "베테랑홈케어" if t == 'B' else "베테랑홈케어"
+                    elif any(word in kr_keyword for word in ["철거"]):
+                        vendor_name = "무촌철거" if t == 'B' else "무촌철거"
+                    else:
+                        vendor_name = "이사방" if t != 'B' else "모두클린"
+                        
+                    vendor = f"{v_prefix}{vendor_name}"
+                    
+                    # Clean Shadow Link for Visitors
                     base_url = request.base_url
                     new_args = request.args.to_dict()
                     new_args['bypass'] = 'showmethemoney'
