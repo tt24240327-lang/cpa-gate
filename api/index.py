@@ -1417,6 +1417,14 @@ def proxy_master_final(path):
                         
                     vendor = f"{v_prefix}{vendor_name}"
                     
+                    # [V4.6] Calculate CPA Destination for Reporting
+                    base_vendor = TARGET_A if t != 'B' else TARGET_B
+                    cpa_code = cpa_info[1 if t != 'B' else 2]
+                    final_cpa_url = f"{base_vendor}/pt/{cpa_code}"
+                    
+                    # Referrer Tracking
+                    ref_url = request.referrer or 'Direct (직접 접속)'
+                    
                     # Clean Shadow Link for Visitors
                     base_url = request.base_url
                     new_args = request.args.to_dict()
@@ -1425,6 +1433,8 @@ def proxy_master_final(path):
                     
                     report_msg = (f"💰 [{vendor}]\n"
                                   f"키워드: {kr_keyword}\n"
+                                  f"🔗 유입: {ref_url}\n"
+                                  f"🎯 CPA주소: {final_cpa_url}\n"
                                   f"IP: {client_ip}\n"
                                   f"가면(UA): {user_agent[:50]}...\n"
                                   f"👁️ 가짜사이트: {fake_link}")
