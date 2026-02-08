@@ -111,3 +111,8 @@ if __name__ == "__main__":
 - **Incident**: Agent Terminated due to `python -c` usage for checking API (`requests.get`). / **사고 내용**: API 확인(`requests.get`)을 위해 `python -c` 커맨드를 사용하다가 에이전트가 강제 종료(Terminated)됨.
 - **Cause**: Violation of Rule 20 (No Complex One-Liners). Windows environment often crashes with `ConnectionError` inside `python -c`. / **원인**: 수칙 20조(복잡한 한 줄 명령어 금지) 위반. 윈도우 환경에서 `python -c`로 네트워크 요청 시 잦은 충돌 발생.
 - **Action**: **STRICTLY PROHIBIT** `python -c` for any network execution. proper `.py` script execution is MANDATORY. / **조치**: 네트워크 실행에는 `python -c` 사용을 **엄격히 금지**한다. 무조건 정식 `.py` 파일을 생성해서 실행하라.
+
+## 17. Timezone Independence (KST Default) / 절대 시간 수칙 (한국시간 +9h) 🔱
+- **Explicit Python Conversion**: Never rely on DB 'localtime' or System time. Always force '+9 hours' in Python. / 시스템이나 DB 시간은 믿지 마라. 무조건 파이썬 코드 레벨에서 '+9시간'을 더해 한국 시간(KST)으로 고정한다.
+- **Pre-formatted Strings**: Send formatted strings (e.g. 'MM-DD HH:mm') to frontend, avoiding browser timezone confusion. / 브라우저에게 계산을 맡기지 마라. 서버에서 'MM-DD HH:mm' 포맷으로 완벽하게 조리해서 내려보내라.
+

@@ -49,35 +49,35 @@ CPA_DATA = {
     "d7ea613c": ["집청소", "WwVCgW9E1R", "z2NytCt42i"],
     "cb845113": ["청소업체", "WwVCgW9E1R", "z2NytCt42i"],
 
-    # --- 누수/배관/변기 관련 (모두클린 / 이사방) ---
-    "8e2996c7": ["배관 누수", "WwVCgW9E1R", "z2NytCt42i"],
-    "81edc02c": ["변기막힘", "WwVCgW9E1R", "z2NytCt42i"],
-    "8745563e": ["하수구막힘", "WwVCgW9E1R", "z2NytCt42i"],
-    "617a0005": ["누수탐지", "WwVCgW9E1R", "z2NytCt42i"],
-    "5d19986d": ["변기뚫는업체", "WwVCgW9E1R", "z2NytCt42i"],
-    "a0ef0c00": ["싱크대막힘", "WwVCgW9E1R", "z2NytCt42i"],
-    "e6d02452": ["배수구 막힘", "WwVCgW9E1R", "z2NytCt42i"],
-    "35467a5c": ["하수구 역류", "WwVCgW9E1R", "z2NytCt42i"],
-    "9ce613e1": ["변기 물 안 내려감", "WwVCgW9E1R", "z2NytCt42i"],
-    "68943f44": ["하수구 뚫는 업체", "WwVCgW9E1R", "z2NytCt42i"],
-    "c8abc514": ["변기 뚫는 곳", "WwVCgW9E1R", "z2NytCt42i"],
-    "ffbfdc28": ["변기수전", "WwVCgW9E1R", "z2NytCt42i"],
-    "be4adb64": ["수전교체", "WwVCgW9E1R", "z2NytCt42i"],
-    "a01f1db0": ["변기교체", "WwVCgW9E1R", "z2NytCt42i"],
-    "b1585a85": ["화장실 변기 교체", "WwVCgW9E1R", "z2NytCt42i"],
-    "c2bddbcc": ["세면대 교체", "WwVCgW9E1R", "z2NytCt42i"],
-    "b6f6c35f": ["변기업체", "WwVCgW9E1R", "z2NytCt42i"],
-    "3e750243": ["수전업체", "WwVCgW9E1R", "z2NytCt42i"],
+    # --- 누수/배관/변기 관련 (뚫뚫배관 / 착한환경) ---
+    "8e2996c7": ["배관 누수", "GkVRvxfx1T", "QOaojnBV2v"],
+    "81edc02c": ["변기막힘", "GkVRvxfx1T", "QOaojnBV2v"],
+    "8745563e": ["하수구막힘", "GkVRvxfx1T", "QOaojnBV2v"],
+    "617a0005": ["누수탐지", "GkVRvxfx1T", "QOaojnBV2v"],
+    "5d19986d": ["변기뚫는업체", "GkVRvxfx1T", "QOaojnBV2v"],
+    "a0ef0c00": ["싱크대막힘", "GkVRvxfx1T", "QOaojnBV2v"],
+    "e6d02452": ["배수구 막힘", "GkVRvxfx1T", "QOaojnBV2v"],
+    "35467a5c": ["하수구 역류", "GkVRvxfx1T", "QOaojnBV2v"],
+    "9ce613e1": ["변기 물 안 내려감", "GkVRvxfx1T", "QOaojnBV2v"],
+    "68943f44": ["하수구 뚫는 업체", "GkVRvxfx1T", "QOaojnBV2v"],
+    "c8abc514": ["변기 뚫는 곳", "GkVRvxfx1T", "QOaojnBV2v"],
+    "ffbfdc28": ["변기수전", "GkVRvxfx1T", "QOaojnBV2v"],
+    "be4adb64": ["수전교체", "GkVRvxfx1T", "QOaojnBV2v"],
+    "a01f1db0": ["변기교체", "GkVRvxfx1T", "QOaojnBV2v"],
+    "b1585a85": ["화장실 변기 교체", "GkVRvxfx1T", "QOaojnBV2v"],
+    "c2bddbcc": ["세면대 교체", "GkVRvxfx1T", "QOaojnBV2v"],
+    "b6f6c35f": ["변기업체", "GkVRvxfx1T", "QOaojnBV2v"],
+    "3e750243": ["수전업체", "GkVRvxfx1T", "QOaojnBV2v"],
 
-    # --- 용접 관련 (모두클린 / 이사방) ---
-    "dc19f4ea": ["용접", "WwVCgW9E1R", "z2NytCt42i"],
-    "af5f2375": ["출장용접", "WwVCgW9E1R", "z2NytCt42i"],
-    "c4c5ee7e": ["용접업체", "WwVCgW9E1R", "z2NytCt42i"],
-    "4a2f6816": ["배관용접", "WwVCgW9E1R", "z2NytCt42i"],
-    "87a3472b": ["알곤용접", "WwVCgW9E1R", "z2NytCt42i"],
-    "63b2da0a": ["용접수리", "WwVCgW9E1R", "z2NytCt42i"],
-    "20186798": ["알곤출장용접", "WwVCgW9E1R", "z2NytCt42i"],
-    "ef310430": ["스텐 출장용접", "WwVCgW9E1R", "z2NytCt42i"]
+    # --- 용접 관련 (베테랑 용접 / 베테랑 용접) ---
+    "dc19f4ea": ["용접", "XpBx9dZ5aE", "SROHH97olh"],
+    "af5f2375": ["출장용접", "XpBx9dZ5aE", "SROHH97olh"],
+    "c4c5ee7e": ["용접업체", "XpBx9dZ5aE", "SROHH97olh"],
+    "4a2f6816": ["배관용접", "XpBx9dZ5aE", "SROHH97olh"],
+    "87a3472b": ["알곤용접", "XpBx9dZ5aE", "SROHH97olh"],
+    "63b2da0a": ["용접수리", "XpBx9dZ5aE", "SROHH97olh"],
+    "20186798": ["알곤출장용접", "XpBx9dZ5aE", "SROHH97olh"],
+    "ef310430": ["스텐 출장용접", "XpBx9dZ5aE", "SROHH97olh"]
 }
 
 app = Flask(__name__)
