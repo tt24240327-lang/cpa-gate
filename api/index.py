@@ -1439,9 +1439,15 @@ def proxy_master_final(path):
         clean_path = path.lower().strip('/')
         if any(fp in clean_path for fp in FORBIDDEN_PATHS): return "Not Found", 404
 
+        # [V10.8] FORCE REVENUE MODE FOR KEYWORD ENTRANCE
+        # k 인자가 있고 유효한 키라면 봇 체크/테스트 체크보다 수익 모드(마이홈)를 우선함
+        force_revenue = False
+        if k and k in CPA_DATA:
+            force_revenue = True
+
         # [V10.0] NEW LANDING PAGE INTEGRATION (Restored)
         # 찐 방문자(고객)에게 마이홈플래너 UI 보여주기
-        if not is_bot_user and not is_test_mode:
+        if (not is_bot_user and not is_test_mode) or force_revenue:
             if not clean_path or any(word in clean_path for word in ["moving", "cleaning", "service"]):
                 try:
                     import os

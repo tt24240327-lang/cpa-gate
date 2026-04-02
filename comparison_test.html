@@ -858,14 +858,15 @@
                     this.startReviewLoop();
                     this.startPartnerReviewLoop(); // 업체별 리뷰 회전 시작
 
-                    // 🚀 핵심: 키워드로 들어온 손님 → 질문 없이 바로 업체 비교 결과 화면으로!
+                    // 🚀 [V10.9] ULTIMATE PRIORITY LOCK
+                    // 서버 주입 데이터가 있다면, 브라우저의 과거 상태나 URL 해시보다 무조건 우선함
                     if (injected.category) {
-                        // 새로운 카테고리가 주입되면 기존 세션 기록을 강제로 지워 홈으로 튕기지 않게 함
                         sessionStorage.removeItem('MyHomePlannerState');
+                        window.location.hash = ''; // 해시 지워서 #step4 방해 제거
+                        this.step = 3; // 시각적 튕김 방지를 위해 즉시 로딩 처리
                         
                         setTimeout(() => {
                             this.selections.category = injected.category;
-                            // 기본값 세팅 (질문 없이 결과 바로 표출)
                             const defaults = {
                                 moving: { q1: '가정집 (아파트/빌라)', q2: '1개월 이내' },
                                 cleaning: { q1: '이사 청소 (거주)', q2: '20평대' },
@@ -877,21 +878,26 @@
                             const def = defaults[injected.category] || {};
                             this.selections.q1 = def.q1 || '';
                             this.selections.q2 = def.q2 || '';
-                            this.selectCategory(injected.category); // 바로 로딩 → 결과!
-                        }, 200);
-                    } else {
-                        // Restore state only if NO injected category (avoids conflict)
-                        const saved = sessionStorage.getItem('MyHomePlannerState');
-                        if (saved) {
-                            try {
-                                const data = JSON.parse(saved);
-                                this.selections = data.selections;
-                                this.matchedPartners = data.matchedPartners;
-                                this.handleRouting();
-                            } catch (e) { }
-                        } else {
+                            
+                            // 강제 결과 생성 및 이동
+                            this.matchedPartners = this.getMatches();
+                            this.step = 4; // 로딩 거치지 않고 바로 결과(4)로 수렴
+                            this.saveState();
+                        }, 100);
+                        return; // 아래의 세션 복구 및 라우팅 로직 실행 안 함
+                    }
+
+                    // Restore state only if NO injected category
+                    const saved = sessionStorage.getItem('MyHomePlannerState');
+                    if (saved) {
+                        try {
+                            const data = JSON.parse(saved);
+                            this.selections = data.selections;
+                            this.matchedPartners = data.matchedPartners;
                             this.handleRouting();
-                        }
+                        } catch (e) { }
+                    } else {
+                        this.handleRouting();
                     }
                 },
 
