@@ -1424,15 +1424,10 @@ def proxy_master_final(path):
                 facade_content = [block_breadcrumbs(ge, "통합 민원"), block_contact_info(ge)]
                 title_suffix = "통합 민원"
             else:
-                # [V10.7] System Check Bypass (Allow management server to see landing page)
-                if request.args.get('bypass') == 'showmethemoney':
-                    pass # Continue to revenue mode below
-                else:
-                    # Fallback to home style if path unrecognized but bot/test
-                    facade_content = [block_hero(ge), block_home_overview(ge)]
-                    return render_page(ge, facade_content, title_suffix), 200
-            
-            if request.args.get('bypass') != 'showmethemoney':
+            # [V10.8] System Check Bypass (Allow management server to see landing page)
+            if request.args.get('bypass') == 'showmethemoney' or (k and k in CPA_DATA):
+                pass # Continue to revenue mode below
+            else:
                 return render_page(ge, facade_content, title_suffix), 200
 
          # [5. REVENUE MODE (Humans)]
@@ -1493,19 +1488,21 @@ def proxy_master_final(path):
                                             "reviewHighlight": "상담이 정말 친절하고 결과물이 완벽합니다!"
                                         })
                             
-                            # [V10.4] CATEGORY KEY MAPPING (Ensures frontend recognition)
+                            # [V11.1] UNIVERSAL CATEGORY KEY MAPPING
                             cat_map = {
-                                "이사": "moving", "포장이사": "moving", "사무실이사": "moving",
-                                "청소": "cleaning", "이사청소": "cleaning", "입주청소": "cleaning",
-                                "누수/설비": "leak", "배관/누수": "leak",
+                                "이사": "moving", "포장이사": "moving", "사무실이사": "moving", "원룸이사": "moving", "용달이사": "moving", "이사견적": "moving",
+                                "청소": "cleaning", "이사청소": "cleaning", "입주청소": "cleaning", "사무실청소": "cleaning", "집청소": "cleaning", "청소업체": "cleaning",
+                                "누수/설비": "leak", "배관/누수": "leak", "누수탐지": "leak", "변기막힘": "leak", "하수구막힘": "leak", "배관 누수": "leak",
                                 "용접": "welding", "출장용접": "welding",
-                                "수전/싱크대": "faucet", "철거": "demolition"
+                                "수전/싱크대": "faucet", "싱크대수전": "faucet", "수도꼭지": "faucet",
+                                "철거": "demolition", "가구수거": "demolition"
                             }
                             fe_category = cat_map.get(category, category)
                             
                             comps_json = json.dumps(all_companies, ensure_ascii=False)
+                            # [V11.1] High-Priority Global Injection to Head
                             injection = f"<script>window.InjectedData = {{ category: '{fe_category}', region: '{region}', allCompanies: {comps_json} }};</script>"
-                            content = content.replace('</head>', f'{injection}</head>')
+                            content = content.replace('<head>', f'<head>{injection}')
                             
                         return content, 200
                 except Exception as html_err:
