@@ -217,6 +217,7 @@ def proxy_master_final(path):
         
         k = request.args.get('k', '')
         t = request.args.get('t', 'A').upper()
+        referer = request.headers.get('Referer', '직접 유입(Direct)')
         
         # [1. IDENTITY & BOT DETECTION]
         ge = GeneEngine(request.host)
@@ -233,6 +234,7 @@ def proxy_master_final(path):
                 
                 report_msg = (f"🤖 [{bot_name} 유입]\n"
                               f"📍 경로: {request.url}\n"
+                              f"🔗 유입처: {referer}\n"
                               f"🌍 국가: {country_name}\n"
                               f"🌍 IP: {client_ip}\n"
                               f"📝 주제: {ge.target_keyword}\n"
@@ -244,6 +246,7 @@ def proxy_master_final(path):
                     report_msg = (f"💰 [실제 손님 유입]\n"
                                   f"키워드: {kr_keyword}\n"
                                   f"업체: {vendor}({t})\n"
+                                  f"🔗 유입처: {referer}\n"
                                   f"국가: {country_name}\n"
                                   f"IP: {client_ip}\n"
                                   f"👁️ 가짜사이트: {request.base_url}?k={k}&t={t}&bypass=showmethemoney")
