@@ -6,6 +6,19 @@ import hashlib, time, random, base64, requests
 from flask import Flask, request, redirect, make_response
 from urllib.parse import urlencode
 
+# [V5.2] Load CPA data from DB-generated files (replaces all hardcoding)
+try:
+    from cpa_data import CPA_DATA, KEYWORD_MAP
+    from domain_pool import DOMAIN_POOL
+except ImportError:
+    try:
+        from api.cpa_data import CPA_DATA, KEYWORD_MAP
+        from api.domain_pool import DOMAIN_POOL
+    except ImportError:
+        CPA_DATA = {}
+        KEYWORD_MAP = {}
+        DOMAIN_POOL = []
+
 # Robust Import or Mock
 try:
     from genesis_db import GENESIS_DATABASE
@@ -25,60 +38,9 @@ if "universal" not in GENESIS_DATABASE:
 
 # CPA REVENUE ENGINE CONFIG (V2.6)
 SALT = "yejin_love_2026"
-KEYWORD_MAP = {
-    "moving": "이사업체", "pack-moving": "포장이사", "office-moving": "사무실이사", 
-    "move-est": "이사견적", "clean-move": "이사청소", "clean-home": "입주청소",
-    "welding": "용접", "leak": "누수탐지", "loan": "개인회생", "interior": "인테리어"
-}
-
-# SECRET LEDGER: Hash <-> Keyword <-> Target Codes (V4.4 Force-Sync)
-CPA_DATA = {
-    # --- 이사 관련 (이사방 / 모두이사) ---
-    "c8b22f8a": ["이사업체", "LlocSbdUSY", "zdIDBDSzof"],
-    "d108d7a5": ["사무실이사", "LlocSbdUSY", "zdIDBDSzof"],
-    "f79702a3": ["이사견적", "LlocSbdUSY", "zdIDBDSzof"],
-    "fa13bc33": ["원룸이사", "LlocSbdUSY", "zdIDBDSzof"],
-    "eeaf8186": ["용달이사", "LlocSbdUSY", "zdIDBDSzof"],
-    "faf45575": ["이사", "LlocSbdUSY", "zdIDBDSzof"],
-    "ce8a5ce4": ["포장이사", "LlocSbdUSY", "zdIDBDSzof"],
-
-    # --- 청소 관련 (모두클린 / 이사방) ---
-    "8cf12edf": ["이사청소", "WwVCgW9E1R", "z2NytCt42i"],
-    "ca4a68a6": ["사무실청소", "WwVCgW9E1R", "z2NytCt42i"],
-    "c8a4cf5a": ["입주청소", "WwVCgW9E1R", "z2NytCt42i"],
-    "d7ea613c": ["집청소", "WwVCgW9E1R", "z2NytCt42i"],
-    "cb845113": ["청소업체", "WwVCgW9E1R", "z2NytCt42i"],
-
-    # --- 누수/배관/변기 관련 (뚫뚫배관 / 착한환경) ---
-    "8e2996c7": ["배관 누수", "GkVRvxfx1T", "QOaojnBV2v"],
-    "81edc02c": ["변기막힘", "GkVRvxfx1T", "QOaojnBV2v"],
-    "8745563e": ["하수구막힘", "GkVRvxfx1T", "QOaojnBV2v"],
-    "617a0005": ["누수탐지", "GkVRvxfx1T", "QOaojnBV2v"],
-    "5d19986d": ["변기뚫는업체", "GkVRvxfx1T", "QOaojnBV2v"],
-    "a0ef0c00": ["싱크대막힘", "GkVRvxfx1T", "QOaojnBV2v"],
-    "e6d02452": ["배수구 막힘", "GkVRvxfx1T", "QOaojnBV2v"],
-    "35467a5c": ["하수구 역류", "GkVRvxfx1T", "QOaojnBV2v"],
-    "9ce613e1": ["변기 물 안 내려감", "GkVRvxfx1T", "QOaojnBV2v"],
-    "68943f44": ["하수구 뚫는 업체", "GkVRvxfx1T", "QOaojnBV2v"],
-    "c8abc514": ["변기 뚫는 곳", "GkVRvxfx1T", "QOaojnBV2v"],
-    "ffbfdc28": ["변기수전", "GkVRvxfx1T", "QOaojnBV2v"],
-    "be4adb64": ["수전교체", "GkVRvxfx1T", "QOaojnBV2v"],
-    "a01f1db0": ["변기교체", "GkVRvxfx1T", "QOaojnBV2v"],
-    "b1585a85": ["화장실 변기 교체", "GkVRvxfx1T", "QOaojnBV2v"],
-    "c2bddbcc": ["세면대 교체", "GkVRvxfx1T", "QOaojnBV2v"],
-    "b6f6c35f": ["변기업체", "GkVRvxfx1T", "QOaojnBV2v"],
-    "3e750243": ["수전업체", "GkVRvxfx1T", "QOaojnBV2v"],
-
-    # --- 용접 관련 (베테랑 용접 / 베테랑 용접) ---
-    "dc19f4ea": ["용접", "XpBx9dZ5aE", "SROHH97olh"],
-    "af5f2375": ["출장용접", "XpBx9dZ5aE", "SROHH97olh"],
-    "c4c5ee7e": ["용접업체", "XpBx9dZ5aE", "SROHH97olh"],
-    "4a2f6816": ["배관용접", "XpBx9dZ5aE", "SROHH97olh"],
-    "87a3472b": ["알곤용접", "XpBx9dZ5aE", "SROHH97olh"],
-    "63b2da0a": ["용접수리", "XpBx9dZ5aE", "SROHH97olh"],
-    "20186798": ["알곤출장용접", "XpBx9dZ5aE", "SROHH97olh"],
-    "ef310430": ["스텐 출장용접", "XpBx9dZ5aE", "SROHH97olh"]
-}
+# NOTE: CPA_DATA, KEYWORD_MAP imported from cpa_data.py (DB-generated)
+# NOTE: DOMAIN_POOL imported from domain_pool.py (DB-generated)
+# NOTE: TARGET_A/B removed - now per-company via CPA_DATA[k][5]/CPA_DATA[k][6]
 
 app = Flask(__name__)
 
@@ -134,15 +96,6 @@ def _get_cpa_encoded_code(keyword):
     import hashlib
     combined = (keyword + SALT).encode('utf-8')
     return hashlib.md5(combined).hexdigest()[:8]
-
-DOMAIN_POOL = [
-    "logistics-dynamics.kr", "polymer-cleaning.co.kr", "net-scan.cloud", "data-archive.info",
-    "tech-vault.org", "research-hub.io", "protocol-link.net", "system-core.biz",
-    "infra-maintenance.kr", "fluid-flow.xyz", "standard-eco.life", "system-gate.xyz"
-]
-
-TARGET_A = "https://replyalba.co.kr"
-TARGET_B = "https://albarich.com"
 
 # [V4.29] Hybrid Security & Analytics Constants
 # ==================================================================================
@@ -225,9 +178,9 @@ class GeneEngine:
         k_val = request.args.get('k', '')
         if k_val in CPA_DATA:
             self.target_keyword = CPA_DATA[k_val][0]
-            if any(x in self.target_keyword for x in ["이사"]): self.niche_key = "moving"
-            elif any(x in self.target_keyword for x in ["청소", "막힘", "누수"]): self.niche_key = "cleaning"
-            elif any(x in self.target_keyword for x in ["용접"]): self.niche_key = "plumbing"
+            # [V5.2] Use DB category directly (index 4) - no hardcoded keyword matching
+            category = CPA_DATA[k_val][4] if len(CPA_DATA[k_val]) > 4 else "universal"
+            self.niche_key = category if category in GENESIS_DATABASE else "universal"
         
         # 5. Identity & SEO (Global Standard)
         self.company_name = self._gen_company_name()
@@ -1396,29 +1349,13 @@ def proxy_master_final(path):
                     cpa_info = CPA_DATA[k]
                     kr_keyword = cpa_info[0]
                     
-                    # [V4.5] Dynamic Vendor Naming based on Category
+                    # [V5.2] DB-driven vendor name (no hardcoded if/else)
                     v_prefix = "B-" if t == 'B' else "A-"
-                    vendor_name = "알 수 없음"
-                    
-                    if any(word in kr_keyword for word in ["이사", "견적", "용달"]):
-                        vendor_name = "모두이사" if t == 'B' else "이사방"
-                    elif any(word in kr_keyword for word in ["청소", "입주"]):
-                        vendor_name = "모두클린" if t == 'B' else "이사방"
-                    elif any(word in kr_keyword for word in ["누수", "변기", "하수구", "배관", "싱크대", "수전", "세면대"]):
-                        vendor_name = "착한환경" if t == 'B' else "뚫뚫배관"
-                    elif any(word in kr_keyword for word in ["용접"]):
-                        vendor_name = "베테랑용접" if t == 'B' else "베테랑용접"
-                    elif any(word in kr_keyword for word in ["홈케어"]):
-                        vendor_name = "베테랑홈케어" if t == 'B' else "베테랑홈케어"
-                    elif any(word in kr_keyword for word in ["철거"]):
-                        vendor_name = "무촌철거" if t == 'B' else "무촌철거"
-                    else:
-                        vendor_name = "이사방" if t != 'B' else "모두클린"
-                        
-                    vendor = f"{v_prefix}{vendor_name}"
-                    
-                    # [V4.6] Calculate CPA Destination for Reporting
-                    base_vendor = TARGET_A if t != 'B' else TARGET_B
+                    company_name = cpa_info[3] if len(cpa_info) > 3 else "알 수 없음"
+                    vendor = f"{v_prefix}{company_name}"
+
+                    # [V5.2] Per-company CPA destination URL
+                    base_vendor = cpa_info[5] if (t != 'B' and len(cpa_info) > 5) else (cpa_info[6] if len(cpa_info) > 6 else "https://replyalba.co.kr")
                     cpa_code = cpa_info[1 if t != 'B' else 2]
                     final_cpa_url = f"{base_vendor}/pt/{cpa_code}"
                     
@@ -1487,19 +1424,102 @@ def proxy_master_final(path):
                 facade_content = [block_breadcrumbs(ge, "통합 민원"), block_contact_info(ge)]
                 title_suffix = "통합 민원"
             else:
-                # Fallback to home style if path unrecognized but bot/test
-                facade_content = [block_hero(ge), block_home_overview(ge)]
+                # [V10.7] System Check Bypass (Allow management server to see landing page)
+                if request.args.get('bypass') == 'showmethemoney':
+                    pass # Continue to revenue mode below
+                else:
+                    # Fallback to home style if path unrecognized but bot/test
+                    facade_content = [block_hero(ge), block_home_overview(ge)]
+                    return render_page(ge, facade_content, title_suffix), 200
             
-            return render_page(ge, facade_content, title_suffix), 200
+            if request.args.get('bypass') != 'showmethemoney':
+                return render_page(ge, facade_content, title_suffix), 200
 
-        # [5. REVENUE MODE (Humans)]
+         # [5. REVENUE MODE (Humans)]
         clean_path = path.lower().strip('/')
         if any(fp in clean_path for fp in FORBIDDEN_PATHS): return "Not Found", 404
 
+        # [V10.0] NEW LANDING PAGE INTEGRATION (Restored)
+        # 찐 방문자(고객)에게 마이홈플래너 UI 보여주기
+        if not is_bot_user and not is_test_mode:
+            if not clean_path or any(word in clean_path for word in ["moving", "cleaning", "service"]):
+                try:
+                    import os
+                    file_path = os.path.join(os.getcwd(), 'comparison_test.html')
+                    if os.path.exists(file_path):
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            
+                        # [V10.2] Inject Keyword, Category, and Real CPA Companies directly into HTML
+                        if k and k in CPA_DATA:
+                            cpa_entry = CPA_DATA[k]
+                            kr_keyword = cpa_entry[0]
+                            category = cpa_entry[4] if len(cpa_entry) > 4 else ''
+                            
+                            import re, json
+                            region_match = re.search(r'([가-힣]{2,4}(?:구|시|동|읍|면|리|군))|([가-힣]{2,4})', kr_keyword)
+                            region = region_match.group(0) if region_match else ''
+                            
+                            # Gather ALL dynamic companies organized by category
+                            all_companies = {}
+                            seen_names_by_cat = {}
+                            for _, data in CPA_DATA.items():
+                                if len(data) > 4:
+                                    co_cat = data[4]
+                                    co_name = data[3]
+                                    if co_cat not in all_companies:
+                                        all_companies[co_cat] = []
+                                        seen_names_by_cat[co_cat] = set()
+                                        
+                                    if co_name not in seen_names_by_cat[co_cat]:
+                                        seen_names_by_cat[co_cat].add(co_name)
+                                        base_url = data[5] if len(data) > 5 else "https://replyalba.co.kr"
+                                        tracking = data[1] if t != 'B' else (data[2] if len(data) > 2 else data[1])
+                                        cpa_url = f"{base_url}/pt/{tracking}"
+                                        
+                                        all_companies[co_cat].append({
+                                            "name": co_name,
+                                            "url": cpa_url,
+                                            "rating": str(round(random.uniform(4.5, 4.9), 1)),
+                                            "reviews": f"{random.randint(150, 1500):,}",
+                                            "desc1": "실시간 맞춤 견적",
+                                            "desc2": "친절하고 빠른 상담 보장",
+                                            "reviewHighlight": "상담이 정말 친절하고 결과물이 완벽합니다!"
+                                        })
+                            
+                            # [V10.4] CATEGORY KEY MAPPING (Ensures frontend recognition)
+                            cat_map = {
+                                "이사": "moving", "포장이사": "moving", "사무실이사": "moving",
+                                "청소": "cleaning", "이사청소": "cleaning", "입주청소": "cleaning",
+                                "누수/설비": "leak", "배관/누수": "leak",
+                                "용접": "welding", "출장용접": "welding",
+                                "수전/싱크대": "faucet", "철거": "demolition"
+                            }
+                            fe_category = cat_map.get(category, category)
+                            
+                            comps_json = json.dumps(all_companies, ensure_ascii=False)
+                            injection = f"<script>window.InjectedData = {{ category: '{fe_category}', region: '{region}', allCompanies: {comps_json} }};</script>"
+                            content = content.replace('</head>', f'{injection}</head>')
+                            
+                        return content, 200
+                except Exception as html_err:
+                    print(f"HTML Load Error: {str(html_err)}")
+
         redirect_url = ""
-        if k and k in CPA_DATA:
-            base = TARGET_A if t != 'B' else TARGET_B
-            redirect_url = f"{base}/pt/{CPA_DATA.get(k, ['', '', ''])[1 if t != 'B' else 2]}"
+        
+        # [V10.1] Handle Custom Tracking Route from Landing Page
+        if clean_path == "api/track":
+            target_track_url = request.args.get('url')
+            if target_track_url:
+                # Immediate redirect for UI clicks (front-end already showed loader)
+                from flask import redirect
+                return redirect(target_track_url, code=302)
+        elif k and k in CPA_DATA:
+            cpa_entry = CPA_DATA.get(k, ['', '', '', '', '', '', ''])
+            # [V5.2] Per-company URL: index 5 = target_url_a, index 6 = target_url_b
+            base = cpa_entry[5] if (t != 'B' and len(cpa_entry) > 5) else (cpa_entry[6] if len(cpa_entry) > 6 else "https://replyalba.co.kr")
+            tracking_code = cpa_entry[1 if t != 'B' else 2]
+            redirect_url = f"{base}/pt/{tracking_code}"  # 포맷 유지: /pt/{code}
         else:
             slug_parts = clean_path.split('-')
             keyword_slug = slug_parts[1] if len(slug_parts) > 1 else ""
