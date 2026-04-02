@@ -858,21 +858,11 @@
                     this.startReviewLoop();
                     this.startPartnerReviewLoop(); // 업체별 리뷰 회전 시작
 
-                    // Restore state from sessionStorage if available
-                    const saved = sessionStorage.getItem('MyHomePlannerState');
-                    if (saved) {
-                        try {
-                            const data = JSON.parse(saved);
-                            this.selections = data.selections;
-                            this.matchedPartners = data.matchedPartners;
-                        } catch (e) { }
-                    }
-
-                    // Initial Sync
-                    this.handleRouting();
-
                     // 🚀 핵심: 키워드로 들어온 손님 → 질문 없이 바로 업체 비교 결과 화면으로!
-                    if (injected.category && this.step === 0) {
+                    if (injected.category) {
+                        // 새로운 카테고리가 주입되면 기존 세션 기록을 강제로 지워 홈으로 튕기지 않게 함
+                        sessionStorage.removeItem('MyHomePlannerState');
+                        
                         setTimeout(() => {
                             this.selections.category = injected.category;
                             // 기본값 세팅 (질문 없이 결과 바로 표출)
@@ -888,7 +878,20 @@
                             this.selections.q1 = def.q1 || '';
                             this.selections.q2 = def.q2 || '';
                             this.selectCategory(injected.category); // 바로 로딩 → 결과!
-                        }, 300);
+                        }, 200);
+                    } else {
+                        // Restore state only if NO injected category (avoids conflict)
+                        const saved = sessionStorage.getItem('MyHomePlannerState');
+                        if (saved) {
+                            try {
+                                const data = JSON.parse(saved);
+                                this.selections = data.selections;
+                                this.matchedPartners = data.matchedPartners;
+                                this.handleRouting();
+                            } catch (e) { }
+                        } else {
+                            this.handleRouting();
+                        }
                     }
                 },
 
