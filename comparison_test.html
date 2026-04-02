@@ -112,10 +112,6 @@
                 </div>
                 <div>
                     <span class="font-bold text-lg tracking-tight">마이홈플래너</span>
-                    <template x-if="region">
-                        <span class="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded ml-1 font-bold"
-                            x-text="region"></span>
-                    </template>
                 </div>
             </div>
             <!-- Progress Indicator Removed for Simplified Flow -->
@@ -146,20 +142,12 @@
                 <div class="mb-5 mt-2">
                     <span
                         class="inline-block py-1 px-3 rounded-full bg-blue-50 text-primary text-sm font-semibold mb-3 border border-blue-100">
-                        <i class="fa-solid fa-bolt text-accent mr-1"></i> <span
-                            x-text="region ? region + ' 지역' : '빅데이터'"></span> 분석 기반
+                        <i class="fa-solid fa-bolt text-accent mr-1"></i> 빅데이터 분석 기반
                     </span>
                     <h1 class="text-2xl font-bold leading-snug mb-2">
-                        <template x-if="region">
-                            <span><span class="text-primary" x-text="region"></span> 최고의 전문가를<br>찾으시나요?</span>
-                        </template>
-                        <template x-if="!region">
-                            <span>어떤 전문가의<br>도움이 필요하신가요?</span>
-                        </template>
+                        어떤 전문가의<br>도움이 필요하신가요?
                     </h1>
-                    <p class="text-gray-500 text-sm"
-                        x-text="region ? region + ' 고객님들이 가장 선호하는 우수 업체를 매칭해드려요.' : '상황에 딱 맞는 상위 1% 우수 파트너를 찾아드려요.'">
-                    </p>
+                    <p class="text-gray-500 text-sm">상황에 딱 맞는 상위 1% 우수 파트너를 찾아드려요.</p>
                 </div>
 
                 <!-- NEW: Step Process Guide (Ultra-Clean Style) -->
@@ -445,7 +433,7 @@
                         class="w-16 h-16 bg-blue-100 text-primary rounded-full flex items-center justify-center text-3xl mx-auto mb-4 backdrop-blur-sm shadow-inner">
                         <i class="fa-solid fa-list-check"></i>
                     </div>
-                    <h2 class="text-2xl font-bold mb-2">업체 비교 리스트</h2>
+                    <h2 class="text-2xl font-bold mb-2" x-text="getCategoryName(selections.category) + ' 비교 리스트'"></h2>
                     <p class="text-gray-600 mb-6">고객님의 조건에 딱 맞는<br>우수 업체 <span x-text="matchedPartners.length"></span>곳을
                         찾았습니다.</p>
 
@@ -785,6 +773,17 @@
                     q2: ''
                 },
                 matchedPartners: [],
+                getCategoryName(cat) {
+                    const names = {
+                        'moving': '이사',
+                        'cleaning': '청소',
+                        'leak': '배관/누수',
+                        'demolition': '철거/원상복구',
+                        'welding': '출장용접',
+                        'faucet': '수전/싱크대'
+                    };
+                    return names[cat] || '전문';
+                },
 
                 // Quiz data
                 questions: {
@@ -871,9 +870,10 @@
                     this.startReviewLoop();
                     this.startPartnerReviewLoop(); // 업체별 리뷰 회전 시작
 
-                    // 🚀 [V10.9] ULTIMATE PRIORITY LOCK
-                    // 서버 주입 데이터가 있다면, 브라우저의 과거 상태나 URL 해시보다 무조건 우선함
-                    if (injected.category) {
+                    // 🚀 [V11.5] DUAL-PRIORITY LOCK (Auto-Jump vs Manual Navigation)
+                    // 서버 주입 데이터가 있어도, 사용자가 이미 홈으로 나갔거나 수동으로 다른 분야를 선택했다면 무시
+                    const manualNav = sessionStorage.getItem('manualNav');
+                    if (injected.category && !manualNav) {
                         sessionStorage.removeItem('MyHomePlannerState');
                         window.location.hash = ''; // 해시 지워서 #step4 방해 제거
                         this.step = 3; // 시각적 튕김 방지를 위해 즉시 로딩 처리
@@ -899,6 +899,7 @@
                         }, 100);
                         return; // 아래의 세션 복구 및 라우팅 로직 실행 안 함
                     }
+
 
                     // Restore state only if NO injected category
                     const saved = sessionStorage.getItem('MyHomePlannerState');
@@ -966,11 +967,13 @@
                     }
                 },
 
+
                 replaceStep(nextStep) {
                     this.goToStep(nextStep); // 0, 4 등 실제 단계로 이동
                 },
 
                 selectCategory(cat) {
+                    sessionStorage.setItem('manualNav', 'true'); // 수동 조작 시작 (자동점프 끔)
                     this.selections.category = cat;
                     this.goToStep(3); // 상태만 3으로 변경 (해시 변화 없음)
                     this.loadingProgress = 0;
@@ -1056,9 +1059,33 @@
                 },
 
                 getMatches() {
+                    const injected = window.InjectedData || {};
                     const cat = this.selections.category;
+
+                    // 🚀 [V11.0] DYNAMIC INJECTION PRIORITY
+                    if (injected.allCompanies && injected.allCompanies[cat]) {
+                        // DB에서 주입된 데이터가 있으면 이를 가공하여 반환
+                        return injected.allCompanies[cat].map(p => ({
+                            name: p.name,
+                            rating: p.rating || "4.8",
+                            reviews: p.reviews || "500",
+                            desc1: p.desc1 || "실시간 견적 매칭 최우수 업체",
+                            desc2: p.desc2 || "전문 상담사 즉시 배정",
+                            url: p.url,
+                            reviewList: p.reviewList || [
+                                "친절한 상담과 빠른 처리에 만족합니다.",
+                                "합리적인 가격으로 잘 진행했습니다.",
+                                "전문성이 느껴지는 서비스였습니다.",
+                                "다음에도 꼭 다시 이용하고 싶네요.",
+                                "지인들에게도 자신있게 추천합니다."
+                            ],
+                            displayedIndices: [0, 1]
+                        }));
+                    }
+
                     let list = [];
                     if (cat === 'moving') {
+
                         list = [
                             {
                                 name: "모두이사", rating: "4.9", reviews: "2,130", desc1: "<b>국내 1위</b> 포장이사 플랫폼 최우수 인증", desc2: "파손 보험 가입 완료로 100% 안전 보장", url: "https://www.replyalba.co.kr/pt/I84cXCrjhG",
@@ -1344,6 +1371,7 @@
 
                 reset() {
                     // 페이지 새로고침 없이 상태만 초기화 (자동점프 반복 방지)
+                    sessionStorage.setItem('manualNav', 'true'); // 수동 조작 시작 (자동점프 끔)
                     sessionStorage.removeItem('MyHomePlannerState');
                     this.step = 0;
                     this.selections = { category: '', q1: '', q2: '' };
