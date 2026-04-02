@@ -197,11 +197,15 @@ def track_click():
     country_map = {'KR': '대한민국', 'US': '미국', 'JP': '일본', 'CN': '중국', 'HK': '홍콩', 'TW': '대만', 'VN': '베트남', 'TH': '태국', 'PH': '필리핀', 'SG': '싱가포르', 'GB': '영국', 'CA': '캐나다', 'AU': '호주'}
     country_name = country_map.get(country_code, country_code)
     
+    # [V12.6] Localize Category for Telegram
+    cat_map_kr = {'moving': '이사', 'cleaning': '청소', 'leak': '배관/누수', 'plumbing': '배관/누수', 'welding': '용접', 'demolition': '철거', 'faucet': '수전 교체'}
+    cat_display = cat_map_kr.get(cat.lower(), cat)
+
     # Send conversion notification to Telegram
     try:
         msg = (f"🎯 [상담 전환 발생]\n"
                f"업체: {name}\n"
-               f"업종: {cat}\n"
+               f"업종: {cat_display}\n"
                f"지역: {region}\n"
                f"국가: {country_name}\n"
                f"IP: {client_ip}\n"
