@@ -729,8 +729,21 @@
 
     <script>
         function quoteApp() {
+            // [V11.0] HIGH-PRIORITY INITIAL STATE LOCK
+            // 서버 주입 데이터가 있으면 시작부터 step을 4(결과)로 고정하여 홈(0) 노출을 원천 봉쇄
+            const injected = window.InjectedData || {};
+            let initialStep = 0;
+            let initialCategory = '';
+            
+            if (injected.category) {
+                sessionStorage.removeItem('MyHomePlannerState');
+                window.location.hash = ''; 
+                initialStep = 4;
+                initialCategory = injected.category;
+            }
+
             return {
-                step: 0,
+                step: initialStep,
                 region: '', // 추출된 지역명
                 showNotification: false,
                 showTerms: false, // 이용약관 모달
@@ -767,7 +780,7 @@
                 displayedReviews: [], // 현재 화면에 보이는 3개
                 sortBy: 'score', // score, rating, reviews
                 selections: {
-                    category: '',
+                    category: initialCategory,
                     q1: '',
                     q2: ''
                 },

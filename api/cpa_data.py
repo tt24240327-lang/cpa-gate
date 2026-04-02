@@ -20,6 +20,12 @@ CPA_DATA = {
     "sk-004": ["서경석의 이사방", "Lrvab2hUbh", "Lrvab2hUbh", "서경석의 이사방", "이사", "https://replyalba.co.kr", "https://albarich.com"],
     "24-005": ["포장이사 24번가", "J4ZFAYbSAA", "J4ZFAYbSAA", "포장이사 24번가", "이사", "https://replyalba.co.kr", "https://albarich.com"],
 
+    # --- 추가된 마이홈 5대장 업체 (동기화) ---
+    "mdu-001": ["모두이사", "I84cXCrjhG", "I84cXCrjhG", "모두이사", "이사", "https://replyalba.co.kr", "https://albarich.com"],
+    "dai-002": ["다이사", "EdQfml7QZD", "EdQfml7QZD", "다이사", "이사", "https://replyalba.co.kr", "https://albarich.com"],
+    "tm-003": ["이사타임", "Kti1P8kTZ1", "Kti1P8kTZ1", "이사타임", "이사", "https://replyalba.co.kr", "https://albarich.com"],
+    "sk-004": ["서경석의 이사방", "Lrvab2hUbh", "Lrvab2hUbh", "서경석의 이사방", "이사", "https://replyalba.co.kr", "https://albarich.com"],
+
     # --- 청소 관련 ---
     "8cf12edf": ["이사청소", "WwVCgW9E1R", "z2NytCt42i", "모두클린", "청소", "https://replyalba.co.kr", "https://albarich.com"],
     "ca4a68a6": ["사무실청소", "WwVCgW9E1R", "z2NytCt42i", "모두클린", "청소", "https://replyalba.co.kr", "https://albarich.com"],
@@ -32,14 +38,14 @@ CPA_DATA = {
     "md-cl-04": ["모두클린", "SxXSKKGDYP", "SxXSKKGDYP", "모두클린", "청소", "https://replyalba.co.kr", "https://albarich.com"],
 
     # --- 누수/배관/변기 관련 ---
+    "ch-lk-01": ["착한환경", "11onnC2QmU3", "11onnC2QmU3", "착한환경", "누수/설비", "https://replyalba.co.kr", "https://albarich.com"],
+    "dd-lk-02": ["뚫뚫배관", "GkVRvxfx1T", "GkVRvxfx1T", "뚫뚫배관", "누수/설비", "https://replyalba.co.kr", "https://albarich.com"],
     "8e2996c7": ["배관 누수", "GkVRvxfx1T", "QOaojnBV2v", "뚫뚫배관", "누수/설비", "https://replyalba.co.kr", "https://albarich.com"],
     "81edc02c": ["변기막힘", "GkVRvxfx1T", "QOaojnBV2v", "뚫뚫배관", "누수/설비", "https://replyalba.co.kr", "https://albarich.com"],
     "8745563e": ["하수구막힘", "GkVRvxfx1T", "QOaojnBV2v", "뚫뚫배관", "누수/설비", "https://replyalba.co.kr", "https://albarich.com"],
     "617a0005": ["누수탐지", "GkVRvxfx1T", "QOaojnBV2v", "뚫뚫배관", "누수/설비", "https://replyalba.co.kr", "https://albarich.com"],
-    "ch-lk-01": ["착한환경", "11onnC2QmU3", "11onnC2QmU3", "착한환경", "누수/설비", "https://replyalba.co.kr", "https://albarich.com"],
-    "dd-lk-02": ["뚫뚫배관", "GkVRvxfx1T", "GkVRvxfx1T", "뚫뚫배관", "누수/설비", "https://replyalba.co.kr", "https://albarich.com"],
 
-    # --- 수전/싱크대/기타 홈케어 ---
+    # --- 기타 홈케어 ---
     "bt-hc-01": ["베테랑 홈케어", "FzYOdTzVNw", "FzYOdTzVNw", "베테랑 홈케어", "수전/싱크대", "https://replyalba.co.kr", "https://albarich.com"],
     "bt-wd-01": ["베테랑 용접", "XpBx9dZ5aE", "XpBx9dZ5aE", "베테랑 용접", "용접", "https://replyalba.co.kr", "https://albarich.com"],
     "mc-dm-01": ["무촌철거", "10qHjZwUanF", "10qHjZwUanF", "무촌철거", "철거", "https://replyalba.co.kr", "https://albarich.com"],
