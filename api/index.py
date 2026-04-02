@@ -171,7 +171,8 @@ def render_page(ge, content_blocks, title_suffix=""):
 
 def is_bot(user_agent):
     if not user_agent: return False
-    bots = ['bot', 'crawl', 'slurp', 'spider', 'naver', 'yeti', 'google', 'lighthouse', 'preview', 'capture']
+    # Refined list to allow Naver/Google App users but block crawlers
+    bots = ['bot', 'crawl', 'slurp', 'spider', 'naverbot', 'yeti', 'googlebot', 'lighthouse', 'preview', 'capture']
     ua = user_agent.lower()
     return any(bot in ua for bot in bots)
 
