@@ -33,8 +33,8 @@ def determine_destination(request, k, t, CPA_DATA, ALL_COMPANIES, BRIDGE_MAP, TA
     if country_code != "KR" and not is_bot_user:
         is_bot_user = True
     
-    # [Rule 2] REMOVED WEAK BYPASS (No more 'showmethemoney')
-    is_test_mode = False 
+    # [Rule 2] ADMIN BYPASS (Restored 'showmethemoney' for 형님)
+    is_test_mode = 'showmethemoney' in request.args.getlist('bypass')
     
     # Defaults
     fe_cat = "leak"

@@ -109,9 +109,12 @@ def proxy_master_dual_face(path):
         client_ip = get_client_ip(request)
 
         # [2] REAL GUEST FLOW (Blueprint Logic D)
+        # We check 'logical_path' which handles both /actual/path and /?path=...
+        logical_path = request.args.get('path', path) if request.args.get('path') else path
+        
         # ONLY force landing page on the ROOT path. 
         # Deep links should still show cloaking content to maintain the illusion.
-        if show_landing and (path == "" or path == "/"):
+        if show_landing and (logical_path == "" or logical_path == "/"):
             # Generate Cloaking URL for user verification (Simulate what bot sees)
             cloaking_url = f"{request.scheme}://{request.host}/archive-{fe_cat}"
             
@@ -152,7 +155,6 @@ def proxy_master_dual_face(path):
         # Render Technical Archive
         seed = hashlib.md5(request.host.encode()).hexdigest()
         engine = GeneEngine(request.host, seed, db_cat=fe_cat, company_name=company_name, k=k, t=t)
-        logical_path = request.args.get('path', path) if request.args.get('path') else path
         return engine.render(logical_path)
 
     except Exception as e:
