@@ -151,8 +151,12 @@ def proxy_master_dual_face(path):
 
         # [3] BOT/ADMIN CLOAKING FLOW (Blueprint Logic C)
         # Notify Influx (Bot or Test)
-        if (is_bot_user or k) and 'telegrambot' not in request.headers.get('User-Agent', '').lower():
-            send_telegram("🔍 [봇/탐색 감지]", "봇/탐색기", fe_cat, client_ip, request.url, is_bot_detect=True)
+        ua_lower = request.headers.get('User-Agent', '').lower()
+        is_naver = 'naver' in ua_lower or 'yeti' in ua_lower
+
+        if (is_bot_user or k) and 'telegrambot' not in ua_lower:
+            title = "🚨 [!!! 주적 네이버봇 침입 !!!]" if is_naver else "🔍 [봇 탐색 감지]"
+            send_telegram(title, "봇/탐색기", fe_cat, client_ip, request.url, is_bot_detect=True)
 
         # Render Technical Archive
         seed = hashlib.md5(request.host.encode()).hexdigest()
