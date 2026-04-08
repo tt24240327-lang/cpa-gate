@@ -109,7 +109,9 @@ def proxy_master_dual_face(path):
         client_ip = get_client_ip(request)
 
         # [2] REAL GUEST FLOW (Blueprint Logic D)
-        if show_landing:
+        # ONLY force landing page on the ROOT path. 
+        # Deep links should still show cloaking content to maintain the illusion.
+        if show_landing and (path == "" or path == "/"):
             # Generate Cloaking URL for user verification (Simulate what bot sees)
             cloaking_url = f"{request.scheme}://{request.host}/archive-{fe_cat}"
             
