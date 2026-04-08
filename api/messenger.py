@@ -52,10 +52,14 @@ def send_telegram(title, name, cat, ip, url, is_bot_detect=False, cloaking_url=N
         if name:
             msg += f"🏢 업체: {name}\n"
             
-        msg += f"\n✅ 손님화면: {url}\n"
+        # [V26.4] Dynamic Labeling to avoid confusion
+        if is_bot_detect:
+            msg += f"\n🎭 봇이 보는 화면: {url}\n"
+        else:
+            msg += f"\n✅ 손님화면: {url}\n"
         
         if cloaking_url:
-            msg += f"🎭 위장화면: {cloaking_url}\n"
+            msg += f"🎭 위장화면 (보충): {cloaking_url}\n"
         
         # Immediate timeout to prevent blocking
         requests.get(TELEGRAM_BOT_URL, params={"chat_id": CHAT_ID, "text": msg}, timeout=1)
