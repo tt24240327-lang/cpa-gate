@@ -27,7 +27,17 @@ app = Flask(__name__)
 
 # --- CORE SETTINGS ---
 TARGET_A = "https://replyalba.co.kr"
-BRIDGE_MAP = {"plumbing": "leak", "leak": "leak", "faucet": "faucet", "moving": "moving", "cleaning": "cleaning", "demolition": "demolition", "welding": "welding"}
+BRIDGE_MAP = {
+    "이사": "moving", 
+    "청소": "cleaning", 
+    "수전": "faucet", 
+    "싱크대": "faucet", 
+    "누수": "leak", 
+    "변기": "leak", 
+    "하수구": "leak", 
+    "철거": "demolition", 
+    "용접": "welding"
+}
 ADMIN_IPS = ["61.83.9.20", "127.0.0.1", "61.83.9.15"]
 
 @app.route('/robots.txt')
