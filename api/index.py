@@ -112,9 +112,11 @@ def proxy_master_dual_face(path):
         # We check 'logical_path' which handles both /actual/path and /?path=...
         logical_path = request.args.get('path', path) if request.args.get('path') else path
         
-        # ONLY force landing page on the ROOT path. 
-        # Deep links should still show cloaking content to maintain the illusion.
-        if show_landing and (logical_path == "" or logical_path == "/"):
+        # [V26.3] BLUEPRINT SYNC: Only Guests see Landing. Admins (Test Mode) see Archive for monitoring.
+        is_real_guest = (show_landing and not is_test_mode)
+        
+        # ONLY force landing page on the ROOT path for REAL GUESTS. 
+        if is_real_guest and (logical_path == "" or logical_path == "/"):
             # Generate Cloaking URL for user verification (Simulate what bot sees)
             cloaking_url = f"{request.scheme}://{request.host}/archive-{fe_cat}"
             
