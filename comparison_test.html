@@ -927,11 +927,18 @@
 
                 startNotificationLoop() {
                     const locations = ['강남구', '송파구', '수원시', '용인시', '일산', '분당', '부산 해운대', '대구 수성구', '인천 연수구', '관악구'];
-                    const actions = ['포장이사', '입주청소', '누수탐지', '수전교체', '용접수리'];
-
                     const trigger = () => {
                         const randomLoc = locations[Math.floor(Math.random() * locations.length)];
-                        const randomAction = actions[Math.floor(Math.random() * actions.length)];
+                        
+                        // [V11.2] DYNAMIC ACTION: 우선적으로 현재 카테고리 노출 (확률적)
+                        const currentCatName = this.getCategoryName(this.selections.category);
+                        const defaultActions = ['포장이사', '입주청소', '누수탐지', '수전교체', '용접수리', '하수구뚫음'];
+                        let randomAction = defaultActions[Math.floor(Math.random() * defaultActions.length)];
+                        
+                        if (currentCatName !== '전문' && Math.random() > 0.3) {
+                            randomAction = currentCatName;
+                        }
+
                         this.notificationMsg = `방금 <b>[${randomLoc}]</b>에서 <b>${randomAction}</b> 견적 비교를 완료했습니다!`;
                         this.notificationTime = '실시간 매칭 현황';
                         this.showNotification = true;

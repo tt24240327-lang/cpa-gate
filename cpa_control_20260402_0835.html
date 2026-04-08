@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🛡️ CPA MASTER CONTROL CENTER</title>
+<style>
+:root{--cyan:#00d4ff;--green:#00ff88;--red:#ff4466;--bg:#0a0e1a;--card:rgba(255,255,255,0.04);--border:rgba(0,212,255,0.2);--text:#e0e8ff;--sub:#8899bb;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;font-size:14px;min-height:100vh;display:flex;flex-direction:column;}
+/* HEADER */
+#hdr{background:rgba(0,0,0,0.6);border-bottom:1px solid var(--border);padding:12px 20px;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px);}
+#hdr-top{display:flex;align-items:center;justify-content:space-between;}
+#hdr-title{font-size:18px;font-weight:900;background:linear-gradient(90deg,var(--cyan),var(--green));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px;}
+#hdr-right{display:flex;gap:10px;align-items:center;}
+.hud-bar{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;}
+.hud-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 16px;text-align:center;min-width:100px;}
+.hud-card .num{font-size:20px;font-weight:900;color:var(--cyan);}
+.hud-card .lbl{font-size:11px;color:var(--sub);}
+#warn-bar{margin-top:8px;display:none;background:rgba(255,180,0,0.12);border:1px solid rgba(255,180,0,0.4);border-radius:8px;padding:6px 14px;color:#ffb400;font-size:12px;}
+/* TABS */
+#tab-bar{display:flex;gap:4px;padding:12px 20px 0;background:rgba(0,0,0,0.3);border-bottom:1px solid var(--border);}
+.tab-btn{padding:8px 18px;border:none;border-bottom:3px solid transparent;background:none;color:var(--sub);cursor:pointer;font-size:13px;font-weight:600;transition:.2s;}
+.tab-btn.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.tab-btn:hover{color:var(--text);}
+/* CONTENT */
+#content{flex:1;padding:20px;overflow-y:auto;padding-bottom:140px;}
+.tab-pane{display:none;} .tab-pane.active{display:block;}
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px;backdrop-filter:blur(6px);}
+.card-title{font-size:13px;font-weight:700;color:var(--cyan);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+/* BUTTONS */
+.btn{padding:7px 16px;border-radius:8px;border:none;cursor:pointer;font-weight:700;font-size:13px;transition:.2s;}
+.btn-cyan{background:linear-gradient(135deg,var(--cyan),var(--green));color:#000;}
+.btn-cyan:hover{opacity:.85;transform:scale(1.03);}
+.btn-red{background:rgba(255,68,102,.15);border:1px solid var(--red);color:var(--red);}
+.btn-ghost{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{background:rgba(0,212,255,.1);}
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{color:var(--sub);font-size:11px;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+.tbl tr:hover td{background:rgba(0,212,255,.04);}
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.form-row.single{grid-template-columns:1fr;}
+label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px;}
+input,select,textarea{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:13px;outline:none;transition:.2s;}
+input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,212,255,.15);}
+select option{background:#0d1120;}
+/* BADGE */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-on{background:rgba(0,255,136,.15);color:var(--green);border:1px solid rgba(0,255,136,.3);}
+.badge-off{background:rgba(255,68,102,.12);color:var(--red);border:1px solid rgba(255,68,102,.3);}
+/* PREVIEW BOX */
+.preview-box{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px;font-family:monospace;color:var(--cyan);min-height:60px;word-break:break-all;}
+/* VERIFY LIST */
+.verify-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--border);margin-bottom:8px;}
+.vi-icon{font-size:20px;width:28px;text-align:center;}
+.vi-text{flex:1;}
+.vi-title{font-weight:700;}
+.vi-sub{font-size:12px;color:var(--sub);}
+/* LOG */
+.log-item{padding:10px;border-left:3px solid var(--border);margin-bottom:6px;background:rgba(255,255,255,.02);border-radius:0 8px 8px 0;}
+.log-item .log-action{font-size:11px;font-weight:700;color:var(--cyan);}
+.log-item .log-time{font-size:11px;color:var(--sub);float:right;}
+/* TERMINAL */
+#terminal{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.92);border-top:1px solid var(--border);backdrop-filter:blur(10px);z-index:200;transition:.3s;}
+#term-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-bottom:1px solid var(--border);cursor:pointer;}
+#term-title{font-size:12px;font-weight:700;color:var(--green);}
+#term-body{height:90px;overflow-y:auto;padding:8px 16px;font-family:monospace;font-size:12px;color:#00ff88;}
+#term-body.hidden{display:none;}
+/* iframe preview */
+#iframe-wrap{position:relative;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#000;width:100%;height:400px;}
+#iframe-wrap iframe{width:100%;height:100%;border:none;}
+/* GLOW btn */
+#deploy-btn{animation:glow 2s infinite;}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(0,212,255,.4);}50%{box-shadow:0 0 20px rgba(0,212,255,.9),0 0 40px rgba(0,255,136,.3);}}
+/* STATUS DOT */
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{50%{opacity:.4;}}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;justify-content:center;align-items:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#0d1120;border:1px solid var(--border);border-radius:16px;padding:28px;width:500px;max-width:95vw;}
+.modal-title{font-size:16px;font-weight:900;color:var(--cyan);margin-bottom:18px;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div id="hdr-top">
+    <div id="hdr-title">🛡️ CPA MASTER CONTROL CENTER</div>
+    <div id="hdr-right">
+      <span id="vercel-status"><span class="dot"></span> VERCEL LIVE</span>
+      &nbsp;
+      <button class="btn btn-red" id="deploy-btn" onclick="deployNow()">⚡ 즉시 배포</button>
+      <button class="btn btn-ghost" onclick="loadStatus()">↻</button>
+    </div>
+  </div>
+  <div class="hud-bar">
+    <div class="hud-card"><div class="num" id="stat-companies">-</div><div class="lbl">🏢 업체</div></div>
+    <div class="hud-card"><div class="num" id="stat-keywords">-</div><div class="lbl">🔑 키워드</div></div>
+    <div class="hud-card"><div class="num" id="stat-domains">-</div><div class="lbl">🌐 도메인</div></div>
+    <div class="hud-card"><div class="num" id="stat-deploy">-</div><div class="lbl">⚡ 마지막 배포</div></div>
+  </div>
+  <div id="warn-bar">⚠️ <span id="warn-text"></span></div>
+</div>
+
+<!-- TAB BAR -->
+<div id="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('t1',this)">🏢 업체관리</button>
+  <button class="tab-btn" onclick="switchTab('t2',this)">🔑 키워드관리</button>
+  <button class="tab-btn" onclick="switchTab('t3',this)">🌐 도메인관리</button>
+  <button class="tab-btn" onclick="switchTab('t4',this)">📡 실시간모니터</button>
+  <button class="tab-btn" onclick="switchTab('t5',this)">✅ 시스템검증</button>
+  <button class="tab-btn" onclick="switchTab('t6',this)">📋 변경이력</button>
+</div>
+
+<!-- CONTENT -->
+<div id="content">
+
+<!-- TAB 1: 업체관리 -->
+<div id="t1" class="tab-pane active">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <div style="font-size:16px;font-weight:700;">업체 목록</div>
+    <button class="btn btn-cyan" onclick="openModal('modal-company')">+ 신규 업체 추가</button>
+  </div>
+  <div id="companies-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+</div>
+
+<!-- TAB 2: 키워드관리 -->
+<div id="t2" class="tab-pane">
+  <div class="card">
+    <div class="card-title">🔑 키워드 추가</div>
+    <div class="form-row">
+      <div><label>업체 선택</label><select id="kw-company"></select></div>
+      <div><label>키워드</label><input id="kw-input" placeholder="예: 인터넷설치" oninput="previewHash()"></div>
+    </div>
+    <div class="preview-box" id="kw-preview">키워드 입력 시 해시코드와 URL이 표시됩니다.</div>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button class="btn btn-cyan" onclick="addKeyword(true)">💾 저장 + 자동배포</button>
+      <button class="btn btn-ghost" onclick="addKeyword(false)">저장만</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between;">
+      <span>📋 키워드 목록</span>
+      <div style="display:flex;gap:8px;">
+        <select id="kw-filter-company" onchange="loadKeywords()" style="width:140px;"><option value="">전체 업체</option></select>
+        <input id="kw-search" placeholder="🔍 검색" oninput="filterKeywords()" style="width:140px;">
+      </div>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>키워드</th><th>해시코드</th><th>업체</th><th>상태</th><th>액션</th></tr></thead>
+      <tbody id="kw-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TAB 3: 도메인관리 -->
+<div id="t3" class="tab-pane">
+  <div class="card" style="margin-bottom:10px;">
+    <div class="card-title" style="justify-content:space-between;">
+      <span>📥 CSV 대량 업로드 / 다운로드</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <a class="btn btn-ghost" href="/api/cpa/keywords/csv" download style="text-decoration:none;padding:7px 16px;">📤 CSV 다운로드</a>
+      <label class="btn btn-ghost" style="cursor:pointer;margin:0;">
+        📥 CSV 업로드
+        <input type="file" accept=".csv" style="display:none;" onchange="uploadCSV(this)">
+      </label>
+      <span style="font-size:11px;color:var(--sub);">CSV 형식: 키워드,업체명 (헤더 포함)</span>
+    </div>
+    <div id="csv-result" style="margin-top:8px;font-size:12px;color:var(--green);display:none;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🌐 도메인 추가</div>
+    <div class="form-row">
+      <div><label>도메인</label><input id="dm-input" placeholder="예: new-site.kr"></div>
+      <div><label>만료일 (선택)</label><input id="dm-expire" type="date"></div>
+    </div>
+    <button class="btn btn-cyan" onclick="addDomain()">+ 도메인 추가</button>
+    <p style="font-size:11px;color:var(--sub);margin-top:8px;">⚠️ 도메인 삭제 불가 — 기존 6만개 포스팅 링크 보호를 위해 비활성화만 허용됩니다.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 도메인 목록</div>
+    <table class="tbl">
+      <thead><tr><th>도메인</th><th>만료일</th><th>남은 일수</th><th>상태</th><th>액션</th></tr></thead>
+      <tbody id="dm-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TAB 4: 실시간 모니터 -->
+<div id="t4" class="tab-pane">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div class="card">
+      <div class="card-title">💰 최근 CPA 전환</div>
+      <div id="cpa-feed" style="font-size:13px;color:var(--sub);">모니터링 준비 중...</div>
+    </div>
+    <div class="card">
+      <div class="card-title">🤖 봇 감지 피드</div>
+      <div id="bot-feed" style="font-size:13px;color:var(--sub);">봇 감지 데이터 대기 중...</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:4px;">
+    <div class="card-title">📊 업체별 현황</div>
+    <div id="company-stats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;"></div>
+  </div>
+</div>
+
+<!-- TAB 5: 시스템 검증 -->
+<div id="t5" class="tab-pane">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-weight:700;font-size:15px;">검증 체크리스트</div>
+        <button class="btn btn-cyan" onclick="runAllVerify()">🔍 전체 자동 검증</button>
+      </div>
+      <div id="verify-list">
+        <div class="verify-item" id="vi-1">
+          <div class="vi-icon">⬜</div>
+          <div class="vi-text"><div class="vi-title">소비자 사이트</div><div class="vi-sub">키워드 선택 후 소비자 화면 미리보기</div></div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <select id="vi-kw" style="width:130px;font-size:12px;"></select>
+            <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;" onclick="verifyConsumer()">미리보기</button>
+          </div>
+        </div>
+        <div class="verify-item" id="vi-2">
+          <div class="vi-icon">⬜</div>
+          <div class="vi-text"><div class="vi-title">봇 가짜사이트</div><div class="vi-sub">봇이 보는 클로킹 화면 확인</div></div>
+          <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;" onclick="verifyBotSite()">미리보기</button>
+        </div>
+        <div class="verify-item" id="vi-3">
+          <div class="vi-icon">⬜</div>
+          <div class="vi-text"><div class="vi-title">텔레그램 발송</div><div class="vi-sub">테스트 메시지 정상 수신 여부</div></div>
+          <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;" onclick="verifyTelegram()">테스트 발송</button>
+        </div>
+        <div class="verify-item" id="vi-4">
+          <div class="vi-icon">⬜</div>
+          <div class="vi-text"><div class="vi-title">encoder_cache 검증</div><div class="vi-sub">DB ↔ encoder_cache.json 해시 일치 여부</div></div>
+          <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;" onclick="verifyEncoderCache()">검증</button>
+        </div>
+        <div class="verify-item" id="vi-5">
+          <div class="vi-icon">⬜</div>
+          <div class="vi-text"><div class="vi-title">인더기 전체 목록</div><div class="vi-sub">DB 키워드 수 vs encoder_cache 수</div></div>
+          <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;" onclick="verifyKeywordCount()">확인</button>
+        </div>
+        <div class="verify-item" id="vi-6">
+          <div class="vi-icon">⬜</div>
+          <div class="vi-text"><div class="vi-title">Vercel 배포 상태</div><div class="vi-sub">현재 배포된 cpa_data.py 키워드 수</div></div>
+          <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;" onclick="verifyVercel()">확인</button>
+        </div>
+      </div>
+      <div id="vi-result" style="margin-top:12px;font-size:12px;color:var(--sub);"></div>
+    </div>
+    <div>
+      <div style="font-weight:700;font-size:15px;margin-bottom:12px;">화면 미리보기</div>
+      <div id="iframe-wrap">
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--sub);font-size:13px;">검증 항목 클릭 시 여기에 표시됩니다</div>
+      </div>
+      <div id="vi-detail" style="margin-top:8px;font-size:12px;color:var(--sub);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 6: 변경 이력 -->
+<div id="t6" class="tab-pane">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <div style="font-weight:700;font-size:15px;">변경 이력</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="loadChangeLogs()">↻ 새로고침</button>
+      <button class="btn btn-ghost" onclick="loadBackups()">📦 백업 목록</button>
+    </div>
+  </div>
+  <div id="log-list"></div>
+  <div id="backup-list" style="display:none;" class="card">
+    <div class="card-title">📦 롤백 가능한 백업</div>
+    <div id="backup-items"></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- TERMINAL -->
+<div id="terminal">
+  <div id="term-hdr" onclick="toggleTerminal()">
+    <div id="term-title">📟 DEPLOY TERMINAL</div>
+    <div style="font-size:11px;color:var(--sub);" id="term-toggle">▲ 접기</div>
+  </div>
+  <div id="term-body">$ 대기 중... 배포 시 로그가 여기에 표시됩니다.</div>
+</div>
+
+<!-- MODAL: 업체 추가 -->
+<div class="modal-overlay" id="modal-company">
+  <div class="modal">
+    <div class="modal-title">🏢 신규 업체 추가</div>
+    <div class="form-row">
+      <div><label>업체명</label><input id="co-name" placeholder="예: 통신업체"></div>
+      <div><label>카테고리</label>
+        <input list="category-options" id="co-category" placeholder="직접 입력 또는 선택" oninput="autoGenerateSlug(this.value)">
+        <datalist id="category-options">
+          <option value="이사"></option>
+          <option value="청소"></option>
+          <option value="누수/배관"></option>
+          <option value="용접"></option>
+          <option value="철거"></option>
+          <option value="인터넷"></option>
+          <option value="법률"></option>
+          <option value="줄눈"></option>
+          <option value="에어컨"></option>
+          <option value="해충방역"></option>
+          <option value="정수기"></option>
+          <option value="폐차"></option>
+        </datalist>
+      </div>
+    </div>
+    <div class="form-row">
+      <div><label>CPA 링크 A (전체 주소)</label><input id="co-link-a" placeholder="https://www.replyalba.co.kr/pt/xxxxxx"></div>
+      <div><label>CPA 링크 B (전체 주소)</label><input id="co-link-b" placeholder="https://albarich.com/pt/yyyyyy"></div>
+    </div>
+    <div class="form-row single">
+      <div><label>Slug (영문 식별자)</label><input id="co-slug" placeholder="예: internet"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px;">
+      <button class="btn btn-cyan" onclick="addCompany()">업체 추가</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-company')">취소</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+
+// ── 초기화 ──────────────────────────────────────────────────────────────────
+window.onload = () => { loadStatus(); loadCompanies(); loadKeywords(); loadDomains(); loadChangeLogs(); };
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='t6') loadChangeLogs();
+}
+
+// ── STATUS ──────────────────────────────────────────────────────────────────
+async function loadStatus() {
+  const r = await fetch(API+'/api/cpa/status').catch(()=>null);
+  if(!r) return;
+  const d = await r.json();
+  if(!d.ok) return;
+  document.getElementById('stat-companies').textContent = d.companies+'개';
+  document.getElementById('stat-keywords').textContent = d.keywords+'개';
+  document.getElementById('stat-domains').textContent = d.domains+'개';
+  if(d.last_deploy) {
+    const ago = timeSince(d.last_deploy);
+    document.getElementById('stat-deploy').textContent = ago;
+  }
+  if(d.expiry_warnings && d.expiry_warnings.length > 0) {
+    const wb = document.getElementById('warn-bar');
+    wb.style.display='block';
+    document.getElementById('warn-text').textContent = d.expiry_warnings.map(w=>`${w.domain} 만료 임박`).join(' | ');
+  }
+}
+
+setInterval(loadStatus, 30000);
+
+// ── COMPANIES ───────────────────────────────────────────────────────────────
+let allCompanies = [];
+async function loadCompanies() {
+  const r = await fetch(API+'/api/cpa/companies').catch(()=>null);
+  if(!r) return;
+  const d = await r.json();
+  if(!d.ok) return;
+  allCompanies = d.companies;
+  renderCompanies(d.companies);
+  fillCompanySelects(d.companies);
+}
+
+function renderCompanies(list) {
+  const g = document.getElementById('companies-grid');
+  g.innerHTML = list.map(c=>`
+    <div class="card" style="position:relative;">
+      <div style="font-size:16px;font-weight:900;margin-bottom:6px;">🏢 ${c.name}</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:8px;">카테고리: ${c.category}</div>
+      <div style="font-size:12px;margin-bottom:4px;">키워드: <b style="color:var(--cyan)">${c.keyword_count}개</b></div>
+      <div style="font-size:11px;color:var(--sub);">트래킹A: ${c.tracking_a}</div>
+      <div style="font-size:11px;color:var(--sub);">Target A: ${c.target_url_a}</div>
+      <div style="margin-top:10px;display:flex;gap:6px;">
+        <span class="badge ${c.is_active?'badge-on':'badge-off'}">${c.is_active?'활성':'비활성'}</span>
+        ${c.is_active?`<button class="btn btn-red" style="font-size:11px;padding:3px 10px;" onclick="deactivateCompany(${c.id})">비활성화</button>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function fillCompanySelects(list) {
+  const opts = list.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  ['kw-company','vi-company','kw-filter-company'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ if(id==='kw-filter-company') el.innerHTML='<option value="">전체 업체</option>'+opts; else el.innerHTML=opts; }
+  });
+}
+
+// [V10.6] 구글 번역 연동 + 똑똑한 특수문자 정제 필터 (Slug 자동 생성)
+let translateTimeout;
+async function autoGenerateSlug(val) {
+  const slugInput = document.getElementById('co-slug');
+  if(!val) { slugInput.value = ''; return; }
+
+  // 1. 너무 잦은 API 호출 방지 (타이핑 멈추면 0.5초 뒤 실행)
+  clearTimeout(translateTimeout);
+  translateTimeout = setTimeout(async () => {
+    try {
+      // 구글 번역 무료 API 활용 (한글 -> 영어)
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ko&tl=en&dt=t&q=${encodeURIComponent(val)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      if(data && data[0] && data[0][0] && data[0][0][0]) {
+        let translated = data[0][0][0].toLowerCase();
+        
+        // 2. 똑똑한 정제 로직 (사장님 요청사항 반영)
+        // - 특수문자 제거, 공백은 하이픈(-)으로, 소문자 통일
+        translated = translated
+          .replace(/[^a-z0-9\s-]/g, '') // 영문, 숫자, 공백, 하이픈 외 삭제
+          .trim()
+          .replace(/\s+/g, '-')         // 공백은 하이픈(-)으로 연결
+          .replace(/-+/g, '-');        // 중복 하이픈 정리
+          
+        slugInput.value = translated;
+      }
+    } catch(err) {
+      console.error('번역 실패:', err);
+      // 번역 실패 시 기존의 가벼운 발음 변환 로직으로 백업
+      const e = ['g','kk','n','d','tt','r','m','b','pp','s','ss','','j','jj','ch','k','t','p','h','a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
+      let fallback = '';
+      for(let i=0; i<val.length; i++){
+        let c = val.charCodeAt(i);
+        if(c >= 0xAC00 && c <= 0xD7A3){
+          fallback += e[Math.floor((c-0xAC00)/588)] || '';
+        } else if(/[a-z0-9]/i.test(val[i])) {
+          fallback += val[i].toLowerCase();
+        }
+      }
+      slugInput.value = fallback;
+    }
+  }, 500);
+}
+
+async function addCompany() {
+  const linkA = document.getElementById('co-link-a').value.trim();
+  const linkB = document.getElementById('co-link-b').value.trim();
+  
+  // URL 분석 함수 (통주소를 URL과 코드로 쪼냅니다)
+  const parseL = (url) => {
+    if(!url) return { base: '', code: '' };
+    try {
+      const parts = url.split('/pt/');
+      if(parts.length > 1) return { base: parts[0], code: parts[1] };
+      // /pt/ 가 없는 경우 전체를 base로 간주
+      return { base: url, code: '' };
+    } catch(e) { return { base: url, code: '' }; }
+  };
+
+  const a = parseL(linkA);
+  const b = parseL(linkB);
+
+  const body = {
+    name: document.getElementById('co-name').value,
+    category: document.getElementById('co-category').value,
+    tracking_a: a.code,
+    tracking_b: b.code,
+    target_url_a: a.base,
+    target_url_b: b.base,
+    slug: document.getElementById('co-slug').value,
+    niche_template: ''
+  };
+  const r = await fetch(API+'/api/cpa/companies',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d = await r.json();
+  if(d.ok){ 
+    closeModal('modal-company'); 
+    loadCompanies(); 
+    termLog(`업체 추가 완료: ${body.name} (자동 링크 분석됨)`); 
+    // 입력필드 초기화
+    document.getElementById('co-name').value='';
+    document.getElementById('co-link-a').value='';
+    document.getElementById('co-link-b').value='';
+    document.getElementById('co-slug').value='';
+  }
+  else alert('오류: '+d.error);
+}
+
+async function deactivateCompany(id) {
+  if(!confirm('이 업체를 비활성화하면 관련 키워드도 모두 비활성화됩니다. 계속하시겠습니까?')) return;
+  const r = await fetch(API+`/api/cpa/companies/${id}`,{method:'DELETE'});
+  const d = await r.json();
+  if(d.ok){ loadCompanies(); loadKeywords(); termLog(`업체 비활성화 completed`); }
+  else alert('오류: '+d.error);
+}
+
+// ── KEYWORDS ────────────────────────────────────────────────────────────────
+let allKeywords = [];
+async function loadKeywords() {
+  const r = await fetch(API+'/api/cpa/keywords').catch(()=>null);
+  if(!r) return;
+  const d = await r.json();
+  if(!d.ok) return;
+  allKeywords = d.keywords;
+  renderKeywords(d.keywords);
+  fillVerifyKeywords(d.keywords);
+}
+
+function renderKeywords(list) {
+  const tb = document.getElementById('kw-tbody');
+  tb.innerHTML = list.map(k=>`
+    <tr>
+      <td><b>${k.keyword}</b></td>
+      <td><code style="color:var(--cyan);font-size:12px;">${k.hash_code}</code></td>
+      <td>${k.company_name||'-'}</td>
+      <td><span class="badge ${k.is_active?'badge-on':'badge-off'}">${k.is_active?'활성':'비활성'}</span></td>
+      <td>
+        <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;" onclick="testKeyword('${k.hash_code}','A')">소비자</button>
+        <button class="btn btn-ghost" style="font-size:11px;padding:3px 8px;" onclick="testKeyword('${k.hash_code}','bot')">봇</button>
+        ${k.is_active?`<button class="btn btn-red" style="font-size:11px;padding:3px 8px;" onclick="deactivateKeyword(${k.id})">삭제</button>`:''}
+      </td>
+    </tr>`).join('');
+}
+
+function filterKeywords() {
+  const q = document.getElementById('kw-search').value.toLowerCase();
+  const cid = document.getElementById('kw-filter-company').value;
+  const filtered = allKeywords.filter(k=>{
+    const matchQ = !q || k.keyword.includes(q) || k.hash_code.includes(q);
+    const matchC = !cid || String(k.company_id)===cid;
+    return matchQ && matchC;
+  });
+  renderKeywords(filtered);
+}
+
+function fillVerifyKeywords(list) {
+  const el = document.getElementById('vi-kw');
+  if(el) el.innerHTML = list.slice(0,20).map(k=>`<option value="${k.hash_code}">${k.keyword}</option>`).join('');
+}
+
+async function previewHash() {
+  const kw = document.getElementById('kw-input').value.trim();
+  if(!kw){ document.getElementById('kw-preview').textContent='키워드 입력 시 해시코드와 URL이 표시됩니다.'; return; }
+  const r = await fetch(API+`/api/cpa/preview/${encodeURIComponent(kw)}`);
+  const d = await r.json();
+  document.getElementById('kw-preview').textContent = `해시코드: ${d.hash}\nURL A: ${d.url_a}\nURL B: ${d.url_b}`;
+}
+
+async function addKeyword(autoDeploy) {
+  const kw = document.getElementById('kw-input').value.trim();
+  const cid = parseInt(document.getElementById('kw-company').value);
+  if(!kw||!cid){ alert('업체와 키워드를 입력해주세요.'); return; }
+  const r = await fetch(API+'/api/cpa/keywords',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({keyword:kw,company_id:cid,auto_deploy:autoDeploy})});
+  const d = await r.json();
+  if(d.ok){
+    document.getElementById('kw-input').value='';
+    document.getElementById('kw-preview').textContent='키워드 입력 시 해시코드와 URL이 표시됩니다.';
+    loadKeywords(); loadStatus();
+    termLog(`키워드 추가: "${kw}" → hash=${d.hash} ${d.deploy_queued?'(배포 예약됨)':''}`);
+  } else alert('오류: '+d.error);
+}
+
+async function deactivateKeyword(id) {
+  if(!confirm('이 키워드를 비활성화하시겠습니까?')) return;
+  const r = await fetch(API+`/api/cpa/keywords/${id}`,{method:'DELETE'});
+  const d = await r.json();
+  if(d.ok){ loadKeywords(); loadStatus(); } else alert('오류: '+d.error);
+}
+
+function testKeyword(hash, mode) {
+  const url = mode==='bot' ? `/?k=${hash}&t=A&bypass=showbot` : `/?k=${hash}&t=A`;
+  showIframe(url,'t5');
+  switchTab('t5', document.querySelectorAll('.tab-btn')[4]);
+}
+
+// ── DOMAINS ─────────────────────────────────────────────────────────────────
+async function loadDomains() {
+  const r = await fetch(API+'/api/cpa/domains').catch(()=>null);
+  if(!r) return;
+  const d = await r.json();
+  if(!d.ok) return;
+  const tb = document.getElementById('dm-tbody');
+  tb.innerHTML = d.domains.map(dm=>{
+    const daysLeft = dm.expire_date ? Math.ceil((new Date(dm.expire_date)-new Date())/86400000) : null;
+    const daysStr = daysLeft!==null ? (daysLeft<30?`<b style="color:#ffb400">D-${daysLeft}</b>`:`D-${daysLeft}`) : '-';
+    return `<tr>
+      <td><b>${dm.domain}</b></td>
+      <td>${dm.expire_date||'-'}</td>
+      <td>${daysStr}</td>
+      <td><span class="badge ${dm.is_active?'badge-on':'badge-off'}">${dm.is_active?'활성':'비활성'}</span></td>
+      <td>
+        ${dm.is_active? 
+          `<button class="btn btn-red" style="font-size:11px;padding:3px 8px;" onclick="deactivateDomain(${dm.id})">비활성화</button>` 
+        : `<button class="btn btn-cyan" style="font-size:11px;padding:3px 8px;" onclick="activateDomain(${dm.id})">활성화</button>`}
+      </td>
+    </tr>`;}).join('');
+}
+
+async function activateDomain(id) {
+  if(!confirm('이 도메인을 다시 활성화하시겠습니까?')) return;
+  const r = await fetch(API+`/api/cpa/domains/${id}/activate`,{method:'POST'});
+  const d = await r.json();
+  if(d.ok){ 
+    loadDomains(); 
+    loadStatus(); 
+    termLog(`도메인 활성화 성공 (ID: ${id}). 우측 상단 [즉시 배포]를 눌러 Vercel에 반영하세요.`);
+  } else {
+    alert('오류: '+d.error);
+  }
+}
+
+async function addDomain() {
+  const domain = document.getElementById('dm-input').value.trim();
+  if(!domain){ alert('도메인을 입력해주세요.'); return; }
+  const expire_date = document.getElementById('dm-expire').value;
+  const r = await fetch(API+'/api/cpa/domains',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({domain,expire_date})});
+  const d = await r.json();
+  if(d.ok){ document.getElementById('dm-input').value=''; loadDomains(); loadStatus(); termLog(`도메인 추가: ${domain}`); }
+  else alert('오류: '+d.error);
+}
+
+async function deactivateDomain(id) {
+  if(!confirm('이 도메인을 비활성화하시겠습니까?\n기존 링크는 보존됩니다.')) return;
+  const r = await fetch(API+`/api/cpa/domains/${id}`,{method:'DELETE'});
+  const d = await r.json();
+  if(d.ok){ loadDomains(); } else alert('오류: '+d.error);
+}
+
+// ── MONITOR ─────────────────────────────────────────────────────────────────
+async function loadMonitorData() {
+  // Company stats from API
+  if(allCompanies.length) {
+    const g = document.getElementById('company-stats');
+    g.innerHTML = allCompanies.map(c=>`
+      <div class="hud-card" style="text-align:left;padding:12px;">
+        <div style="font-weight:700;margin-bottom:4px;">${c.name}</div>
+        <div style="font-size:12px;color:var(--sub);">${c.category}</div>
+        <div style="font-size:20px;font-weight:900;color:var(--cyan);margin-top:4px;">${c.keyword_count}<span style="font-size:12px;color:var(--sub);font-weight:400;"> 키워드</span></div>
+      </div>`).join('');
+  }
+}
+
+// ── VERIFY ──────────────────────────────────────────────────────────────────
+function setVI(n, icon, color='') {
+  const el = document.getElementById(`vi-${n}`);
+  el.querySelector('.vi-icon').textContent = icon;
+  if(color) el.style.borderColor = color;
+}
+
+function showIframe(url, tabId) {
+  const wrap = document.getElementById('iframe-wrap');
+  wrap.innerHTML = `<iframe src="${url}" sandbox="allow-same-origin allow-scripts"></iframe>`;
+}
+
+function verifyConsumer() {
+  const hash = document.getElementById('vi-kw').value;
+  if(!hash) return;
+  setVI(1,'🔄');
+  const url = `/?k=${hash}&t=A&bypass=showmethemoney`;
+  showIframe(url);
+  setTimeout(()=> setVI(1,'✅','rgba(0,255,136,.5)'), 1000);
+}
+
+function verifyBotSite() {
+  const hash = document.getElementById('vi-kw')?.value || '';
+  setVI(2,'🔄');
+  const url = hash ? `/?k=${hash}&t=A` : '/';
+  showIframe(url);
+  setTimeout(()=> setVI(2,'✅','rgba(0,255,136,.5)'), 1000);
+}
+
+async function verifyTelegram() {
+  setVI(3,'🔄');
+  document.getElementById('vi-detail').textContent = '텔레그램 실제 발송 중...';
+  const r = await fetch(API+'/api/cpa/verify/telegram',{method:'POST'}).catch(()=>null);
+  if(!r){ setVI(3,'❌','rgba(255,68,102,.5)'); document.getElementById('vi-detail').textContent='서버 연결 실패'; return; }
+  const d = await r.json();
+  if(d.ok){
+    setVI(3,'✅','rgba(0,255,136,.5)');
+    document.getElementById('vi-detail').textContent = `✅ 텔레그램 발송 성공! message_id=${d.message_id}`;
+  } else {
+    setVI(3,'❌','rgba(255,68,102,.5)');
+    document.getElementById('vi-detail').textContent = `❌ 발송 실패: ${d.error}`;
+  }
+}
+
+async function verifyEncoderCache() {
+  setVI(4,'🔄');
+  const r = await fetch(API+'/api/cpa/verify/encoder-cache').catch(()=>null);
+  if(!r){ setVI(4,'❌','rgba(255,68,102,.5)'); return; }
+  const d = await r.json();
+  if(d.ok && d.match && d.mismatches.length===0) {
+    setVI(4,'✅','rgba(0,255,136,.5)');
+    document.getElementById('vi-detail').textContent = `DB ${d.db_count}개 = Cache ${d.cache_count}개 (Salt OK)`;
+  } else {
+    setVI(4,'❌','rgba(255,68,102,.5)');
+    document.getElementById('vi-detail').textContent = `불일치: DB=${d.db_count} Cache=${d.cache_count} 미스매치=${d.mismatches?.length}`;
+  }
+}
+
+async function verifyKeywordCount() {
+  setVI(5,'🔄');
+  const r = await fetch(API+'/api/cpa/status');
+  const d = await r.json();
+  setVI(5,'✅','rgba(0,255,136,.5)');
+  document.getElementById('vi-detail').textContent = `DB 활성 키워드: ${d.keywords}개`;
+}
+
+async function verifyVercel() {
+  setVI(6,'🔄');
+  const r = await fetch('/api/cpa/status');
+  const d = await r.json();
+  if(d.ok){ setVI(6,'✅','rgba(0,255,136,.5)'); }
+  else { setVI(6,'❌','rgba(255,68,102,.5)'); }
+}
+
+async function runAllVerify() {
+  await verifyEncoderCache();
+  await verifyKeywordCount();
+  await verifyVercel();
+  verifyConsumer();
+  document.getElementById('vi-result').textContent = '전체 검증 완료 — ' + new Date().toLocaleString('ko-KR');
+}
+
+// ── CHANGE LOG ──────────────────────────────────────────────────────────────
+async function loadChangeLogs() {
+  const r = await fetch(API+'/api/cpa/change-log?limit=50').catch(()=>null);
+  if(!r) return;
+  const d = await r.json();
+  if(!d.ok) return;
+  const list = document.getElementById('log-list');
+  if(!d.logs.length){ list.innerHTML='<div style="color:var(--sub);text-align:center;padding:20px;">변경 이력이 없습니다.</div>'; return; }
+  list.innerHTML = d.logs.map(l=>`
+    <div class="log-item">
+      <div><span class="log-action">${l.action}</span> — ${l.target} <span class="log-time">${l.created_at||''}</span></div>
+      ${l.after_val?`<div style="font-size:11px;color:var(--sub);margin-top:3px;">${l.after_val}</div>`:''}
+    </div>`).join('');
+}
+
+async function loadBackups() {
+  const bl = document.getElementById('backup-list');
+  bl.style.display = bl.style.display==='none' ? 'block' : 'none';
+  if(bl.style.display==='none') return;
+  const r = await fetch(API+'/api/cpa/backups');
+  const d = await r.json();
+  document.getElementById('backup-items').innerHTML = d.backups.map(b=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid var(--border);">
+      <span style="font-size:12px;font-family:monospace;">${b}</span>
+      <button class="btn btn-red" style="font-size:11px;padding:3px 10px;" onclick="rollback('${b}')">⏪ 롤백</button>
+    </div>`).join('');
+}
+
+async function rollback(name) {
+  if(!confirm(`"${name}" 버전으로 롤백하고 즉시 재배포 하시겠습니까?`)) return;
+  termLog(`롤백 시작: ${name}`);
+  const r = await fetch(API+`/api/cpa/rollback/${name}`,{method:'POST'});
+  const d = await r.json();
+  if(d.ok){ termLog('롤백 + 재배포 성공'); loadStatus(); }
+  else termLog('롤백 실패: '+d.error);
+}
+
+// ── DEPLOY ──────────────────────────────────────────────────────────────────
+async function deployNow() {
+  if(!confirm('지금 즉시 Vercel에 배포하시겠습니까?\n(cpa_data.py, domain_pool.py, encoder_cache.json 모두 재생성됩니다)')) return;
+  termLog('배포 시작...');
+  document.getElementById('deploy-btn').textContent='⏳ 배포 중...';
+  document.getElementById('deploy-btn').disabled=true;
+  const r = await fetch(API+'/api/cpa/sync/now',{method:'POST'});
+  const d = await r.json();
+  document.getElementById('deploy-btn').textContent='⚡ 즉시 배포';
+  document.getElementById('deploy-btn').disabled=false;
+  if(d.ok){ termLog('배포 성공! keywords='+d.keywords); loadStatus(); }
+  else termLog('배포 실패: '+d.error);
+}
+
+// ── TERMINAL ────────────────────────────────────────────────────────────────
+function termLog(msg) {
+  const b = document.getElementById('term-body');
+  b.innerHTML += `\n$ ${new Date().toLocaleTimeString('ko-KR')} | ${msg}`;
+  b.scrollTop = b.scrollHeight;
+}
+
+function toggleTerminal() {
+  const b = document.getElementById('term-body');
+  const t = document.getElementById('term-toggle');
+  b.classList.toggle('hidden');
+  t.textContent = b.classList.contains('hidden') ? '▼ 펼치기' : '▲ 접기';
+}
+
+// ── MODAL ────────────────────────────────────────────────────────────────────
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(el=> el.addEventListener('click',e=>{ if(e.target===el) el.classList.remove('open'); }));
+
+// ── UTIL ─────────────────────────────────────────────────────────────────────
+function timeSince(ts) {
+  const d = new Date(ts), now = new Date();
+  const diff = Math.floor((now-d)/60000);
+  if(diff<1) return '방금';
+  if(diff<60) return diff+'분 전';
+  if(diff<1440) return Math.floor(diff/60)+'시간 전';
+  return Math.floor(diff/1440)+'일 전';
+}
+
+async function uploadCSV(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  const r = await fetch(API+'/api/cpa/keywords/csv-upload',{method:'POST',body:fd});
+  const d = await r.json();
+  const el = document.getElementById('csv-result');
+  el.style.display='block';
+  if(d.ok){
+    el.style.color='var(--green)';
+    el.textContent = `완료! 추가=${d.added}개, 스킵=${d.skipped}개 ${d.deploy_queued?'(자동배포 예약됨)':''}`;
+    if(d.errors && d.errors.length) el.textContent += ' | 오류: ' + d.errors.join(', ');
+    loadKeywords(); loadStatus();
+  } else {
+    el.style.color='var(--red)';
+    el.textContent = '업로드 실패: ' + d.error;
+  }
+  input.value = '';
+}
+
+// Tab4 companyStats auto-load
+document.querySelectorAll('.tab-btn')[3].addEventListener('click', loadMonitorData);
+</script>
+</body>
+</html>
