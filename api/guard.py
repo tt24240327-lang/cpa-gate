@@ -57,9 +57,12 @@ def determine_destination(request, k, t, CPA_DATA, ALL_COMPANIES, BRIDGE_MAP, TA
             idx = 1 if t == 'B' and len(companies_list) > 1 else 0
             company_name = companies_list[idx]['name']
             
-        # [4] REVENUE SIGNAL: Real humans from KR see the REAL site
-        # Even if k is missing or wrong, we let real people see the MyHome Main.
-        if not is_bot_user and country_code == "KR":
-            show_landing = True
+    # [4] REVENUE SIGNAL: ALL Real humans from KR see the REAL site
+    # Even if k is missing or wrong, we let real people see the MyHome Main.
+    if not is_bot_user and country_code == "KR":
+        show_landing = True
+        # If no valid k, make fe_cat empty so MyHome shows the category selection (Main Home).
+        if not (k and k in CPA_DATA):
+            fe_cat = ""
 
     return is_bot_user, is_test_mode, fe_cat, company_name, show_landing, companies_list
