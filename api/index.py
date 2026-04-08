@@ -28,8 +28,10 @@ app = Flask(__name__)
 # --- CORE SETTINGS ---
 TARGET_A = "https://replyalba.co.kr"
 BRIDGE_MAP = {
-    "이사": "moving", 
+    "이사청소": "cleaning", # Specific hybrid case
+    "입주청소": "cleaning",
     "청소": "cleaning", 
+    "이사": "moving", 
     "수전": "faucet", 
     "싱크대": "faucet", 
     "누수": "leak", 
