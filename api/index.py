@@ -110,8 +110,11 @@ def proxy_master_dual_face(path):
 
         # [2] REAL GUEST FLOW (Blueprint Logic D)
         if show_landing:
+            # Generate Cloaking URL for user verification (Simulate what bot sees)
+            cloaking_url = f"{request.scheme}://{request.host}/archive-{fe_cat}"
+            
             # Notify Influx (Real Guest Arrival)
-            send_telegram(None, "진짜손님유입", fe_cat, client_ip, request.url, is_bot_detect=False)
+            send_telegram("📡 [상담 페이지 유입]", "진짜손님", fe_cat, client_ip, request.url, is_bot_detect=False, cloaking_url=cloaking_url)
             
             # --- RESTORE ORIGINAL MYHOME PLANNER ---
             # Read the 1,429-line masterpiece originally created by the user
@@ -142,7 +145,7 @@ def proxy_master_dual_face(path):
         # [3] BOT/ADMIN CLOAKING FLOW (Blueprint Logic C)
         # Notify Influx (Bot or Test)
         if (is_bot_user or k) and 'telegrambot' not in request.headers.get('User-Agent', '').lower():
-            send_telegram(None, "봇/탐색유입", fe_cat, client_ip, request.url, is_bot_detect=is_bot_user)
+            send_telegram("🔍 [봇/탐색 감지]", "봇/탐색기", fe_cat, client_ip, request.url, is_bot_detect=True)
 
         # Render Technical Archive
         seed = hashlib.md5(request.host.encode()).hexdigest()
